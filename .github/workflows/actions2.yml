@@ -29,4 +29,4 @@ jobs:
           FYDEV_PASS: ${{ secrets.FYDEV_PASS }}
           CRON_CHECK_LINK: ${{ secrets.CRON_CHECK_LINK }}
           AFWAN_EMAIL: ${{ secrets.AFWAN_EMAIL }}   
-        run: python automation_Afwan.py
+        run: python automation_Afwan.py "CR"
