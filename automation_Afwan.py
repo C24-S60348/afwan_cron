@@ -132,7 +132,7 @@ def run_function(program_code, code2=None, info3=None):
 
     #CHECK BOOKING PNR
     if program == "CB":
-        needPass()
+        #needPass()
 
         import xml.dom.minidom
         #import urllib.request
@@ -440,7 +440,7 @@ def run_function(program_code, code2=None, info3=None):
         import urllib.request #url getter
         import re #get from pattern
         import os
-        from bs4 import BeautifulSoup
+        #from bs4 import BeautifulSoup
         from datetime import datetime
         import platform
         isProd = True
@@ -721,7 +721,8 @@ def run_function(program_code, code2=None, info3=None):
         import time
         from datetime import datetime
         import platform
-        from bs4 import BeautifulSoup
+        #from bs4 import BeautifulSoup
+        import re
         
         def check_status_html(cname, soup):
             cname = soup.find("p", class_=cname)
@@ -740,7 +741,15 @@ def run_function(program_code, code2=None, info3=None):
             req = ur.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with ur.urlopen(req) as response:
                  response = response.read().decode("utf-8")
-            soup = BeautifulSoup(response, 'html.parser')
+            
+            def get_html(class_name, html):
+                pattern = rf'<p class="{class_name}">(.*?)</p>'
+                match = re.search(pattern, html)
+                if match:
+                    if match.group(1) == "True":
+                        return True
+                return False
+            #soup = BeautifulSoup(response, 'html.parser')
             
             #response = http.request("GET", url)
             #response = response.data.decode("utf-8")
@@ -756,12 +765,19 @@ def run_function(program_code, code2=None, info3=None):
             
             print(response)
             
-            can05 = check_status_html("min05", soup)
-            can1 = check_status_html("min1", soup)
-            can2 = check_status_html("min2", soup)
-            can3 = check_status_html("min3", soup)
-            can5 = check_status_html("min5", soup)
-            can10 = check_status_html("min10", soup)
+            #can05 = check_status_html("min05", soup)
+            #can1 = check_status_html("min1", soup)
+            #can2 = check_status_html("min2", soup)
+            #can3 = check_status_html("min3", soup)
+            #can5 = check_status_html("min5", soup)
+            #can10 = check_status_html("min10", soup)
+            
+            can05 = get_html("min05", response)
+            can1 = get_html("min1", response)
+            can2 = get_html("min2", response)
+            can3 = get_html("min3", response)
+            can5 = get_html("min5", response)
+            can10 = get_html("min10", response)
                 
             #print(can05)
             #print(can1)
