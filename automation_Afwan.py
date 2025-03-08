@@ -2,6 +2,7 @@ import getpass
 import sys
 import config 
 import urllib3
+import requests
 
 #pip install selenium
 #pip install beautifulsoup4
@@ -429,6 +430,7 @@ def run_function(program_code, code2=None, info3=None):
         import re #get from pattern
         import os
         from bs4 import BeautifulSoup
+        from lxml import 
         from datetime import datetime
         import platform
         isProd = True
@@ -718,12 +720,12 @@ def run_function(program_code, code2=None, info3=None):
             cronchecklink = config.cronchecklink
             url = cronchecklink
             
-            response = http.request("GET", url)
+            #response = http.request("GET", url)
             
-            response = response.data.decode("utf-8")
-            soup = BeautifulSoup(response, 'html.parser')
-            #response = requests.get(url)
-            #soup = BeautifulSoup(response.text, 'html.parser')
+            #response = response.data.decode("utf-8")
+            #soup = BeautifulSoup(response, 'html.parser')
+            response = requests.get(url)
+            soup = BeautifulSoup(response.text, 'html.parser')
             global can05
             global can1
             global can2
