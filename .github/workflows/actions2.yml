@@ -17,7 +17,16 @@ jobs:
         with:
           python-version: '3.12'  # Install Python 3.12
 
-      - name: Execute py script
+      - name: execute py script # run automation_Afwan.py
         env:
           SOME_SECRET: ${{ secrets.SOME_SECRET }}
+          CSFTP_LINK: ${{ secrets.CSFTP_LINK }}
+          FYDEV_LINK: ${{ secrets.FYDEV_LINK }}
+          FY_APP_CODE: ${{ secrets.FY_APP_CODE }}
+          FY_APP_STAGING: ${{ secrets.FY_APP_STAGING }}
+          FY_APP_PROD: ${{ secrets.FY_APP_PROD }}
+          FYDEV_USER: ${{ secrets.FYDEV_USER }}
+          FYDEV_PASS: ${{ secrets.FYDEV_PASS }}
+          CRON_CHECK_LINK: ${{ secrets.CRON_CHECK_LINK }}
+          AFWAN_EMAIL: ${{ secrets.AFWAN_EMAIL }}   
         run: python automation_Afwan.py
