@@ -38,6 +38,7 @@ can10 = True
 
 def run_function(program_code, code2=None, info3=None):
     program = program_code
+    global variables
     #global http
     
 
@@ -145,13 +146,13 @@ def run_function(program_code, code2=None, info3=None):
         pnr = 'LDIW8U'
         stagingorprod = "S" #S - Staging , P - Prod
         #VARIABLES------------------
-        fycode = config.fy_code
+        fycode = variables.fy_code
         
         if stagingorprod == "S":
-            link = config.fy_app_staging
+            link = variables.fy_app_staging
             url = f"{link}?Key={fycode}&RecordLocator={pnr}"
         else:
-            link = config.fy_app_prod
+            link = variables.fy_app_prod
             url = f"{link}?Key={fycode}&RecordLocator={pnr}"
 
         #content = http.request("GET", url)
@@ -338,9 +339,9 @@ def run_function(program_code, code2=None, info3=None):
                 else:
                     return 1
 
-        fydevlink = config.fydevlink
-        username = config.fydevusername
-        password = config.fydevpassword
+        fydevlink = variables.fydevlink
+        username = variables.fydevusername
+        password = variables.fydevpassword
         url = f"https://{username}:{password}@{fydevlink}"
         station_depart = station_depart.upper()
         station_return = station_return.upper()
@@ -575,7 +576,7 @@ def run_function(program_code, code2=None, info3=None):
         
         
         # VARIABLES -----------------
-        tb_token = config.tb_token
+        tb_token = variables.tb_token
         
         # Telegram API URL
         url = f"https://api.telegram.org/bot{tb_token}/sendMessage"
@@ -636,7 +637,7 @@ def run_function(program_code, code2=None, info3=None):
 
         #initialize url, data, & cookie
         url = 'https://afwanhaziq.pythonanywhere.com/login'
-        email = config.afwanemail
+        email = variables.afwanemail
         data = {'email': email, 'password': 'test12345', 'submit':''}
         cookie_jar = http.cookiejar.CookieJar()
 
@@ -874,7 +875,7 @@ def run_function(program_code, code2=None, info3=None):
     
     #CHECK SFTP
     elif program == "CSFTP":
-        csftp_link = config.csftp_link
+        csftp_link = variables.csftp_link
         url = csftp_link
         try:
             print("running CSFTP...")
