@@ -747,13 +747,19 @@ def run_function(program_code, code2=None, info3=None):
             with ur.urlopen(req) as response:
                  response = response.read().decode("utf-8")
             
-            def get_html(class_name, html):
+            def get_html_true(class_name, html):
                 pattern = rf'<p class="{class_name}">(.*?)</p>'
                 match = re.search(pattern, html)
                 if match:
                     if match.group(1) == "True":
                         return True
                 return False
+            def get_html(class_name, html):
+                pattern = rf'<p class="{class_name}">(.*?)</p>'
+                match = re.search(pattern, html)
+                if match:
+                    return match.group(1)
+                return ""
             #soup = BeautifulSoup(response, 'html.parser')
             
             #response = http.request("GET", url)
@@ -780,12 +786,12 @@ def run_function(program_code, code2=None, info3=None):
             
             timenowKL = get_html("timenowKL", response)
             timenowKL = Decimal(timenowKL)
-            can05 = get_html("min05", response)
-            can1 = get_html("min1", response)
-            can2 = get_html("min2", response)
-            can3 = get_html("min3", response)
-            can5 = get_html("min5", response)
-            can10 = get_html("min10", response)
+            can05 = get_html_true("min05", response)
+            can1 = get_html_true("min1", response)
+            can2 = get_html_true("min2", response)
+            can3 = get_html_true("min3", response)
+            can5 = get_html_true("min5", response)
+            can10 = get_html_true("min10", response)
                 
             #print(can05)
             #print(can1)
@@ -946,5 +952,4 @@ def run_function(program_code, code2=None, info3=None):
 
 
 run_function(program)
-
 
