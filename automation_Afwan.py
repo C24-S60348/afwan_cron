@@ -716,14 +716,14 @@ def run_function(program_code, code2=None, info3=None):
         def check_can_cron():
             print("Run check...")
             global http
-            url = config.cronchecklink
+            url = "https://afwanproductions.pythonanywhere.com/croncheck"
             
-            #response = http.request("GET", url)
+            response = http.request("GET", url)
             
-            #response = response.data.decode("utf-8")
-            #soup = BeautifulSoup(response, 'html.parser')
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            response = response.data.decode("utf-8")
+            soup = BeautifulSoup(response, 'html.parser')
+            #response = requests.get(url)
+            #soup = BeautifulSoup(response.text, 'html.parser')
             global can05
             global can1
             global can2
