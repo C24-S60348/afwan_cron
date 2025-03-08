@@ -2,7 +2,7 @@ import getpass
 import sys
 import config 
 import urllib3
-import requests
+#import requests
 
 #pip install selenium
 #pip install beautifulsoup4
