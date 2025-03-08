@@ -1,6 +1,8 @@
 import getpass
 import requests
 import sys
+import os
+from config
 
 #pip install selenium
 #pip install beautifulsoup4
@@ -548,7 +550,7 @@ def run_function(program_code, code2=None, info3=None):
         
         
         # VARIABLES -----------------
-        tb_token = os.getenv("TB_TOKEN")
+        tb_token = config.tb_token
         # Telegram API URL
         url = f"https://api.telegram.org/bot{tb_token}/sendMessage"
 
@@ -808,7 +810,7 @@ def run_function(program_code, code2=None, info3=None):
     
     #CHECK SFTP
     elif program == "CSFTP":
-        csftp_link = os.getenv("CSFTP_LINK")
+        csftp_link = config.csftp_link
         url = csftp_link
         try:
             print("running CSFTP...")
