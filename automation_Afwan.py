@@ -911,10 +911,9 @@ def run_function(program_code, code2=None, info3=None):
             #timenowKLDate = datetime.fromtimestamp(float(timenowKL))
             #now = timenowKL
             
-            now = datetime.now()
-            if now.tzinfo == timezone.utc:
-                gmt8 = timezone(timedelta(hours=8))
-                now = now.astimezone(gmt8)
+            now = datetime.now(timezone.utc)
+            gmt8 = timezone(timedelta(hours=8))
+            now = now.astimezone(gmt8)
             
             current_time = now.strftime("%H:%M")
             weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
