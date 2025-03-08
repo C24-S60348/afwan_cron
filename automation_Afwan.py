@@ -803,6 +803,7 @@ def run_function(program_code, code2=None, info3=None):
             print("Done check")
 
         def load_10_min():
+            url = "cron10min"
             try:              
                 print("---------------------- every 10 min")
 
