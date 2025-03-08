@@ -10,7 +10,7 @@ import urllib3
 #pip install webdriver-manager
 
 #VARIABLES-------------------------------------
-program = "CB" # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch , 
+program = "CR" # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch , 
                # TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
                # CR - Cron Run , CSFTP - Check SFTP , 
 #VARIABLES------------------
@@ -123,7 +123,7 @@ def run_function(program_code, code2=None, info3=None):
 
     #CHECK BOOKING PNR
     if program == "CB":
-        needPass()
+        #needPass()
 
         import xml.dom.minidom
         #import urllib.request
