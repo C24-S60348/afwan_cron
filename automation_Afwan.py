@@ -2,6 +2,7 @@ import getpass
 import sys
 import urllib.request as ur
 import variables
+from decimal import Decimal
 #import urllib3
 #import requests
 
@@ -34,11 +35,13 @@ can2 = True
 can3 = True
 can5 = True
 can10 = True
+timenowKL = 0
 #http = urllib3.PoolManager()
 
 def run_function(program_code, code2=None, info3=None):
     program = program_code
     global variables
+    global timenowKL
     #global http
     
 
@@ -737,7 +740,8 @@ def run_function(program_code, code2=None, info3=None):
         def check_can_cron():
             print("Run check...")
             #global http
-            url = "https://afwanproductions.pythonanywhere.com/croncheck"
+            cronchecklink = variables.cronchecklink
+            url = cronchecklink
             
             req = ur.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with ur.urlopen(req) as response:
@@ -757,6 +761,7 @@ def run_function(program_code, code2=None, info3=None):
             #soup = BeautifulSoup(response, 'html.parser')
             #response = requests.get(url)
             #soup = BeautifulSoup(response.text, 'html.parser')
+            global timenowKL
             global can05
             global can1
             global can2
@@ -773,6 +778,8 @@ def run_function(program_code, code2=None, info3=None):
             #can5 = check_status_html("min5", soup)
             #can10 = check_status_html("min10", soup)
             
+            timenowKL = get_html("timenowKL", response)
+            timenowKL = Decimal(timenowKL)
             can05 = get_html("min05", response)
             can1 = get_html("min1", response)
             can2 = get_html("min2", response)
@@ -902,7 +909,8 @@ def run_function(program_code, code2=None, info3=None):
 
         print("running RP...")
         def checkTime():
-            now = datetime.now()
+            #now = datetime.now()
+            now = timenowKL
             current_time = now.strftime("%H:%M")
             weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
 
