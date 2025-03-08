@@ -1,8 +1,6 @@
 import getpass
 import sys
-import urllib.request as ur
-import variables
-from decimal import Decimal
+
 #import urllib3
 #import requests
 
@@ -48,6 +46,12 @@ def run_function(program_code, code2=None, info3=None):
 
     #functions
     if (True):
+        import urllib.request as ur
+        import variables
+        import time
+        import datetime
+        from datetime import datetime, timezone, timedelta
+        from decimal import Decimal
         browser_code = 'F' # C - Chrome , F - Firefox , E - Microsoft Edge , S - Safari
         openfileorfolder = 'F' # F - File , FD - Folder
         xmlformatted = True
@@ -445,7 +449,6 @@ def run_function(program_code, code2=None, info3=None):
         import re #get from pattern
         import os
         #from bs4 import BeautifulSoup
-        from datetime import datetime
         import platform
         isProd = True
         
@@ -722,20 +725,9 @@ def run_function(program_code, code2=None, info3=None):
 
     #CRON RUN
     elif program == "CR":
-        import time
-        from datetime import datetime
         import platform
         #from bs4 import BeautifulSoup
         import re
-        
-        def check_status_html(cname, soup):
-            cname = soup.find("p", class_=cname)
-            if cname:
-                cname = cname.decode_contents()
-                if cname == "True":
-                    return True
-                     
-            return False
         
         def check_can_cron():
             print("Run check...")
@@ -911,15 +903,18 @@ def run_function(program_code, code2=None, info3=None):
 
     #Reminder Parking
     elif program == "RP":
-        import time
-        from datetime import datetime
 
         print("running RP...")
         def checkTime():
             
             #now = datetime.now()
-            timenowKLDate = datetime.fromtimestamp(float(timenowKL))
-            now = timenowKL
+            #timenowKLDate = datetime.fromtimestamp(float(timenowKL))
+            #now = timenowKL
+            
+            now = datetime.now()
+            if now.tzinfo == timezone.utc:
+                gmt8 = timezone(timedelta(hours=8))
+                now = now.astimezone(gmt8)
             
             current_time = now.strftime("%H:%M")
             weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
