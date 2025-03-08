@@ -1,8 +1,7 @@
 import getpass
-import requests
 import sys
-import os
-import config
+import config 
+import urllib3
 
 #pip install selenium
 #pip install beautifulsoup4
@@ -11,7 +10,7 @@ import config
 #pip install webdriver-manager
 
 #VARIABLES-------------------------------------
-program = "CR" # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch , 
+program = "CB" # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch , 
                # TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
                # CR - Cron Run , CSFTP - Check SFTP , 
 #VARIABLES------------------
@@ -33,9 +32,11 @@ can2 = True
 can3 = True
 can5 = True
 can10 = True
+http = urllib3.PoolManager()
 
 def run_function(program_code, code2=None, info3=None):
     program = program_code
+    global http
 
 
     #functions
@@ -82,6 +83,7 @@ def run_function(program_code, code2=None, info3=None):
 
             return browser
         def needPass():
+            import json
             password = getpass.getpass("Please input password (can be blank): ")
             url = "https://afwanproductions.pythonanywhere.com/api/executejsonv2"  # Replace with the actual URL
             payload = {
@@ -91,10 +93,17 @@ def run_function(program_code, code2=None, info3=None):
             headers = {
                 "Content-Type": "application/json"
             }
-            response = requests.post(url, json=payload, headers=headers)
+            #response = requests.post(url, json=payload, headers=headers)
 
-            print("Status Code:", response.status_code)
-            print("Response:", response.text)
+            #print("Status Code:", response.status_code)
+            #print("Response:", response.text)
+            
+            
+            payload = json.dumps(payload).encode("utf-8") #change to json
+            response = http.request("POST", url, body=payload, headers=headers)
+
+            print("Status Code:", response.status)
+            print("Response:", response.data.decode("utf-8"))
 
             global fyuser
             global fypass
@@ -114,38 +123,41 @@ def run_function(program_code, code2=None, info3=None):
 
     #CHECK BOOKING PNR
     if program == "CB":
+        needPass()
 
         import xml.dom.minidom
-        import urllib.request
+        #import urllib.request
         import os
         import platform
         import base64
-        needPass()
+        #needPass()
 
         #VARIABLES------------------
         pnr = 'LDIW8U'
         stagingorprod = "S" #S - Staging , P - Prod
         #VARIABLES------------------
-
+        fycode = config.fy_code
         
         if stagingorprod == "S":
-            link = os.getenv("FY_STAGING_APP")
+            link = config.fy_app_staging
             url = f"{link}?Key={fycode}&RecordLocator={pnr}"
         else:
-            link = os.geteng("FY_PROD_APP")
+            link = config.fy_app_prod
             url = f"{link}?Key={fycode}&RecordLocator={pnr}"
 
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        # req = urllib.request.urlopen(url)
-        try:
-            with urllib.request.urlopen(req) as response:
-                content = response.read()
-        except urllib.error.HTTPError as e:
-            print(f"HTTP Error: {e.code} - {e.reason}")
-        except urllib.error.URLError as e:
-            print(f"URL Error: {e.reason}")
-
+        content = http.request("GET", url)
+        content = content.data.decode("utf-8")
         content = base64.b64decode(content).decode('utf-8')
+        #req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        #try:
+            #with urllib.request.urlopen(req) as response:
+                #content = response.read()
+        #except urllib.error.HTTPError as e:
+            #print(f"HTTP Error: {e.code} - {e.reason}")
+        #except urllib.error.URLError as e:
+            #print(f"URL Error: {e.reason}")
+
+        #content = base64.b64decode(content).decode('utf-8')
 
         if xmlformatted:
             dom = xml.dom.minidom.parseString(content)
@@ -314,9 +326,9 @@ def run_function(program_code, code2=None, info3=None):
                 else:
                     return 1
 
-        fydevlink = os.getenv("FYDEV_LINK")
-        username = os.getenv("FYDEV_USER")
-        password = os.getenv("FYDEV_PASS")
+        fydevlink = config.fydevlink
+        username = config.fydevusername
+        password = config.fydevpassword
         url = f"https://{username}:{password}@{fydevlink}"
         station_depart = station_depart.upper()
         station_return = station_return.upper()
@@ -531,6 +543,7 @@ def run_function(program_code, code2=None, info3=None):
     #TELEGRAM BOT
     elif program == "TB":
         # needPass()
+        import json
 
         # VARIABLES -----------------
         TOKEN = tbtoken
@@ -551,14 +564,19 @@ def run_function(program_code, code2=None, info3=None):
         
         # VARIABLES -----------------
         tb_token = config.tb_token
+        
         # Telegram API URL
         url = f"https://api.telegram.org/bot{tb_token}/sendMessage"
+        data={"chat_id": CHAT_ID, "text": MESSAGE}
+        data = json.dumps(data).encode("utf-8") #change to json
+        response = http.request("POST", url, body=data, headers={"Content-Type":"application/json"})
 
         # Send the message
-        response = requests.post(url, data={"chat_id": CHAT_ID, "text": MESSAGE})
+        #response = requests.post(url, data={"chat_id": CHAT_ID, "text": MESSAGE})
 
         # Check response
-        if response.status_code == 200:
+        #if response.status_code == 200:
+        if response.status == 200:
             print("Message sent successfully!")
         else:
             print(f"Failed to send message: {response.text}")
@@ -598,7 +616,8 @@ def run_function(program_code, code2=None, info3=None):
 
         #initialize url, data, & cookie
         url = 'https://afwanhaziq.pythonanywhere.com/login'
-        data = {'email': 'afwanhaziq987@gmail.com', 'password': 'test12345', 'submit':''}
+        email = config.afwanemail
+        data = {'email': email, 'password': 'test12345', 'submit':''}
         cookie_jar = http.cookiejar.CookieJar()
 
         response_data = login_and_get_data(url, data, cookie_jar)
@@ -695,9 +714,15 @@ def run_function(program_code, code2=None, info3=None):
         
         def check_can_cron():
             print("Run check...")
-            url = "https://afwanproductions.pythonanywhere.com/croncheck"
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            cronchecklink = config.cronchecklink
+            url = cronchecklink
+            
+            response = http.request("GET", url)
+            
+            response = response.data.decode("utf-8")
+            soup = BeautifulSoup(response, 'html.parser')
+            #response = requests.get(url)
+            #soup = BeautifulSoup(response.text, 'html.parser')
             global can05
             global can1
             global can2
@@ -705,7 +730,7 @@ def run_function(program_code, code2=None, info3=None):
             global can5
             global can10
             
-            print(response.text)
+            print(response)
             
             can05 = check_status_html("min05", soup)
             can1 = check_status_html("min1", soup)
@@ -724,7 +749,6 @@ def run_function(program_code, code2=None, info3=None):
             print("Done check")
 
         def load_10_min():
-            url = "https://afwanproductions.pythonanywhere.com"
             try:              
                 print("---------------------- every 10 min")
 
@@ -814,8 +838,10 @@ def run_function(program_code, code2=None, info3=None):
         url = csftp_link
         try:
             print("running CSFTP...")
-            response = requests.get(url)
-            html_data = response.text
+            #response = requests.get(url)
+            response = http.request("GET", url)
+            response = response.data.decode("utf-8")
+            html_data = response
             #print(html_data)
             if (html_data != "connected to NAVITAIRE1SAP<br/>connected to NPS1FIREFLY<br/>connected to ELNVOICE1NAVITAIRE"): #has changes
                 run_function("TB", "Afwan", f"One of the SFTP is not running  \n  \n  {html_data}")
