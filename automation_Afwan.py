@@ -714,6 +714,7 @@ def run_function(program_code, code2=None, info3=None):
         
         def check_can_cron():
             print("Run check...")
+            global http
             cronchecklink = config.cronchecklink
             url = cronchecklink
             
