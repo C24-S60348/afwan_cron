@@ -1,7 +1,7 @@
 import getpass
 import sys
-import config 
 import urllib.request as ur
+import variables
 #import urllib3
 #import requests
 
