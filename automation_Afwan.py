@@ -430,7 +430,6 @@ def run_function(program_code, code2=None, info3=None):
         import re #get from pattern
         import os
         from bs4 import BeautifulSoup
-        from lxml import 
         from datetime import datetime
         import platform
         isProd = True
