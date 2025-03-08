@@ -916,8 +916,11 @@ def run_function(program_code, code2=None, info3=None):
 
         print("running RP...")
         def checkTime():
+            
             #now = datetime.now()
+            timenowKLDate = datetime.fromtimestamp(float(timenowKL))
             now = timenowKL
+            
             current_time = now.strftime("%H:%M")
             weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
 
