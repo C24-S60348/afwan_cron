@@ -913,7 +913,8 @@ def run_function(program_code, code2=None, info3=None):
     elif program == "CM":
         import json
 
-        url = f"https://api.telegram.org/bot5414141515:AAHhNK_PNWcv-rtUvpVq5348RgDXksG0TzI/getUpdates"
+        tb_token = variables.tb_token
+        url = f"https://api.telegram.org/bot{tb_token}/getUpdates"
         target_id = "222338004"
         target_username = "sra2931" #Afwanhz , sra2931
         search_by = "CM" # ID , US - username , CM - Command
