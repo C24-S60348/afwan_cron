@@ -1,6 +1,5 @@
-import getpass
 import sys
-
+import variables
 #import urllib3
 #import requests
 
@@ -11,30 +10,52 @@ import sys
 #pip install webdriver-manager
 
 #VARIABLES-------------------------------------
-program = "CR" # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch , 
-               # TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
-               # CR - Cron Run , CSFTP - Check SFTP , 
+program = variables.program
+if program == "":
+    program = "CB" 
+
+                # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch , 
+                # TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
+                # CRS - Cron Run Server , CRPC - Cron Run PC , CSFTP - Check SFTP , FW - Flask Website afwanproductions,
+                # CM - Check message telegram , 
 #VARIABLES------------------
 
+if (program == "FW"):
+    from flask import Flask, request, jsonify, render_template, render_template_string
+    from flask_cors import CORS
+    app = Flask(__name__)
+    cors = CORS(app)
 
 #print(len(sys.argv))
 if len(sys.argv) > 1:
     program = sys.argv[1]
 
 #Public variables
-fyuser = ""
-fypass = ""
-fycode = ""
-tbtoken = ""
-csftplink = ""
-can05 = True
-can1 = True
-can2 = True
-can3 = True
-can5 = True
-can10 = True
-timenowKL = 0
-#http = urllib3.PoolManager()
+if True:
+    fyuser = ""
+    fypass = ""
+    fycode = ""
+    tbtoken = ""
+    csftplink = ""
+    can05 = True
+    can1 = True
+    can2 = True
+    can3 = True
+    can5 = True
+    can10 = True
+    can30 = True
+    can60 = True
+    timenowKL = 0
+    last_run_time = 0
+    last_run_time_05 = 0
+    last_run_time_1 = 0
+    last_run_time_2 = 0
+    last_run_time_3 = 0
+    last_run_time_5 = 0
+    last_run_time_10 = 0
+    last_run_time_30 = 0
+    last_run_time_60 = 0
+    #http = urllib3.PoolManager()
 
 def run_function(program_code, code2=None, info3=None):
     program = program_code
@@ -47,95 +68,95 @@ def run_function(program_code, code2=None, info3=None):
     #functions
     if (True):
         import urllib.request as ur
-        import variables
-        import time
-        import datetime
-        from datetime import datetime, timezone, timedelta
-        from decimal import Decimal
-        browser_code = 'F' # C - Chrome , F - Firefox , E - Microsoft Edge , S - Safari
-        openfileorfolder = 'F' # F - File , FD - Folder
-        xmlformatted = True
-        def getbrowser(browser_code):
-            if browser_code == 'C':
-                trymethod = 1
-                if trymethod == 1:
-                    options = webdriver.ChromeOptions()
-                    options.add_experimental_option("detach", True)
-                    browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-                else:
-                    options = ChromeOptions()
-                    options.add_experimental_option("detach", True)  # Prevents browser from closing
-                    #service = Service("chromedriver.exe")  # Path to your ChromeDriver
-                    browser = webdriver.Chrome(options=options)
-            elif browser_code == 'F':
-                trymethod = 1
-                if trymethod == 1:
-                    options = webdriver.FirefoxOptions()
-                    service = FirefoxService(FirefoxDriverManager().install())
-                    browser = webdriver.Firefox(service=service, options=options)
-                else:
-                    browser = webdriver.Firefox()
-            elif browser_code == 'S':
-                browser = webdriver.Safari()
-            elif browser_code == 'E':
-                trymethod = 1
-                if trymethod == 1:
-                    options = EdgeOptions()
-                    options.add_experimental_option("detach", True)  # Prevents browser from closing
-                    service = EdgeService(EdgeDriverManager().install())
-                    browser = webdriver.Edge(service=service, options=options)
-                else:
-                    options = EdgeOptions()
-                    options.add_experimental_option("detach", True)  # Prevents browser from closing
-                    browser = webdriver.Edge(options=options)
-                # browser = webdriver.Edge(options=options)
+    import variables
+    import time
+    import datetime
+    from datetime import datetime, timezone, timedelta
+    from decimal import Decimal
+    browser_code = 'F' # C - Chrome , F - Firefox , E - Microsoft Edge , S - Safari
+    openfileorfolder = 'F' # F - File , FD - Folder
+    xmlformatted = True
+    def getbrowser(browser_code):
+        if browser_code == 'C':
+            trymethod = 1
+            if trymethod == 1:
+                options = webdriver.ChromeOptions()
+                options.add_experimental_option("detach", True)
+                browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+            else:
+                options = ChromeOptions()
+                options.add_experimental_option("detach", True)  # Prevents browser from closing
+                #service = Service("chromedriver.exe")  # Path to your ChromeDriver
+                browser = webdriver.Chrome(options=options)
+        elif browser_code == 'F':
+            trymethod = 1
+            if trymethod == 1:
+                options = webdriver.FirefoxOptions()
+                service = FirefoxService(FirefoxDriverManager().install())
+                browser = webdriver.Firefox(service=service, options=options)
             else:
                 browser = webdriver.Firefox()
+        elif browser_code == 'S':
+            browser = webdriver.Safari()
+        elif browser_code == 'E':
+            trymethod = 1
+            if trymethod == 1:
+                options = EdgeOptions()
+                options.add_experimental_option("detach", True)  # Prevents browser from closing
+                service = EdgeService(EdgeDriverManager().install())
+                browser = webdriver.Edge(service=service, options=options)
+            else:
+                options = EdgeOptions()
+                options.add_experimental_option("detach", True)  # Prevents browser from closing
+                browser = webdriver.Edge(options=options)
+            # browser = webdriver.Edge(options=options)
+        else:
+            browser = webdriver.Firefox()
 
-            return browser
-        def needPass():
-            import json
-            password = getpass.getpass("Please input password (can be blank): ")
-            url = "https://afwanproductions.pythonanywhere.com/api/executejsonv2"  # Replace with the actual URL
-            payload = {
-                "password": password,
-                "query": "SELECT * FROM afwandata"
-            }
-            headers = {
-                "Content-Type": "application/json"
-            }
-            #response = requests.post(url, json=payload, headers=headers)
+        return browser
+    # def needPass():
+    #         import json
+    #         password = getpass.getpass("Please input password (can be blank): ")
+    #         url = "https://afwanproductions.pythonanywhere.com/api/executejsonv2"  # Replace with the actual URL
+    #         payload = {
+    #             "password": password,
+    #             "query": "SELECT * FROM afwandata"
+    #         }
+    #         headers = {
+    #             "Content-Type": "application/json"
+    #         }
+    #         #response = requests.post(url, json=payload, headers=headers)
 
-            #print("Status Code:", response.status_code)
-            #print("Response:", response.text)
+    #         #print("Status Code:", response.status_code)
+    #         #print("Response:", response.text)
             
             
-            payload = json.dumps(payload).encode("utf-8") #change to json
-            #response = http.request("POST", url, body=payload, headers=headers)
-            req = ur.Request(url, data=payload, headers=headers, method="POST")
-            with ur.urlopen(req) as response:
-                status_code = response.getcode()
-                response = response.read().decode("utf-8")
+    #         payload = json.dumps(payload).encode("utf-8") #change to json
+    #         #response = http.request("POST", url, body=payload, headers=headers)
+    #         req = ur.Request(url, data=payload, headers=headers, method="POST")
+    #         with ur.urlopen(req) as response:
+    #             status_code = response.getcode()
+    #             response = response.read().decode("utf-8")
             
 
-            print("Status Code:", status_code)
-            print("Response:", response)
+    #         print("Status Code:", status_code)
+    #         print("Response:", response)
 
-            global fyuser
-            global fypass
-            global fycode
-            global tbtoken
-            global csftplink #todo
+    #         global fyuser
+    #         global fypass
+    #         global fycode
+    #         global tbtoken
+    #         global csftplink #todo
 
-            # Convert response to JSON
-            #data = response.json()
-            data = json.loads(response)
-            # Extract fyuser from the first result
-            if "results" in data and len(data["results"]) > 0:
-                fyuser = data["results"][0]["fyuser"]
-                fypass = data["results"][0]["fypass"]
-                fycode = data["results"][0]["fycode"]
-                tbtoken = data["results"][0]["tbtoken"]
+    #         # Convert response to JSON
+    #         #data = response.json()
+    #         data = json.loads(response)
+    #         # Extract fyuser from the first result
+    #         if "results" in data and len(data["results"]) > 0:
+    #             fyuser = data["results"][0]["fyuser"]
+    #             fypass = data["results"][0]["fypass"]
+    #             fycode = data["results"][0]["fycode"]
+    #             tbtoken = data["results"][0]["tbtoken"]
 
 
     #CHECK BOOKING PNR
@@ -150,8 +171,8 @@ def run_function(program_code, code2=None, info3=None):
         #needPass()
 
         #VARIABLES------------------
-        pnr = 'LDIW8U'
-        stagingorprod = "S" #S - Staging , P - Prod
+        pnr = input("Please input PNR")
+        stagingorprod = input("Staging - S , Prod - P") #S - Staging , P - Prod
         #VARIABLES------------------
         fycode = variables.fy_code
         
@@ -221,11 +242,11 @@ def run_function(program_code, code2=None, info3=None):
         from webdriver_manager.opera import OperaDriverManager
         # from webdriver_manager.drivers import edge
         import time
-        needPass()
+        #needPass()
 
         #VARIABLES------------------
-        is_one_way = False
-        is_login = False
+        is_one_way = "Y" # Y - Yes, N - No
+        is_login = "Y" # Y - Yes , N - No
         if fyuser == "":
             fyuser = ""  # put your custom email and pass fy staging here
             fypass = ""
@@ -233,8 +254,8 @@ def run_function(program_code, code2=None, info3=None):
         flight_fare_type2 = 'B'
         adult = 1
         infant = 0
-        station_depart = 'pen'
-        station_return = 'lgk'
+        station_depart = 'SZB'
+        station_return = 'PEN'
         target_date = '20250319'
         target_date2 = '20250320'
         first_name = 'afwan'
@@ -244,6 +265,9 @@ def run_function(program_code, code2=None, info3=None):
         contact_email = 'afwan@haziq.com'
         mobile_phone = '01152853044'
         #VARIABLES-------------------------
+
+        is_one_way = is_one_way == "Y"
+        is_login = is_login == "Y"
 
         # options = ChromeOptions()
         # options.add_experimental_option("detach", True)  # Prevents browser from closing
@@ -452,7 +476,7 @@ def run_function(program_code, code2=None, info3=None):
         import platform
         isProd = True
         
-        ct_link = os.getenv("CT_LINK")
+        ct_link = variables.CT_LINK
 
         if isProd:
             req = urllib.request.urlopen(ct_link)
@@ -577,6 +601,8 @@ def run_function(program_code, code2=None, info3=None):
             CHAT_ID = "-4515480710"
         elif code2 == "Study":
             CHAT_ID = "-4515480710"
+        elif code2 == "Sara":
+            CHAT_ID = "6238256254"
         
         MESSAGE = info3
         
@@ -724,14 +750,13 @@ def run_function(program_code, code2=None, info3=None):
         e.click()
 
     #CRON RUN
-    elif program == "CR":
+    elif program == "CRS" or program == "CRPC":
         import platform
         #from bs4 import BeautifulSoup
         import re
         
-        def check_can_cron():
+        def run_cron():
             print("Run check...")
-            #global http
             cronchecklink = variables.cronchecklink
             url = cronchecklink
             
@@ -752,13 +777,7 @@ def run_function(program_code, code2=None, info3=None):
                 if match:
                     return match.group(1)
                 return ""
-            #soup = BeautifulSoup(response, 'html.parser')
             
-            #response = http.request("GET", url)
-            #response = response.data.decode("utf-8")
-            #soup = BeautifulSoup(response, 'html.parser')
-            #response = requests.get(url)
-            #soup = BeautifulSoup(response.text, 'html.parser')
             global timenowKL
             global can05
             global can1
@@ -766,15 +785,10 @@ def run_function(program_code, code2=None, info3=None):
             global can3
             global can5
             global can10
+            global can30
+            global can60
             
             print(response)
-            
-            #can05 = check_status_html("min05", soup)
-            #can1 = check_status_html("min1", soup)
-            #can2 = check_status_html("min2", soup)
-            #can3 = check_status_html("min3", soup)
-            #can5 = check_status_html("min5", soup)
-            #can10 = check_status_html("min10", soup)
             
             timenowKL = get_html("timenowKL", response)
             timenowKL = Decimal(timenowKL)
@@ -784,100 +798,59 @@ def run_function(program_code, code2=None, info3=None):
             can3 = get_html_true("min3", response)
             can5 = get_html_true("min5", response)
             can10 = get_html_true("min10", response)
-                
-            #print(can05)
-            #print(can1)
-            #print(can2)
-            #print(can3)
-            #print(can5)
-            #print(can10)
+            can30 = get_html_true("min30", response)
+            can60 = get_html_true("min60", response)
             
             print("Done check")
 
-        def load_10_min():
-            url = "cron10min"
-            try:              
-                print("---------------------- every 10 min")
+            if can05:
+                load_min(0.5)
+            if can1:
+                load_min(1)
+            if can2:
+                load_min(2)
+            if can3:
+                load_min(3)
+            if can5:
+                load_min(5)
+            if can10:
+                load_min(10)
+            if can30:
+                load_min(30)
+            if can60:
+                load_min(60)
 
-                run_function("CSFTP")
+        def load_min(min):
+            print(f"---------------------- every {min} min")
+            if min == 0.5:
+                print("")
+            if min == 1:
+                print("")
+            if min == 2:
                 run_function("RP")
-
-                print("---------------------- every 10 min")
-
-            except Exception as e:
-                print(f"Failed to load {url} - Error: {e}")
+            if min == 3:
+                print("")
+            if min == 5:
+                print("")
+            if min == 10:
+                print("")
+            if min == 30:
+                print("")
+            if min == 60:
+                run_function("CSFTP")
+            print(f"---------------------- every {min} min")
         
-        def load_5_min():     
-            print("---------------every 5 min")
-              
-            print("---------------every 5 min")
-        
-        def load_3_min():     
-            print("---------------every 3 min")
-              
-            print("---------------every 3 min")
+        run_cron()
 
-        if __name__ == "__main__":
-            method_use = 4
-            
-            if method_use == 4:
-                check_can_cron()
-                print("run once")
-                if can10:
-                        load_10_min()
-                if can5:
-                        load_5_min()
-                if can3:
-                        load_3_min()
-            
-            if method_use != 4:
-                while True:
-                    check_can_cron()
-                    
-                    if can10:
-                        load_10_min()
-                    if can5:
-                        load_5_min()
-                    if can3:
-                        load_3_min()
-                    
-                    method_use = 3
-                    
-                    if method_use == 1:
-    
-                        for remaining in range(600, 300, -60): #sleep 5min
-                            remaining_minute = remaining/60
-                            print(f"\rWaiting: {remaining_minute} minutes remaining...", end="", flush=True)
-                            time.sleep(60)
-                        
-                        load_5_min()
-                    
-                        for remaining in range(300, 0, -60): #sleep 5min
-                            remaining_minute = remaining/60
-                            print(f"\rWaiting: {remaining_minute} minutes remaining...", end="", flush=True)
-                            time.sleep(60)
-                    
-                    elif method_use == 2:
-                        print(f"\rWaiting: 10 minutes remaining...", end="", flush=True)
-                        time.sleep(300)
-                        load_5_min()
-                        print(f"\rWaiting: 5 minutes remaining...", end="", flush=True)
-                        time.sleep(300)
-                        
-                    elif method_use == 3:
-                        totalsec = 200
-                        #minutes = 600
-                        countsec = 10
-                        #countsec = 600
-                        for remaining in range(0, totalsec, countsec): #sleep 5min
-                            emin = remaining/60
-                            esec = remaining
-                            print(f"\rElapsed {esec}s ...", end="", flush=True)
-                            time.sleep(countsec)
-                    
-                    
-                    
-                #time.sleep(600)  # Sleep for 5 minutes (300 seconds) # 10 mins
+        if program == "CRPC":
+            while True:
+                totalsec = 200
+                countsec = 10
+                for remaining in range(0, totalsec, countsec): #sleep 5min
+                    esec = remaining
+                    print(f"\rElapsed {esec}s ...", end="", flush=True)
+                    time.sleep(countsec)
+                run_cron()
     
     #CHECK SFTP
     elif program == "CSFTP":
@@ -894,7 +867,7 @@ def run_function(program_code, code2=None, info3=None):
             #response = response.data.decode("utf-8")
             #html_data = response
             #print(html_data)
-            if (html_data != "connected to NAVITAIRE1SAP<br/>connected to NPS1FIREFLY<br/>connected to ELNVOICE1NAVITAIRE"): #has changes
+            if (html_data != "connected to NAVITAIRE1SAP<br/>connected to NPS1FIREFLY<br/>connected to ELNVOICE1NAVITAIRE<br/>connected to 2360692 prod<br/>connected to 2360692 staging"): #has changes
                 run_function("TB", "Afwan", f"One of the SFTP is not running  \n  \n  {html_data}")
             print("done CSFTP")
 
@@ -917,32 +890,389 @@ def run_function(program_code, code2=None, info3=None):
             
             current_time = now.strftime("%H:%M")
             weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
-
-            # Define the time range
-            start_time = "13:50"
-            end_time = "14:10"
-
-            start_time2 = "8:50"
-            end_time2 = "9:10"
-            
-            start_time3 = "20:50"
-            end_time3 = "21:10"
             
             print(f"now is {current_time}")
 
-            if weekdays and start_time <= current_time <= end_time:
-                run_function("TB", "Afwan", "Bayar parking petanggg")
-                # print("Current time is between 13:50 and 14:10 on a weekday.")
-            if weekdays and start_time2 <= current_time <= end_time2:
-                run_function("TB", "Afwan", "Bayar parking pagii")
-                # print("Now it's 9 AM, please pay your parking.")
-            if start_time3 <= current_time <= end_time3:
+            #Weekdays
+            if weekdays: 
+                if "8:50" <= current_time <= "9:10":
+                    run_function("TB", "Afwan", "Bayar parking pagii")
+                if "13:50" <= current_time <= "14:10":
+                    run_function("TB", "Afwan", "Bayar parking petanggg")
+
+            #Normal days
+            if "20:50" <= current_time <= "21:10":
                 run_function("TB", "Afwan", "Cakap SAYANG kat sara")
                 
                 
         
         checkTime()
         print("done RP")
+
+    #Check message
+    elif program == "CM":
+        import json
+
+        url = f"https://api.telegram.org/bot5414141515:AAHhNK_PNWcv-rtUvpVq5348RgDXksG0TzI/getUpdates"
+        target_id = "222338004"
+        target_username = "sra2931" #Afwanhz , sra2931
+        search_by = "CM" # ID , US - username , CM - Command
+        try:
+            print("running CM...")
+            response = requests.get(url)
+            data = response.json()
+            for update in data.get("result", []):
+                message = update.get("message", {})
+                user = message.get("from", {})
+                
+                # Check if the message is from the target user
+                if search_by == "ID":
+                    if str(user.get("id")) == target_id:
+                        id = user.get("id", "Unknown")
+                        username = user.get("username", "Unknown")
+                        text = message.get("text", "[No text message]")
+                        print(f"Id: {id} | User: {username} | Message: {text}")
+
+                elif search_by == "US":
+                    if str(user.get("username")) == target_username:
+                        id = user.get("id", "Unknown")
+                        username = user.get("username", "Unknown")
+                        text = message.get("text", "[No text message]")
+                        print(f"Id: {id} | User: {username} | Message: {text}")
+
+                elif search_by == "CM":
+                    id = user.get("id", "Unknown")
+                    username = user.get("username", "Unknown")
+                    text = message.get("text", "[No text message]")
+                    date = message.get("date", "[No date]") #Unique
+                    # print(f"Id: {id} | User: {username} | Message: {text}")
+
+                    #Command
+                    
+
+                    if "/command1" in text: 
+                        if "/command1@I_Awesome_OT_Bot" in text: 
+                            print(f"{username} | date:{date} | command : {text}")
+                        else:
+                            print(f"{username} | date:{date} | command private : {text}")
+
+        except Exception as e:
+            print(f"Error: {e}")
+
+        except Exception as e:
+            print(f"Failed to load {url} - Error: {e}")
+
+    #Flask website afwanproductions
+    elif program == "FW":
+        import mysql.connector
+        import json, time
+        from datetime import datetime
+        from contextlib import contextmanager
+        from werkzeug.exceptions import BadRequest
+        import os
+        #pip install flask mysql-connector-python flask-cors werkzeug
+
+        @contextmanager
+        def connect_to_db():
+            try:
+                mydb = mysql.connector.connect(
+                    host="AfwanProductions.mysql.pythonanywhere-services.com",
+                    user="AfwanProductions",
+                    password="afwan987",
+                    database="AfwanProductions$afwan_db"
+                )
+                admin_db = mydb.cursor()
+                yield admin_db, mydb
+            except mysql.connector.Error as err:
+                print(f"Error connecting to database: {err}")
+                raise
+            finally:
+                if mydb:
+                    mydb.close()
+
+        #TRY===========================================================================
+        @app.route('/api', methods=['GET','POST'])
+        def handle_request():
+            text = str(request.args.get('input')) #?input=a
+            character_count = len(text)
+
+            data_set = {'input': text, 'timestamp': time.time(), 'character_count': character_count}
+            json_dump = json.dumps(data_set)
+            return json_dump
+
+        #QUERY EXECUTER============================================================================
+        @app.route('/api/execute', methods=['GET','POST'])
+        def execute_query():
+            try:
+                with connect_to_db() as (admin_db, mydb):
+
+                    sql = str(request.args.get('query'))
+                    password = str(request.args.get('password'))
+
+                    if "'" in sql:
+                        return jsonify({"error": "query parameter is not valid"}), 400
+                    if not sql:
+                        return jsonify({"error": "query parameter is required"}), 400
+                    if not password:
+                        return jsonify({"error": "password parameter is required"}), 400
+
+                    if password == variables.website_pass:
+                        try:
+                            admin_db.execute(sql)
+                            if admin_db.with_rows: # Check if the query returns rows
+                                results = admin_db.fetchall() # Fetch all results
+                                return jsonify({"results": results}), 200 # Return results in JSON
+                            else:
+                                mydb.commit() # Commit for insert, update, delete
+                                return jsonify({"message": "Query executed successfully"}), 200
+                        except mysql.connector.Error as db_err:
+                            mydb.rollback() # Rollback in case of error
+                            return jsonify({"error": f"Database error: {db_err}"}), 500
+                    else:
+                        return jsonify({"error": "Incorrect password"}), 401
+            except Exception as e:
+                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
+        #QUERY EXECUTER JSON============================================================================
+        @app.route('/api/executejson', methods=['GET','POST'])
+        def execute_query_json():
+            try:
+                with connect_to_db() as (admin_db, mydb):
+
+                    data = request.get_json()
+
+                    if 'query' not in data:
+                        return jsonify({"error": "query parameter is required"}), 400
+
+                    if 'password' not in data:
+                        return jsonify({"error": "password parameter is required"}), 400
+
+                    sql = data['query']
+                    password = data['password']
+
+                    #if "'" in sql:
+                        #return jsonify({"error": "query parameter is not valid"}), 400
+
+                    if password == variables.website_pass:
+                        try:
+                            admin_db.execute(sql)
+                            if admin_db.with_rows: # Check if the query returns rows
+                                results = admin_db.fetchall() # Fetch all results
+                                return jsonify({"results": results}), 200 # Return results in JSON
+                            else:
+                                mydb.commit() # Commit for insert, update, delete
+                                return jsonify({"message": "Query executed successfully"}), 200
+                        except mysql.connector.Error as db_err:
+                            mydb.rollback() # Rollback in case of error
+                            return jsonify({"error": f"Database error: {db_err}"}), 500
+                    else:
+                        return jsonify({"error": "Incorrect password"}), 401
+            except Exception as e:
+                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
+        #QUERY EXECUTER JSON V2============================================================================
+        @app.route('/api/executejsonv2', methods=['GET','POST'])
+        def execute_query_json_v2():
+            try:
+                with connect_to_db() as (admin_db, mydb):
+
+                    data = request.get_json()
+
+                    if 'query' not in data:
+                        return jsonify({"error": "query parameter is required"}), 400
+
+                    if 'password' not in data:
+                        return jsonify({"error": "password parameter is required"}), 400
+
+                    sql = data['query']
+                    password = data['password']
+
+                    #if "'" in sql:
+                        #return jsonify({"error": "query parameter is not valid"}), 400
+
+                    if password == variables.website_pass:
+                        try:
+                            admin_db.execute(sql)
+                            if admin_db.with_rows: # Check if the query returns rows
+                                columns = [column[0] for column in admin_db.description] # Get column names
+                                results = []
+                                for row in admin_db.fetchall():
+                                    results.append(dict(zip(columns, row))) # Create dictionary for each row
+                                return jsonify({"results": results}), 200 # Return results in JSON
+                            else:
+                                mydb.commit() # Commit for insert, update, delete
+                                return jsonify({"message": "Query executed successfully"}), 200
+                        except mysql.connector.Error as db_err:
+                            mydb.rollback() # Rollback in case of error
+                            return jsonify({"error": f"Database error: {db_err}"}), 500
+                    else:
+                        return jsonify({"error": "Incorrect password"}), 401
+            except Exception as e:
+                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
+        #QUERY EXECUTER JSON TEST============================================================================
+        @app.route('/api/executejsontest', methods=['GET','POST'])
+        def execute_query_json_test():
+            try:
+                with connect_to_db() as (admin_db, mydb):
+
+                    if request.is_json:
+                        data = request.get_json()
+                        return jsonify(data)
+                    else:
+                        return jsonify({"error": "Invalid JSON data provided."}), 400
+
+                    return data
+
+            except Exception as e:
+                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
+        #afwan
+        TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"  # Replace with the actual path
+
+        @app.route("/croncheck")
+        def cron_check():
+            global last_run_time_05
+            global last_run_time_1
+            global last_run_time_2
+            global last_run_time_3
+            global last_run_time_5
+            global last_run_time_10
+            global last_run_time_30
+            global last_run_time_60
+            can05 = False
+            can1 = False
+            can2 = False
+            can3 = False
+            can5 = False
+            can10 = False
+            can30 = False
+            can60 = False
+
+
+            current_time = time.time()
+            #check minutes
+            if current_time - last_run_time_05 > 20: #30
+                last_run_time_05 = current_time
+                can3 = True
+            if current_time - last_run_time_1 > 50: #60
+                last_run_time_1 = current_time
+                can3 = True
+            if current_time - last_run_time_2 > 110: #120
+                last_run_time_2 = current_time
+                can3 = True
+            if current_time - last_run_time_3 > 170: #180
+                last_run_time_3 = current_time
+                can3 = True
+            if current_time - last_run_time_5 > 290: #300
+                last_run_time_5 = current_time
+                can5 = True
+            if current_time - last_run_time_10 > 590: #600
+                last_run_time_10 = current_time
+                can10 = True
+            if current_time - last_run_time_30 > 1790: #1800
+                last_run_time_30 = current_time
+                can30 = True
+            if current_time - last_run_time_60 > 3590: #3600
+                last_run_time_60 = current_time
+                can60 = True
+
+            current_time = current_time + (8*3600)
+            timenowKL = current_time
+            time05 = last_run_time_05 + (8*3600)
+            time1 = last_run_time_1 + (8*3600)
+            time2 = last_run_time_2 + (8*3600)
+            time3 = last_run_time_3 + (8*3600)
+            time5 = last_run_time_5 + (8*3600)
+            time10 = last_run_time_10 + (8*3600)
+            time30 = last_run_time_30 + (8*3600)
+            time60 = last_run_time_60 + (8*3600)
+
+            current_time = datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %I:%M %p')
+            time05 = datetime.fromtimestamp(time05).strftime('%Y-%m-%d %I:%M %p')
+            time1 = datetime.fromtimestamp(time1).strftime('%Y-%m-%d %I:%M %p')
+            time2 = datetime.fromtimestamp(time2).strftime('%Y-%m-%d %I:%M %p')
+            time3 = datetime.fromtimestamp(time3).strftime('%Y-%m-%d %I:%M %p')
+            time5 = datetime.fromtimestamp(time5).strftime('%Y-%m-%d %I:%M %p')
+            time10 = datetime.fromtimestamp(time10).strftime('%Y-%m-%d %I:%M %p')
+            time30 = datetime.fromtimestamp(time30).strftime('%Y-%m-%d %I:%M %p')
+            time60 = datetime.fromtimestamp(time60).strftime('%Y-%m-%d %I:%M %p')
+
+            html = """
+                <!DOCTYPE html>
+                <html>
+                <head><title>Cron Check</title></head>
+                <body>
+                    <h2>Cron Check</h2>
+                    <p>Current time: {{ current_time }}</p>
+                    <p>Last 0.5min: {{ time05 }}</p>
+                    <p>Last 1min: {{ time1 }}</p>
+                    <p>Last 2min: {{ time2 }}</p>
+                    <p>Last 3min: {{ time3 }}</p>
+                    <p>Last 5min: {{ time5 }}</p>
+                    <p>Last 10min: {{ time10 }}</p>
+                    <p>Last 30min: {{ time30 }}</p>
+                    <p>Last 1hr: {{ time60 }}</p>
+                    <p class="min05">{{can05}}</p>
+                    <p class="min1">{{can1}}</p>
+                    <p class="min2">{{can2}}</p>
+                    <p class="min3">{{can3}}</p>
+                    <p class="min5">{{can5}}</p>
+                    <p class="min10">{{can10}}</p>
+                    <p class="min30">{{can30}}</p>
+                    <p class="min60">{{can60}}</p>
+                    <p class="timenowKL">{{timenowKL}}</p>
+                </body>
+                </html>
+            """
+
+            return render_template_string(html, current_time=current_time,
+                                          timenowKL=timenowKL,
+                                          time05 = time05, time1 = time1, time2 = time2, time3 = time3, time5 = time5, time10 = time10, time30 = time30, time60 = time60,
+                                          can05 = can05, can1 = can1, can2 = can2, can3 = can3, can5 = can5, can10 = can10, can30 = can30, can60 = can60)
+
+
+        @app.route("/")
+        def index():
+
+            #run cron------------------------------------------------
+            global last_run_time
+
+            current_time = time.time()
+
+            # Check if 5 minutes (300 seconds) have passed
+            if current_time - last_run_time > 600: #10 mins
+                run_function("WS")  # Call the function
+                last_run_time = current_time  # Update the last run time
+            #------------------------------------------------
+            # Convert timestamps to GMT+8 format
+            last_run_time_8 = last_run_time + (8 * 3600)  # Add 8 hours in seconds
+            last_run_time_8 = datetime.fromtimestamp(last_run_time_8).strftime('%Y-%m-%d %I:%M %p')
+
+            current_time_8 = current_time + (8 * 3600)  # Add 8 hours in seconds
+            current_time_8 = datetime.fromtimestamp(current_time_8).strftime('%Y-%m-%d %I:%M %p')
+
+            txt_files = [f for f in os.listdir(TXT_FILES_DIR) if f.endswith(".txt")]
+            txt_files.sort(reverse=True)
+            return render_template("index.html", files=txt_files, last_run_time=last_run_time_8, current_time=current_time_8)
+
+        @app.route("/view/<filename>")
+        def view_file(filename):
+            filepath = os.path.join(TXT_FILES_DIR, filename)
+            try:
+                with open(filepath, "r") as f:
+                    content = f.read()
+                return render_template("view.html", content=content, filename=filename)
+            except FileNotFoundError:
+                return "File not found", 404
+
+
+
+        #APP DEBUG==============================================================================
+        if __name__ == '__main__':
+            app.run(debug=True)
+
+
 
 
 
