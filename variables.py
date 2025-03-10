@@ -12,3 +12,8 @@ password = os.getenv("FYDEV_PASS", "")
 
 cronchecklink = os.getenv("CRON_CHECK_LINK", "")
 afwanemail = os.getenv("AFWAN_EMAIL", "")
+
+ct_link = os.getenv("CT_LINK", "")
+website_pass = os.getenv("WEBSITE_PASS", "")
+program = os.getenv("PROGRAM", "CRS") #only for the program
+
