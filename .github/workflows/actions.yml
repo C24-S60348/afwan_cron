@@ -37,4 +37,4 @@ jobs:
           CT_LINK: ${{ secrets.CT_LINK }} 
           WEBSITE_PASS: ${{ secrets.WEBSITE_PASS }} 
           PROGRAM: ${{ secrets.PROGRAM }} 
-        run: python automation_Afwan.py "CR"
+        run: python automation_Afwan.py
