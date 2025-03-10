@@ -1,5 +1,6 @@
 import sys
 import variables
+from datetime import datetime, timezone, timedelta
 #import urllib3
 #import requests
 
@@ -8,6 +9,8 @@ import variables
 #pip install urllib3
 #pip install requests
 #pip install webdriver-manager
+
+
 
 #VARIABLES-------------------------------------
 program = variables.program
@@ -37,24 +40,17 @@ if True:
     fycode = ""
     tbtoken = ""
     csftplink = ""
-    can05 = True
-    can1 = True
-    can2 = True
-    can3 = True
-    can5 = True
-    can10 = True
-    can30 = True
-    can60 = True
     timenowKL = 0
-    last_run_time = 0
-    last_run_time_05 = 0
-    last_run_time_1 = 0
-    last_run_time_2 = 0
-    last_run_time_3 = 0
-    last_run_time_5 = 0
-    last_run_time_10 = 0
-    last_run_time_30 = 0
-    last_run_time_60 = 0
+    last_run_times = {
+        "0.5":0,
+        "1":0,
+        "2":0,
+        "3":0,
+        "5":0,
+        "10":0, 
+        "30":0, 
+        "60":0, 
+    }
     #http = urllib3.PoolManager()
 
 def run_function(program_code, code2=None, info3=None):
@@ -778,65 +774,39 @@ def run_function(program_code, code2=None, info3=None):
                     return match.group(1)
                 return ""
             
-            global timenowKL
-            global can05
-            global can1
-            global can2
-            global can3
-            global can5
-            global can10
-            global can30
-            global can60
-            
             print(response)
             
             timenowKL = get_html("timenowKL", response)
             timenowKL = Decimal(timenowKL)
-            can05 = get_html_true("min05", response)
-            can1 = get_html_true("min1", response)
-            can2 = get_html_true("min2", response)
-            can3 = get_html_true("min3", response)
-            can5 = get_html_true("min5", response)
-            can10 = get_html_true("min10", response)
-            can30 = get_html_true("min30", response)
-            can60 = get_html_true("min60", response)
+            global last_run_times
+            cans = {}
+            for key in last_run_times.keys():
+                cans[key] = get_html_true(f"min{key}", response)
             
             print("Done check")
 
-            if can05:
-                load_min(0.5)
-            if can1:
-                load_min(1)
-            if can2:
-                load_min(2)
-            if can3:
-                load_min(3)
-            if can5:
-                load_min(5)
-            if can10:
-                load_min(10)
-            if can30:
-                load_min(30)
-            if can60:
-                load_min(60)
+            for key in cans.keys():
+                if cans[key]:
+                    load_min(key)
+
 
         def load_min(min):
             print(f"---------------------- every {min} min")
-            if min == 0.5:
+            if min == "0.5":
                 print("")
-            if min == 1:
+            if min == "1":
                 print("")
-            if min == 2:
+            if min == "2":
                 run_function("RP")
-            if min == 3:
+            if min == "3":
                 print("")
-            if min == 5:
+            if min == "5":
                 print("")
-            if min == 10:
+            if min == "10":
                 print("")
-            if min == 30:
+            if min == "30":
                 print("")
-            if min == 60:
+            if min == "60":
                 run_function("CSFTP")
             print(f"---------------------- every {min} min")
         
@@ -869,6 +839,7 @@ def run_function(program_code, code2=None, info3=None):
             #print(html_data)
             if (html_data != "connected to NAVITAIRE1SAP<br/>connected to NPS1FIREFLY<br/>connected to ELNVOICE1NAVITAIRE<br/>connected to 2360692 prod<br/>connected to 2360692 staging"): #has changes
                 run_function("TB", "Afwan", f"One of the SFTP is not running  \n  \n  {html_data}")
+            print (html_data)
             print("done CSFTP")
 
         except Exception as e:
@@ -900,9 +871,6 @@ def run_function(program_code, code2=None, info3=None):
         #Normal days
         if "20:50" <= current_time <= "21:10":
             run_function("TB", "Afwan", "Cakap SAYANG kat sara")
-        if "15:30" <= current_time <= "17:30":
-            run_function("TB", "Afwan", "time between 4")
-            print('time beetwen 4')
                 
         
         print("done RP")
@@ -965,7 +933,6 @@ def run_function(program_code, code2=None, info3=None):
     elif program == "FW":
         import mysql.connector
         import json, time
-        from datetime import datetime
         from contextlib import contextmanager
         from werkzeug.exceptions import BadRequest
         import os
@@ -1131,129 +1098,64 @@ def run_function(program_code, code2=None, info3=None):
 
         @app.route("/croncheck")
         def cron_check():
-            global last_run_time_05
-            global last_run_time_1
-            global last_run_time_2
-            global last_run_time_3
-            global last_run_time_5
-            global last_run_time_10
-            global last_run_time_30
-            global last_run_time_60
-            can05 = False
-            can1 = False
-            can2 = False
-            can3 = False
-            can5 = False
-            can10 = False
-            can30 = False
-            can60 = False
+            global last_run_times
+
+            now = datetime.now(timezone.utc)
+            gmt8 = timezone(timedelta(hours=8))
+            current_time_raw = now.astimezone(gmt8)
+            current_time_timestamp = current_time_raw.timestamp()
+
+            # get time
+            timenowKL = current_time_timestamp
+            times = {}
+            for key in last_run_times.keys():
+                times[key] = datetime.fromtimestamp(last_run_times[key], tz=gmt8).strftime('%Y-%m-%d %I:%M %p')
+                # times[key] = datetime.fromtimestamp(last_run_times[key]).strftime('%Y-%m-%d %I:%M %p')
 
 
-            current_time = time.time()
-            #check minutes
-            if current_time - last_run_time_05 > 20: #30
-                last_run_time_05 = current_time
-                can05 = True
-            if current_time - last_run_time_1 > 50: #60
-                last_run_time_1 = current_time
-                can1 = True
-            if current_time - last_run_time_2 > 110: #120
-                last_run_time_2 = current_time
-                can2 = True
-            if current_time - last_run_time_3 > 170: #180
-                last_run_time_3 = current_time
-                can3 = True
-            if current_time - last_run_time_5 > 290: #300
-                last_run_time_5 = current_time
-                can5 = True
-            if current_time - last_run_time_10 > 590: #600
-                last_run_time_10 = current_time
-                can10 = True
-            if current_time - last_run_time_30 > 1790: #1800
-                last_run_time_30 = current_time
-                can30 = True
-            if current_time - last_run_time_60 > 3590: #3600
-                last_run_time_60 = current_time
-                can60 = True
+            # get can or not
+            cans = {}
+            for key in times.keys():
+                print(current_time_timestamp)
+                print(last_run_times[key])
+                print(current_time_timestamp - last_run_times[key])
+                if (current_time_timestamp - last_run_times[key]) > ((float(key)*30)-10):
+                    last_run_times[key] = current_time_timestamp
+                    cans[key] = True 
+                else:
+                    cans[key] = False 
 
-            current_time = current_time + (8*3600)
-            timenowKL = current_time
-            time05 = last_run_time_05 + (8*3600)
-            time1 = last_run_time_1 + (8*3600)
-            time2 = last_run_time_2 + (8*3600)
-            time3 = last_run_time_3 + (8*3600)
-            time5 = last_run_time_5 + (8*3600)
-            time10 = last_run_time_10 + (8*3600)
-            time30 = last_run_time_30 + (8*3600)
-            time60 = last_run_time_60 + (8*3600)
+            current_time = current_time_raw.strftime('%Y-%m-%d %I:%M %p')
 
-            current_time = datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %I:%M %p')
-            time05 = datetime.fromtimestamp(time05).strftime('%Y-%m-%d %I:%M %p')
-            time1 = datetime.fromtimestamp(time1).strftime('%Y-%m-%d %I:%M %p')
-            time2 = datetime.fromtimestamp(time2).strftime('%Y-%m-%d %I:%M %p')
-            time3 = datetime.fromtimestamp(time3).strftime('%Y-%m-%d %I:%M %p')
-            time5 = datetime.fromtimestamp(time5).strftime('%Y-%m-%d %I:%M %p')
-            time10 = datetime.fromtimestamp(time10).strftime('%Y-%m-%d %I:%M %p')
-            time30 = datetime.fromtimestamp(time30).strftime('%Y-%m-%d %I:%M %p')
-            time60 = datetime.fromtimestamp(time60).strftime('%Y-%m-%d %I:%M %p')
-
-            html = """
+            html = f"""
                 <!DOCTYPE html>
                 <html>
                 <head><title>Cron Check</title></head>
                 <body>
                     <h2>Cron Check</h2>
-                    <p>Current time: {{ current_time }}</p>
-                    <p>Last 0.5min: {{ time05 }}</p>
-                    <p>Last 1min: {{ time1 }}</p>
-                    <p>Last 2min: {{ time2 }}</p>
-                    <p>Last 3min: {{ time3 }}</p>
-                    <p>Last 5min: {{ time5 }}</p>
-                    <p>Last 10min: {{ time10 }}</p>
-                    <p>Last 30min: {{ time30 }}</p>
-                    <p>Last 1hr: {{ time60 }}</p>
-                    <p class="min05">{{can05}}</p>
-                    <p class="min1">{{can1}}</p>
-                    <p class="min2">{{can2}}</p>
-                    <p class="min3">{{can3}}</p>
-                    <p class="min5">{{can5}}</p>
-                    <p class="min10">{{can10}}</p>
-                    <p class="min30">{{can30}}</p>
-                    <p class="min60">{{can60}}</p>
-                    <p class="timenowKL">{{timenowKL}}</p>
+                    <p>Current time: { current_time }</p>
+                    """
+            
+            for key in times.keys():
+                html += f'<p>Last {key}min: { times[key] }</p>'
+            for key in times.keys():
+                html += f'<p class="min{key}">{cans[key]}</p>'
+
+            html += f"""
+                    <p class="timenowKL">{timenowKL}</p>
                 </body>
                 </html>
             """
 
-            return render_template_string(html, current_time=current_time,
-                                          timenowKL=timenowKL,
-                                          time05 = time05, time1 = time1, time2 = time2, time3 = time3, time5 = time5, time10 = time10, time30 = time30, time60 = time60,
-                                          can05 = can05, can1 = can1, can2 = can2, can3 = can3, can5 = can5, can10 = can10, can30 = can30, can60 = can60)
+            return render_template_string(html)
 
 
         @app.route("/")
         def index():
 
-            #run cron------------------------------------------------
-            global last_run_time
-
-            current_time = time.time()
-
-            # Check if 5 minutes (300 seconds) have passed
-            if current_time - last_run_time > 600: #10 mins
-                run_function("WS")  # Call the function
-                last_run_time = current_time  # Update the last run time
-            #------------------------------------------------
-            # Convert timestamps to GMT+8 format
-            last_run_time_8 = last_run_time + (8 * 3600)  # Add 8 hours in seconds
-            last_run_time_8 = datetime.fromtimestamp(last_run_time_8).strftime('%Y-%m-%d %I:%M %p')
-
-            current_time_8 = current_time + (8 * 3600)  # Add 8 hours in seconds
-            current_time_8 = datetime.fromtimestamp(current_time_8).strftime('%Y-%m-%d %I:%M %p')
-
             txt_files = [f for f in os.listdir(TXT_FILES_DIR) if f.endswith(".txt")]
             txt_files.sort(reverse=True)
-            return render_template("index.html", files=txt_files, last_run_time=last_run_time_8, current_time=current_time_8)
+            return render_template("index.html", files=txt_files)
 
         @app.route("/view/<filename>")
         def view_file(filename):
