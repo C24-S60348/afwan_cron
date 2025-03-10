@@ -878,35 +878,33 @@ def run_function(program_code, code2=None, info3=None):
     elif program == "RP":
 
         print("running RP...")
-        def checkTime():
             
-            #now = datetime.now()
-            #timenowKLDate = datetime.fromtimestamp(float(timenowKL))
-            #now = timenowKL
-            
-            now = datetime.now(timezone.utc)
-            gmt8 = timezone(timedelta(hours=8))
-            now = now.astimezone(gmt8)
-            
-            current_time = now.strftime("%H:%M")
-            weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
-            
-            print(f"now is {current_time}")
+        now = datetime.now(timezone.utc)
+        gmt8 = timezone(timedelta(hours=8))
+        now = now.astimezone(gmt8)
+        
+        current_time = now.strftime("%H:%M")
+        weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
+        
+        print(f"now is {current_time}")
 
-            #Weekdays
-            if weekdays: 
-                if "8:50" <= current_time <= "9:10":
-                    run_function("TB", "Afwan", "Bayar parking pagii")
-                if "13:50" <= current_time <= "14:10":
-                    run_function("TB", "Afwan", "Bayar parking petanggg")
+        
 
-            #Normal days
-            if "20:50" <= current_time <= "21:10":
-                run_function("TB", "Afwan", "Cakap SAYANG kat sara")
-                
+        #Weekdays
+        if weekdays: 
+            if "8:50" <= current_time <= "9:10":
+                run_function("TB", "Afwan", "Bayar parking pagii")
+            if "13:50" <= current_time <= "14:10":
+                run_function("TB", "Afwan", "Bayar parking petanggg")
+
+        #Normal days
+        if "20:50" <= current_time <= "21:10":
+            run_function("TB", "Afwan", "Cakap SAYANG kat sara")
+        if "15:30" <= current_time <= "17:30":
+            run_function("TB", "Afwan", "time between 4")
+            print('time beetwen 4')
                 
         
-        checkTime()
         print("done RP")
 
     #Check message
@@ -1155,13 +1153,13 @@ def run_function(program_code, code2=None, info3=None):
             #check minutes
             if current_time - last_run_time_05 > 20: #30
                 last_run_time_05 = current_time
-                can3 = True
+                can05 = True
             if current_time - last_run_time_1 > 50: #60
                 last_run_time_1 = current_time
-                can3 = True
+                can1 = True
             if current_time - last_run_time_2 > 110: #120
                 last_run_time_2 = current_time
-                can3 = True
+                can2 = True
             if current_time - last_run_time_3 > 170: #180
                 last_run_time_3 = current_time
                 can3 = True
