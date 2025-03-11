@@ -1,0 +1,36 @@
+name: run automation_Afwan.py 3
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Runs every 10 minutes
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repo content
+        uses: actions/checkout@v2  # Checkout repository
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'  # Install Python 3.12
+
+      - name: execute py script # run automation_Afwan.py
+        env:
+          SOME_SECRET: ${{ secrets.SOME_SECRET }}
+          CSFTP_LINK: ${{ secrets.CSFTP_LINK }}
+          FYDEV_LINK: ${{ secrets.FYDEV_LINK }}
+          FY_APP_CODE: ${{ secrets.FY_APP_CODE }}
+          FY_APP_STAGING: ${{ secrets.FY_APP_STAGING }}
+          FY_APP_PROD: ${{ secrets.FY_APP_PROD }}
+          FYDEV_USER: ${{ secrets.FYDEV_USER }}
+          FYDEV_PASS: ${{ secrets.FYDEV_PASS }}
+          CRON_CHECK_LINK: ${{ secrets.CRON_CHECK_LINK }}
+          AFWAN_EMAIL: ${{ secrets.AFWAN_EMAIL }}   
+          TB_TOKEN: ${{ secrets.TB_TOKEN }} 
+          CT_LINK: ${{ secrets.CT_LINK }} 
+          WEBSITE_PASS: ${{ secrets.WEBSITE_PASS }} 
+          PROGRAM: ${{ secrets.PROGRAM }} 
+        run: python automation_Afwan.py
