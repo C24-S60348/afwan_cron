@@ -863,7 +863,7 @@ def run_function(program_code, code2=None, info3=None):
 
         #Weekdays
         if weekdays: 
-            if "8:50" <= current_time <= "9:10":
+            if "08:50" <= current_time <= "09:10":
                 run_function("TB", "Afwan", "Bayar parking pagii")
             if "13:50" <= current_time <= "14:10":
                 run_function("TB", "Afwan", "Bayar parking petanggg")
