@@ -1223,7 +1223,6 @@ def run_function(program_code, code2=None, info3=None):
 
             tz_gmt8 = datetime.timezone(datetime.timedelta(hours=8))
             now = datetime.datetime.now(tz=tz_gmt8).time()
-            # now = datetime.datetime.now().time()
             if reminder_time <= now:
                 await update.message.reply_text("The time must be in the future!")
                 return
@@ -1236,16 +1235,14 @@ def run_function(program_code, code2=None, info3=None):
             print(f"{user_name} : Reminder set for {timing}: {reminder_text}")
             await update.message.reply_text(f"Reminder set for {timing}: {reminder_text}")
 
-        # Remove the synchronous wrapper as we are now directly using asyncio.create_task
-
         async def send_reminder(application: Application, chat_id, message):
             await application.bot.send_message(chat_id=chat_id, text=f"🔔 Reminder: {message}")
         #reminder--------------------
 
         async def start(update: Update, context: CallbackContext):
-            user_id = update.effective_user.id  # Get User ID
+            chat_id = update.effective_chat.id  # Get Chat ID
             user_message = update.message.text
-            print(f"User ID: {user_id}")
+            print(f"Chat ID: {chat_id}")
             print(f"User Message: {user_message}")
             await update.message.reply_text("Hai sara, laju tak saya reply, hihi, sorry haritu ngantuukk")
 
@@ -1255,7 +1252,7 @@ def run_function(program_code, code2=None, info3=None):
             await update.message.reply_text("SAYANG SARA JUGAKKKKKKKK")
 
         async def handle_messages(update: Update, context: CallbackContext):
-            user_id = update.effective_user.id
+            chat_id = update.effective_chat.id
             user_name = update.effective_user.username
             user_message = update.message.text
             print(f"Message from {user_name} : {user_message}")
