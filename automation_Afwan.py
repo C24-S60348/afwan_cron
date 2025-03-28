@@ -3,10 +3,10 @@ import sys
 import requests
 import variables
 from datetime import datetime, timezone, timedelta
-import logging
+# import logging
 import json
 
-logging.basicConfig(filename="cron_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
+# logging.basicConfig(filename="cron_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
 
 #import urllib3
 #import requests
@@ -791,7 +791,7 @@ def run_function(program_code, code2=None, info3=None):
             if min == "1":
                 print("")
             if min == "2":
-                logging.info(f"Run RP")
+                # logging.info(f"Run RP")
                 run_function("RP")
             if min == "3":
                 print("")
@@ -803,7 +803,7 @@ def run_function(program_code, code2=None, info3=None):
                 print("")
             if min == "60":
                 if program != "CRF":
-                    logging.info(f"Run CSFTP")
+                    # logging.info(f"Run CSFTP")
                     run_function("CSFTP")
             print(f"---------------------- every {min} min")
 
