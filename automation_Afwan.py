@@ -1242,7 +1242,7 @@ def run_function(program_code, code2=None, info3=None):
             )
 
             print(f"{user_name} : Reminder set for {timing}: {reminder_text}")
-            await update.message.reply_text(f"Reminder set for {timing}: {reminder_text}")
+            await update.message.reply_text(f"Reminder has set")
 
         async def send_reminder(application: Application, chat_id, message):
             await application.bot.send_message(chat_id=chat_id, text=f"🔔 Reminder: {message}")
