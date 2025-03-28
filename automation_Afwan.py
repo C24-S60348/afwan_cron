@@ -1197,7 +1197,6 @@ def run_function(program_code, code2=None, info3=None):
 
         #reminder--------------------
         async def reminder_command(update: Update, context: CallbackContext):
-            user_id = update.effective_user.id
             chat_id = update.effective_chat.id
             user_name = update.effective_user.username
             message_parts = update.message.text.split(maxsplit=2)  # Split text into parts
@@ -1232,9 +1231,8 @@ def run_function(program_code, code2=None, info3=None):
             run_time = datetime.datetime.combine(datetime.date.today(), reminder_time)
             run_time = run_time.replace(tzinfo=tz_gmt8)
             scheduler.add_job(
-                asyncio.create_task, 'date', run_date=run_time, args=[send_reminder(context.application, chat_id, reminder_text)]
+                send_reminder, 'date', run_date=run_time, args=[context.application, chat_id, reminder_text]
             )
-
             print(f"{user_name} : Reminder set for {timing}: {reminder_text}")
             await update.message.reply_text(f"Reminder set for {timing}: {reminder_text}")
 
