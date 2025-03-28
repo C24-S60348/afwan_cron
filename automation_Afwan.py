@@ -1,6 +1,4 @@
 import sys
-
-import requests
 import variables
 from datetime import datetime, timezone, timedelta
 # import logging
@@ -573,6 +571,7 @@ def run_function(program_code, code2=None, info3=None):
     elif program == "TB":
         # needPass()
         import json
+        import requests
 
         # VARIABLES -----------------
         TOKEN = tbtoken
@@ -882,6 +881,7 @@ def run_function(program_code, code2=None, info3=None):
     #Check message
     elif program == "CM":
         import json
+        import requests
 
         tb_token = variables.tb_token
         url = f"https://api.telegram.org/bot{tb_token}/getUpdates"
