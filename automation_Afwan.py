@@ -1,6 +1,13 @@
 import sys
+
+import requests
 import variables
 from datetime import datetime, timezone, timedelta
+import logging
+import json
+
+logging.basicConfig(filename="cron_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
+
 #import urllib3
 #import requests
 
@@ -17,21 +24,30 @@ program = variables.program
 if program == "":
     program = "CB" 
 
-                # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch , 
+                # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch ,
                 # TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
                 # CRS - Cron Run Server , CRPC - Cron Run PC , CSFTP - Check SFTP , FW - Flask Website afwanproductions,
-                # CM - Check message telegram , 
+                # CM - Check message telegram , BP - Bot Polling
 #VARIABLES------------------
+
+
+
+#print(len(sys.argv))
+if len(sys.argv) > 1:
+    program = sys.argv[1]
+
+program = program.upper()
+
 
 if (program == "FW"):
     from flask import Flask, request, jsonify, render_template, render_template_string
     from flask_cors import CORS
     app = Flask(__name__)
-    cors = CORS(app)
-
-#print(len(sys.argv))
-if len(sys.argv) > 1:
-    program = sys.argv[1]
+    # cors = CORS(app)
+    CORS(app, supports_credentials=True, 
+        resources={r"/*": {"origins": "http://localhost:8081"}}, 
+        allow_headers=["Content-Type", "Authorization"]
+    )
 
 #Public variables
 if True:
@@ -47,10 +63,11 @@ if True:
         "2":0,
         "3":0,
         "5":0,
-        "10":0, 
-        "30":0, 
-        "60":0, 
+        "10":0,
+        "30":0,
+        "60":0,
     }
+    reminder = {} #todo - get data from user
     #http = urllib3.PoolManager()
 
 def run_function(program_code, code2=None, info3=None):
@@ -58,101 +75,64 @@ def run_function(program_code, code2=None, info3=None):
     global variables
     global timenowKL
     #global http
-    
+
 
 
     #functions
     if (True):
         import urllib.request as ur
-    import variables
-    import time
-    import datetime
-    from datetime import datetime, timezone, timedelta
-    from decimal import Decimal
-    browser_code = 'F' # C - Chrome , F - Firefox , E - Microsoft Edge , S - Safari
-    openfileorfolder = 'F' # F - File , FD - Folder
-    xmlformatted = True
-    def getbrowser(browser_code):
-        if browser_code == 'C':
-            trymethod = 1
-            if trymethod == 1:
-                options = webdriver.ChromeOptions()
-                options.add_experimental_option("detach", True)
-                browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-            else:
-                options = ChromeOptions()
-                options.add_experimental_option("detach", True)  # Prevents browser from closing
-                #service = Service("chromedriver.exe")  # Path to your ChromeDriver
-                browser = webdriver.Chrome(options=options)
-        elif browser_code == 'F':
-            trymethod = 1
-            if trymethod == 1:
-                options = webdriver.FirefoxOptions()
-                service = FirefoxService(FirefoxDriverManager().install())
-                browser = webdriver.Firefox(service=service, options=options)
+        import variables
+        import time
+        import datetime
+        from datetime import datetime, timezone, timedelta
+        from decimal import Decimal
+        browser_code = 'F' # C - Chrome , F - Firefox , E - Microsoft Edge , S - Safari
+        openfileorfolder = 'F' # F - File , FD - Folder
+        xmlformatted = True
+        def getbrowser(browser_code):
+            if browser_code == 'C':
+                trymethod = 0
+                if trymethod == 0:
+                    chrome_options = ChromeOptions()
+                    chrome_options.add_experimental_option("detach", True)
+                    chrome_options.add_argument("user-data-dir=C:\\Users\\YourUser\\AppData\\Local\\Google\\Chrome\\User Data")
+                    chrome_options.add_argument("--profile-directory=Default")
+                    browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=chrome_options)
+                elif trymethod == 1:
+                    options = webdriver.ChromeOptions()
+                    options.add_experimental_option("detach", True)
+                    browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+                else:
+                    options = ChromeOptions()
+                    options.add_experimental_option("detach", True)  # Prevents browser from closing
+                    #service = Service("chromedriver.exe")  # Path to your ChromeDriver
+                    browser = webdriver.Chrome(options=options)
+            elif browser_code == 'F':
+                trymethod = 1
+                if trymethod == 1:
+                    options = webdriver.FirefoxOptions()
+                    service = FirefoxService(FirefoxDriverManager().install())
+                    browser = webdriver.Firefox(service=service, options=options)
+                else:
+                    browser = webdriver.Firefox()
+            elif browser_code == 'S':
+                browser = webdriver.Safari()
+            elif browser_code == 'E':
+                trymethod = 1
+                if trymethod == 1:
+                    options = EdgeOptions()
+                    options.add_experimental_option("detach", True)  # Prevents browser from closing
+                    service = EdgeService(EdgeDriverManager().install())
+                    browser = webdriver.Edge(service=service, options=options)
+                else:
+                    options = EdgeOptions()
+                    options.add_experimental_option("detach", True)  # Prevents browser from closing
+                    browser = webdriver.Edge(options=options)
+                # browser = webdriver.Edge(options=options)
             else:
                 browser = webdriver.Firefox()
-        elif browser_code == 'S':
-            browser = webdriver.Safari()
-        elif browser_code == 'E':
-            trymethod = 1
-            if trymethod == 1:
-                options = EdgeOptions()
-                options.add_experimental_option("detach", True)  # Prevents browser from closing
-                service = EdgeService(EdgeDriverManager().install())
-                browser = webdriver.Edge(service=service, options=options)
-            else:
-                options = EdgeOptions()
-                options.add_experimental_option("detach", True)  # Prevents browser from closing
-                browser = webdriver.Edge(options=options)
-            # browser = webdriver.Edge(options=options)
-        else:
-            browser = webdriver.Firefox()
 
-        return browser
-    # def needPass():
-    #         import json
-    #         password = getpass.getpass("Please input password (can be blank): ")
-    #         url = "https://afwanproductions.pythonanywhere.com/api/executejsonv2"  # Replace with the actual URL
-    #         payload = {
-    #             "password": password,
-    #             "query": "SELECT * FROM afwandata"
-    #         }
-    #         headers = {
-    #             "Content-Type": "application/json"
-    #         }
-    #         #response = requests.post(url, json=payload, headers=headers)
-
-    #         #print("Status Code:", response.status_code)
-    #         #print("Response:", response.text)
-            
-            
-    #         payload = json.dumps(payload).encode("utf-8") #change to json
-    #         #response = http.request("POST", url, body=payload, headers=headers)
-    #         req = ur.Request(url, data=payload, headers=headers, method="POST")
-    #         with ur.urlopen(req) as response:
-    #             status_code = response.getcode()
-    #             response = response.read().decode("utf-8")
-            
-
-    #         print("Status Code:", status_code)
-    #         print("Response:", response)
-
-    #         global fyuser
-    #         global fypass
-    #         global fycode
-    #         global tbtoken
-    #         global csftplink #todo
-
-    #         # Convert response to JSON
-    #         #data = response.json()
-    #         data = json.loads(response)
-    #         # Extract fyuser from the first result
-    #         if "results" in data and len(data["results"]) > 0:
-    #             fyuser = data["results"][0]["fyuser"]
-    #             fypass = data["results"][0]["fypass"]
-    #             fycode = data["results"][0]["fycode"]
-    #             tbtoken = data["results"][0]["tbtoken"]
+            return browser
 
 
     #CHECK BOOKING PNR
@@ -167,15 +147,18 @@ def run_function(program_code, code2=None, info3=None):
         #needPass()
 
         #VARIABLES------------------
-        pnr = input("Please input PNR")
-        stagingorprod = input("Staging - S , Prod - P") #S - Staging , P - Prod
+        pnr = input("Please input PNR: ")
+        stagingorprod = input("Staging - s , Prod - p: ").upper() #S - Staging , P - Prod
         #VARIABLES------------------
         fycode = variables.fy_code
-        
+        bookingtype = "Production"
+
         if stagingorprod == "S":
+            bookingtype = "Staging"
             link = variables.fy_app_staging
             url = f"{link}?Key={fycode}&RecordLocator={pnr}"
         else:
+            bookingtype = "Production"
             link = variables.fy_app_prod
             url = f"{link}?Key={fycode}&RecordLocator={pnr}"
 
@@ -194,13 +177,13 @@ def run_function(program_code, code2=None, info3=None):
         with ur.urlopen(req) as response:
                 content = response.read().decode('utf-8')
         content = base64.b64decode(content)
-        
+
 
         if xmlformatted:
             dom = xml.dom.minidom.parseString(content)
             content = dom.toprettyxml(indent="    ")
 
-        file_name = f"output booking/{pnr}.xml"
+        file_name = f"output booking/{pnr} - {bookingtype}.xml"
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
 
         with open(file_name, 'w', encoding='utf-8') as file:
@@ -241,19 +224,27 @@ def run_function(program_code, code2=None, info3=None):
         #needPass()
 
         #VARIABLES------------------
-        is_one_way = "Y" # Y - Yes, N - No
-        is_login = "Y" # Y - Yes , N - No
+        is_one_way = input("Is one way? y/n: ").upper() # Y - Yes, N - No
+        is_one_way = is_one_way == "Y"
+        # is_login = input("Is login? y/n: ").upper() # Y - Yes , N - No
+        is_login = "N" # Y - Yes , N - No - need to No because of OTP
+        is_login = is_login == "Y"
+        fyuser = variables.fy_dev_user
+        fypass = variables.fy_dev_pass
         if fyuser == "":
             fyuser = ""  # put your custom email and pass fy staging here
             fypass = ""
-        flight_fare_type = 'B'   #S - Saver , B - Basic , F - Flex
-        flight_fare_type2 = 'B'
-        adult = 1
-        infant = 0
-        station_depart = 'SZB'
-        station_return = 'PEN'
-        target_date = '20250319'
-        target_date2 = '20250320'
+        station_depart = input("Input Departure: ").upper()
+        station_return = input("Input Return: ").upper()
+        adult = int(input("Input Adult: "))
+        infant = int(input("Input Infant: "))
+        flight_fare_type = input("Input Fare type (S) (B) (F): ").upper()   #S - Saver , B - Basic , F - Flex
+        target_date = '2025' + input("Input date (0319 = march 19): ")
+        if not is_one_way:
+            flight_fare_type2 = input("Input Fare type (S) (B) (F): ").upper()
+            target_date2 = '2025' + input("Input date (0320 = march 20): ")
+        
+        
         first_name = 'afwan'
         last_name = 'haziq'
         contact_first_name = 'afwann'
@@ -262,8 +253,8 @@ def run_function(program_code, code2=None, info3=None):
         mobile_phone = '01152853044'
         #VARIABLES-------------------------
 
-        is_one_way = is_one_way == "Y"
-        is_login = is_login == "Y"
+        
+        
 
         # options = ChromeOptions()
         # options.add_experimental_option("detach", True)  # Prevents browser from closing
@@ -367,11 +358,9 @@ def run_function(program_code, code2=None, info3=None):
                     return 1
 
         fydevlink = variables.fydevlink
-        username = variables.fydevusername
-        password = variables.fydevpassword
+        username = variables.fy_mweb_user
+        password = variables.fy_mweb_pass
         url = f"https://{username}:{password}@{fydevlink}"
-        station_depart = station_depart.upper()
-        station_return = station_return.upper()
 
         browser.get(url)
         assert 'Firefly' in browser.title
@@ -423,7 +412,8 @@ def run_function(program_code, code2=None, info3=None):
             clickID('button_search')
 
         flight_fare_id = getFareID(flight_fare_type)
-        flight_fare_id2 = getFareID(flight_fare_type2)
+        if not is_one_way:
+            flight_fare_id2 = getFareID(flight_fare_type2)
 
 
         #select page
@@ -471,7 +461,7 @@ def run_function(program_code, code2=None, info3=None):
         #from bs4 import BeautifulSoup
         import platform
         isProd = True
-        
+
         ct_link = variables.CT_LINK
 
         if isProd:
@@ -590,7 +580,7 @@ def run_function(program_code, code2=None, info3=None):
             code2 = "Afwan" #Custom to
             info3 = "custom" #Custom message
         #VARIABLES ------------------
-        
+
         if code2 == "Afwan":
             CHAT_ID = "222338004" # Celik Tafsir website update Warning : -4723012335 , Study with Afwan : -4515480710 , Afwan : 222338004
         elif code2 == "Study":
@@ -599,29 +589,30 @@ def run_function(program_code, code2=None, info3=None):
             CHAT_ID = "-4515480710"
         elif code2 == "Sara":
             CHAT_ID = "6238256254"
-        
+
         MESSAGE = info3
-        
-        
+
+
         # VARIABLES -----------------
         tb_token = variables.tb_token
-        
+
         # Telegram API URL
         url = f"https://api.telegram.org/bot{tb_token}/sendMessage"
-        data={"chat_id": CHAT_ID, "text": MESSAGE}
-        data = json.dumps(data).encode("utf-8") #change to json
-        headers = {"Content-Type":"application/json"}
+        # data={"chat_id": CHAT_ID, "text": MESSAGE}
+        # data = json.dumps(data).encode("utf-8") #change to json
+        # headers = {"Content-Type":"application/json"}
         #response = http.request("POST", url, body=data, headers=headers)
-        
-        req = ur.Request(url, data=data, headers=headers, method="POST")
-        with ur.urlopen(req) as response:
-            status_code = response.getcode()
-            response = response.read().decode("utf-8")
-        
-        
+
+        # req = ur.Request(url, data=data, headers=headers, method="POST")
+        # with ur.urlopen(req) as response:
+        #     status_code = response.getcode()
+        #     response = response.read().decode("utf-8")
+
+
 
         # Send the message
-        #response = requests.post(url, data={"chat_id": CHAT_ID, "text": MESSAGE})
+        response = requests.post(url, data={"chat_id": CHAT_ID, "text": MESSAGE})
+        status_code = response.status_code
 
         # Check response
         #if response.status_code == 200:
@@ -746,20 +737,21 @@ def run_function(program_code, code2=None, info3=None):
         e.click()
 
     #CRON RUN
-    elif program == "CRS" or program == "CRPC":
+    elif program == "CRS" or program == "CRPC" or program == "CRF" or program == "CRO" or program == "CRM":
+        #CRPC - Cron Run PC , CRO - Cron Run Once , CRM - Cron Run Multiple
         import platform
         #from bs4 import BeautifulSoup
         import re
-        
+
         def run_cron():
             print("Run check...")
             cronchecklink = variables.cronchecklink
             url = cronchecklink
-            
+
             req = ur.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with ur.urlopen(req) as response:
                  response = response.read().decode("utf-8")
-            
+
             def get_html_true(class_name, html):
                 pattern = rf'<p class="{class_name}">(.*?)</p>'
                 match = re.search(pattern, html)
@@ -773,16 +765,16 @@ def run_function(program_code, code2=None, info3=None):
                 if match:
                     return match.group(1)
                 return ""
-            
+
             print(response)
-            
+
             timenowKL = get_html("timenowKL", response)
             timenowKL = Decimal(timenowKL)
             global last_run_times
             cans = {}
             for key in last_run_times.keys():
                 cans[key] = get_html_true(f"min{key}", response)
-            
+
             print("Done check")
 
             for key in cans.keys():
@@ -791,12 +783,15 @@ def run_function(program_code, code2=None, info3=None):
 
 
         def load_min(min):
+            global program
+            print (f"program = {program}")
             print(f"---------------------- every {min} min")
             if min == "0.5":
                 print("")
             if min == "1":
                 print("")
             if min == "2":
+                logging.info(f"Run RP")
                 run_function("RP")
             if min == "3":
                 print("")
@@ -807,21 +802,27 @@ def run_function(program_code, code2=None, info3=None):
             if min == "30":
                 print("")
             if min == "60":
-                run_function("CSFTP")
+                if program != "CRF":
+                    logging.info(f"Run CSFTP")
+                    run_function("CSFTP")
             print(f"---------------------- every {min} min")
-        
+
         run_cron()
 
         if program == "CRPC":
             while True:
-                totalsec = 200
+                totalsec = 120
                 countsec = 10
                 for remaining in range(0, totalsec, countsec): #sleep 5min
                     esec = remaining
                     print(f"\rElapsed {esec}s ...", end="", flush=True)
                     time.sleep(countsec)
                 run_cron()
-    
+        elif program == "CRF" or program == "CRM":
+            while True:
+                time.sleep(120)
+                run_cron()
+
     #CHECK SFTP
     elif program == "CSFTP":
         csftp_link = variables.csftp_link
@@ -849,32 +850,35 @@ def run_function(program_code, code2=None, info3=None):
     elif program == "RP":
 
         print("running RP...")
-            
+
         now = datetime.now(timezone.utc)
         gmt8 = timezone(timedelta(hours=8))
         now = now.astimezone(gmt8)
-        
+
         current_time = now.strftime("%H:%M")
         weekdays = now.weekday() < 5  # Monday to Friday are considered weekdays (0-4)
-        
+
         print(f"now is {current_time}")
 
-        
 
-        #Weekdays
-        if weekdays: 
-            if "08:50" <= current_time <= "09:10":
-                run_function("TB", "Afwan", "Bayar parking pagii")
-            if "13:50" <= current_time <= "14:10":
-                run_function("TB", "Afwan", "Bayar parking petanggg")
 
-        #Normal days
-        if "20:50" <= current_time <= "21:10":
-            run_function("TB", "Afwan", "Cakap SAYANG kat sara")
-                
-        
+        # Load reminders from JSON
+
+        reminders = [
+            {"time_range": ["08:58", "09:01"], "message": "Bayar parking pagii https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
+            ,{"time_range": ["13:58", "14:01"], "message": "Bayar parking petanggg https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
+            ,{"time_range": ["20:50", "21:10"], "message": "Cakap SAYANG kat saraa", "days": "all", "to": "Afwan"}
+            ,{"time_range": ["16:30", "16:50"], "message": "ya iya sayang", "days": "all", "to": "Sara"}
+        ]
+
+        for reminder in reminders:
+            if (weekdays and reminder["days"] == "weekdays") or reminder["days"] == "all":
+                if reminder["time_range"][0] <= current_time <= reminder["time_range"][1]:
+                    run_function("TB", reminder["to"], reminder["message"])
+
+
         print("done RP")
-
+   
     #Check message
     elif program == "CM":
         import json
@@ -891,7 +895,7 @@ def run_function(program_code, code2=None, info3=None):
             for update in data.get("result", []):
                 message = update.get("message", {})
                 user = message.get("from", {})
-                
+
                 # Check if the message is from the target user
                 if search_by == "ID":
                     if str(user.get("id")) == target_id:
@@ -915,10 +919,10 @@ def run_function(program_code, code2=None, info3=None):
                     # print(f"Id: {id} | User: {username} | Message: {text}")
 
                     #Command
-                    
 
-                    if "/command1" in text: 
-                        if "/command1@I_Awesome_OT_Bot" in text: 
+
+                    if "/command1" in text:
+                        if "/command1@I_Awesome_OT_Bot" in text:
                             print(f"{username} | date:{date} | command : {text}")
                         else:
                             print(f"{username} | date:{date} | command private : {text}")
@@ -955,7 +959,10 @@ def run_function(program_code, code2=None, info3=None):
             finally:
                 if mydb:
                     mydb.close()
-
+        
+        @app.route('/api/test', methods=['GET','POST', 'OPTIONS'])
+        def test():
+            return jsonify({"message": "Query executed successfully"}), 200
         #TRY===========================================================================
         @app.route('/api', methods=['GET','POST'])
         def handle_request():
@@ -1100,6 +1107,7 @@ def run_function(program_code, code2=None, info3=None):
         def cron_check():
             global last_run_times
 
+            #get time
             now = datetime.now(timezone.utc)
             gmt8 = timezone(timedelta(hours=8))
             current_time_raw = now.astimezone(gmt8)
@@ -1110,7 +1118,6 @@ def run_function(program_code, code2=None, info3=None):
             times = {}
             for key in last_run_times.keys():
                 times[key] = datetime.fromtimestamp(last_run_times[key], tz=gmt8).strftime('%Y-%m-%d %I:%M %p')
-                # times[key] = datetime.fromtimestamp(last_run_times[key]).strftime('%Y-%m-%d %I:%M %p')
 
 
             # get can or not
@@ -1121,9 +1128,9 @@ def run_function(program_code, code2=None, info3=None):
                 print(current_time_timestamp - last_run_times[key])
                 if (current_time_timestamp - last_run_times[key]) > ((float(key)*30)-10):
                     last_run_times[key] = current_time_timestamp
-                    cans[key] = True 
+                    cans[key] = True
                 else:
-                    cans[key] = False 
+                    cans[key] = False
 
             current_time = current_time_raw.strftime('%Y-%m-%d %I:%M %p')
 
@@ -1135,7 +1142,7 @@ def run_function(program_code, code2=None, info3=None):
                     <h2>Cron Check</h2>
                     <p>Current time: { current_time }</p>
                     """
-            
+
             for key in times.keys():
                 html += f'<p>Last {key}min: { times[key] }</p>'
             for key in times.keys():
@@ -1173,8 +1180,295 @@ def run_function(program_code, code2=None, info3=None):
         if __name__ == '__main__':
             app.run(debug=True)
 
+    #Run Bot Polling
+    elif program == "BP":
+        #pip install python-telegram-bot --upgrade
+        #pip install apscheduler
+
+        from telegram import Update
+        from telegram.ext import Application, CommandHandler, CallbackContext #, MessageHandler, filters
+        from apscheduler.schedulers.background import BackgroundScheduler
+        import datetime
+        import asyncio
+
+        TOKEN = variables.tb_token
+        scheduler = BackgroundScheduler()
+        scheduler.start()
+
+        #reminder--------------------
+        async def reminder_command(update: Update, context: CallbackContext):
+            user_id = update.effective_user.id
+            user_name = update.effective_user.username
+            message_parts = update.message.text.split(maxsplit=2)  # Split text into parts
+
+            if len(message_parts) < 3:
+                await update.message.reply_text("Usage: /reminder <time> <message>\nExamples:\n- /reminder 2pm lunch\n- /reminder 2:30pm meeting")
+                return
+
+            timing = message_parts[1]
+            reminder_text = message_parts[2]
+
+            # Try to parse "2pm" and "2:30pm" formats
+            reminder_time = None
+            for time_format in ("%I:%M%p", "%I%p"):
+                try:
+                    reminder_time = datetime.datetime.strptime(timing, time_format).time()
+                    break
+                except ValueError:
+                    continue
+
+            if reminder_time is None:
+                await update.message.reply_text("Invalid time format! Use:\n- `2pm`\n- `2:30pm`\n- `10am`\n- `10:45pm`")
+                return
+
+            tz_gmt8 = datetime.timezone(datetime.timedelta(hours=8))
+            now = datetime.datetime.now(tz=tz_gmt8).time()
+            # now = datetime.datetime.now().time()
+            if reminder_time <= now:
+                await update.message.reply_text("The time must be in the future!")
+                return
+
+            run_time = datetime.datetime.combine(datetime.date.today(), reminder_time)
+            run_time = run_time.replace(tzinfo=tz_gmt8)
+            scheduler.add_job(
+                asyncio.create_task, 'date', run_date=run_time, args=[send_reminder(context.application, user_id, reminder_text)]
+            )
+
+            print(f"{user_name} : Reminder set for {timing}: {reminder_text}")
+            await update.message.reply_text(f"Reminder set for {timing}: {reminder_text}")
+
+        # Remove the synchronous wrapper as we are now directly using asyncio.create_task
+
+        async def send_reminder(application: Application, user_id, message):
+            await application.bot.send_message(chat_id=user_id, text=f"🔔 Reminder: {message}")
+        #reminder--------------------
+
+        async def start(update: Update, context: CallbackContext):
+            user_id = update.effective_user.id  # Get User ID
+            user_message = update.message.text
+            print(f"User ID: {user_id}")
+            print(f"User Message: {user_message}")
+            await update.message.reply_text("Hai sara, laju tak saya reply, hihi, sorry haritu ngantuukk")
+
+        async def help_command(update: Update, context: CallbackContext):
+            await update.message.reply_text("Available commands: /start")
+        async def sayang_afwan(update: Update, context: CallbackContext):
+            await update.message.reply_text("SAYANG SARA JUGAKKKKKKKK")
+
+        async def handle_messages(update: Update, context: CallbackContext):
+            user_id = update.effective_user.id
+            user_name = update.effective_user.username
+            user_message = update.message.text
+            print(f"Message from {user_name} : {user_message}")
+
+            # Example: If user says "hello", bot replies "Hello too!"
+            if "hello" in user_message.lower():
+                await update.message.reply_text("Hello too!")
+            if "hai afwan" in user_message.lower():
+                await update.message.reply_text("Hai saraaa -Afwan 2025")
+            # else:
+            #     await update.message.reply_text(f"Afwan received: {user_message}")
+
+        def main():
+            app = Application.builder().token(TOKEN).build()
+
+            # Add command handlers
+            app.add_handler(CommandHandler("start", start))
+            app.add_handler(CommandHandler("help", help_command))
+            app.add_handler(CommandHandler("sayangafwan", sayang_afwan))
+
+            # app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
+            app.add_handler(CommandHandler("reminder", reminder_command))
+
+            print("Bot is running...")
+
+            # Start long polling
+            app.run_polling()
+
+        if __name__ == "__main__":
+            main()
+
+    #Summary today log
+    elif program == "STL":
+        today = datetime.now().strftime("%Y-%m-%d")
+        log_summary = []
+
+        with open("cron_log.txt", "r") as file:
+            for line in file:
+                if today in line:
+                    log_summary.append(line.strip())
+
+        
+        now = datetime.now(timezone.utc)
+        gmt8 = timezone(timedelta(hours=17.81))
+        current_time_raw = now.astimezone(gmt8)
+        current_time_timestamp = current_time_raw.timestamp()
+        current_time = current_time_raw.strftime('%Y-%m-%d %I:%M %p')
+        current_time2 = current_time_raw.strftime('%I:%M %p')
+        if ("11:59 PM" <= current_time2 <= "12:01 AM"):
+            #show summary
+            today = datetime.now().strftime("%Y-%m-%d")
+            log_summary = []
+
+            with open("cron_log.txt", "r") as file:
+                for line in file:
+                    if today in line:
+                        log_summary.append(line.strip())
+            summary = "\n".join(log_summary) if log_summary else "No logs for today."
+            run_function("TB", "Afwan", f"Summary of today's log:\n{summary}")
+        print(current_time2)
+        
+    #expo react native bundle release
+    elif program == "EXPO":
+        import textwrap
+
+        print(textwrap.dedent(r"""
+            README: This will run ./gradlew bundleRelease , please make sure:
+                              
+            Inside android\build.gradle:
+                              
+            ext {
+                buildToolsVersion = findProperty('android.buildToolsVersion') ?: '35.0.0'
+                minSdkVersion = Integer.parseInt(findProperty('android.minSdkVersion') ?: '24')
+                compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '35')
+                targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
+                kotlinVersion = findProperty('android.kotlinVersion') ?: '1.9.25'
+                ndkVersion = "26.1.10909125"  ---important
+            }
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                classpath('com.android.tools.build:gradle')
+                classpath('com.facebook.react:react-native-gradle-plugin')
+                classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+            }
+
+            if want to use gradle 8.10.2:
+            distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-all.zip
+            
+            dependencies {
+                classpath("com.android.tools.build:gradle:8.10.2") 
+                ...
+            }
 
 
+            """
+        ))
+
+        import os
+        import subprocess
+        import sys
+        import datetime
+        import requests
+
+        #Put directory app
+        # projectloc = input("Please input project directory location: ")
+        projectname = "Escabee"
+        projectloc = r"C:\escabee-mobile"
+        projectloc += r"\android" 
+
+        # go to directory
+        if True:
+            if os.path.exists(projectloc):
+                os.chdir(projectloc)
+                print(f"Changed directory to: {os.getcwd()}")
+            else:
+                print(f"Warning: The specified directory '{projectloc}' does not exist.")
+
+            # Check 
+            if not os.path.exists("gradle"):
+                print("Error: This is not an Android folder. You cannot run gradlew here.")
+                sys.exit(1)
+
+        def run_command(command):
+            """Runs a command in the shell and waits for it to complete."""
+            process = subprocess.Popen(command, shell=True)
+            process.communicate()
+            if process.returncode != 0:
+                print(f"Error: Command '{command}' failed.")
+                sys.exit(1)
+
+        # Gradlew clean , bundleRelease
+        if True:
+            print(r"Running: .\gradlew clean")
+            run_command(r".\gradlew clean")
+
+            print(r"Running: .\gradlew bundleRelease")
+            run_command(r".\gradlew bundleRelease")
+
+        # If already has AAB file, run this
+        if True:
+            # goto AAB file
+            if True:
+                output_dir = "app/build/outputs/bundle/release/"
+                if os.path.exists(output_dir):
+                    os.chdir(output_dir)
+                    print(f"Changed directory to: {os.getcwd()}")
+                else:
+                    print(f"Warning: Output directory '{output_dir}' not found.")
+            
+            run_command("dir")
+
+            bundletool_file = "bundletool-all-1.18.1.jar"
+            keystore_file = "my-release-key.jks"
+            aab_file = "app-release.aab"
+            apks_file = datetime.datetime.now().strftime("my_app%d%b.apks")
+            # Download bundletool
+            if True:
+                bundletool_url = "https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar"
+                if not os.path.exists(bundletool_file):
+                    print(f"Downloading {bundletool_file}...")
+                    response = requests.get(bundletool_url, stream=True)
+                    with open(bundletool_file, "wb") as file:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            file.write(chunk)
+                print("Download completed.")
+
+            # Generate Keystore
+            if True:
+                if not os.path.exists(keystore_file):
+                    print("Generating keystore...")
+                    run_command("keytool -genkeypair -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-key-alias")
+                    print("Keystore generated.")
+
+            # Build APK
+            if True:
+                if os.path.exists(apks_file):
+                    print(f"Deleting existing {apks_file}...")
+                    os.remove(apks_file)
+                print("Building APKs using bundletool...")
+                run_command(f'java -jar {bundletool_file} build-apks --bundle={aab_file} --output={apks_file} --mode=universal --ks={keystore_file} --ks-pass=pass:123456 --ks-key-alias=my-key-alias --key-pass=pass:123456')
+                print(f"APKs successfully built as {apks_file}.")
+            
+            #Extract APK
+            if True:
+                if not os.path.exists(apks_file):
+                    print(f"Error: {apks_file} not found.")
+                    sys.exit(1)
+                    
+                print(f"Extracting {apks_file}...")
+                extracted_dir = "extracted_apks"
+                if not os.path.exists(extracted_dir):
+                    os.makedirs(extracted_dir)
+                # run_command(f'unzip -o "{apks_file}" -d {extracted_dir}')
+                run_command(f'tar -xf "{apks_file}" -C {extracted_dir}')
+
+            # Rename APK
+            if True:
+                universal_apk_path = os.path.join(extracted_dir, "universal.apk")
+                if os.path.exists(universal_apk_path):
+                    formatted_date = datetime.datetime.now().strftime("Escabee_%d_%b_%Y_%I%M%p.apk")
+                    #Rename
+                    # new_apk_name = os.path.join(os.getcwd(), formatted_date)
+                    new_apk_name = os.path.join(extracted_dir, formatted_date)
+                    os.rename(universal_apk_path, new_apk_name)
+                    
+                    print(f"Renamed 'universal.apk' to '{formatted_date}'")
+                else:
+                    print("Error: 'universal.apk' not found in extracted_apks.")
+                    sys.exit(1)
 
 
 
