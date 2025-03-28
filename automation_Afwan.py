@@ -1197,7 +1197,7 @@ def run_function(program_code, code2=None, info3=None):
 
         #reminder--------------------
         async def reminder_command(update: Update, context: CallbackContext):
-            chat_id = update.effective_chat.id
+            user_id = update.effective_user.id
             user_name = update.effective_user.username
             message_parts = update.message.text.split(maxsplit=2)  # Split text into parts
 
@@ -1223,6 +1223,7 @@ def run_function(program_code, code2=None, info3=None):
 
             tz_gmt8 = datetime.timezone(datetime.timedelta(hours=8))
             now = datetime.datetime.now(tz=tz_gmt8).time()
+            # now = datetime.datetime.now().time()
             if reminder_time <= now:
                 await update.message.reply_text("The time must be in the future!")
                 return
@@ -1230,19 +1231,22 @@ def run_function(program_code, code2=None, info3=None):
             run_time = datetime.datetime.combine(datetime.date.today(), reminder_time)
             run_time = run_time.replace(tzinfo=tz_gmt8)
             scheduler.add_job(
-                send_reminder, 'date', run_date=run_time, args=[context.application, chat_id, reminder_text]
+                asyncio.create_task, 'date', run_date=run_time, args=[send_reminder(context.application, user_id, reminder_text)]
             )
+
             print(f"{user_name} : Reminder set for {timing}: {reminder_text}")
             await update.message.reply_text(f"Reminder set for {timing}: {reminder_text}")
 
-        async def send_reminder(application: Application, chat_id, message):
-            await application.bot.send_message(chat_id=chat_id, text=f"🔔 Reminder: {message}")
+        # Remove the synchronous wrapper as we are now directly using asyncio.create_task
+
+        async def send_reminder(application: Application, user_id, message):
+            await application.bot.send_message(chat_id=user_id, text=f"🔔 Reminder: {message}")
         #reminder--------------------
 
         async def start(update: Update, context: CallbackContext):
-            chat_id = update.effective_chat.id  # Get Chat ID
+            user_id = update.effective_user.id  # Get User ID
             user_message = update.message.text
-            print(f"Chat ID: {chat_id}")
+            print(f"User ID: {user_id}")
             print(f"User Message: {user_message}")
             await update.message.reply_text("Hai sara, laju tak saya reply, hihi, sorry haritu ngantuukk")
 
@@ -1252,7 +1256,7 @@ def run_function(program_code, code2=None, info3=None):
             await update.message.reply_text("SAYANG SARA JUGAKKKKKKKK")
 
         async def handle_messages(update: Update, context: CallbackContext):
-            chat_id = update.effective_chat.id
+            user_id = update.effective_user.id
             user_name = update.effective_user.username
             user_message = update.message.text
             print(f"Message from {user_name} : {user_message}")
