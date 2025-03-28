@@ -1190,6 +1190,7 @@ def run_function(program_code, code2=None, info3=None):
         from apscheduler.schedulers.background import BackgroundScheduler
         import datetime
         import asyncio
+        from functools import partial
 
         TOKEN = variables.tb_token
         scheduler = BackgroundScheduler()
@@ -1198,17 +1199,20 @@ def run_function(program_code, code2=None, info3=None):
         #reminder--------------------
         async def reminder_command(update: Update, context: CallbackContext):
             user_id = update.effective_user.id
+            chat_id = update.effective_chat.id
             user_name = update.effective_user.username
-            message_parts = update.message.text.split(maxsplit=2)  # Split text into parts
+            message_parts = update.message.text.split(maxsplit=2)  
 
             if len(message_parts) < 3:
-                await update.message.reply_text("Usage: /reminder <time> <message>\nExamples:\n- /reminder 2pm lunch\n- /reminder 2:30pm meeting")
+                await update.message.reply_text(
+                    "Usage: /reminder <time> <message>\nExamples:\n- /reminder 2pm lunch\n- /reminder 2:30pm meeting"
+                )
                 return
 
             timing = message_parts[1]
             reminder_text = message_parts[2]
 
-            # Try to parse "2pm" and "2:30pm" formats
+            # Try parsing time
             reminder_time = None
             for time_format in ("%I:%M%p", "%I%p"):
                 try:
@@ -1223,25 +1227,25 @@ def run_function(program_code, code2=None, info3=None):
 
             tz_gmt8 = datetime.timezone(datetime.timedelta(hours=8))
             now = datetime.datetime.now(tz=tz_gmt8).time()
-            # now = datetime.datetime.now().time()
+
             if reminder_time <= now:
                 await update.message.reply_text("The time must be in the future!")
                 return
 
-            run_time = datetime.datetime.combine(datetime.date.today(), reminder_time)
-            run_time = run_time.replace(tzinfo=tz_gmt8)
+            run_time = datetime.datetime.combine(datetime.date.today(), reminder_time).replace(tzinfo=tz_gmt8)
+
+            # Correct way to add async function to scheduler
             scheduler.add_job(
-                asyncio.create_task, 'date', run_date=run_time, args=[send_reminder(context.application, user_id, reminder_text)]
+                partial(asyncio.run, send_reminder(context.application, chat_id, reminder_text)),
+                "date",
+                run_date=run_time
             )
 
             print(f"{user_name} : Reminder set for {timing}: {reminder_text}")
             await update.message.reply_text(f"Reminder set for {timing}: {reminder_text}")
 
-        # Remove the synchronous wrapper as we are now directly using asyncio.create_task
-
-        async def send_reminder(application: Application, user_id, message):
-            await application.bot.send_message(chat_id=user_id, text=f"🔔 Reminder: {message}")
-        #reminder--------------------
+        async def send_reminder(application: Application, chat_id, message):
+            await application.bot.send_message(chat_id=chat_id, text=f"🔔 Reminder: {message}")
 
         async def start(update: Update, context: CallbackContext):
             user_id = update.effective_user.id  # Get User ID
