@@ -40,10 +40,12 @@ program = program.upper()
 if (program == "FW"):
     from flask import Flask, request, jsonify, render_template, render_template_string
     from flask_cors import CORS
+    
     app = Flask(__name__)
-    # cors = CORS(app)
-    CORS(app, supports_credentials=True, 
-        resources={r"/*": {"origins": "http://localhost:8081"}}, 
+    
+    # CORS configuration to allow all origins
+    CORS(app, supports_credentials=True,
+        resources={r"/*": {"origins": "*"}},
         allow_headers=["Content-Type", "Authorization"]
     )
 
@@ -935,235 +937,141 @@ def run_function(program_code, code2=None, info3=None):
 
     #Flask website afwanproductions
     elif program == "FW":
-        import mysql.connector
-        import json, time
-        from contextlib import contextmanager
-        from werkzeug.exceptions import BadRequest
         import os
-        #pip install flask mysql-connector-python flask-cors werkzeug
-
-        @contextmanager
-        def connect_to_db():
+        import json
+        import time
+        import asyncio
+        from datetime import datetime, timedelta, timezone
+        import aiomysql
+        import variables 
+        from contextlib import asynccontextmanager
+        
+        # Async context manager for MySQL connection
+        @asynccontextmanager
+        async def connect_to_db():
+            connection = await aiomysql.connect(
+                host="AfwanProductions.mysql.pythonanywhere-services.com",
+                user="AfwanProductions",
+                password="afwan987",
+                db="AfwanProductions$afwan_db",
+                loop=asyncio.get_event_loop()
+            )
             try:
-                mydb = mysql.connector.connect(
-                    host="AfwanProductions.mysql.pythonanywhere-services.com",
-                    user="AfwanProductions",
-                    password="afwan987",
-                    database="AfwanProductions$afwan_db"
-                )
-                admin_db = mydb.cursor()
-                yield admin_db, mydb
-            except mysql.connector.Error as err:
+                async with connection.cursor() as cursor:
+                    yield cursor, connection
+            except aiomysql.MySQLError as err:
                 print(f"Error connecting to database: {err}")
                 raise
             finally:
-                if mydb:
-                    mydb.close()
+                connection.close()
         
-        @app.route('/api/test', methods=['GET','POST', 'OPTIONS'])
-        def test():
+        # Test Route
+        @app.route('/api/test', methods=['GET', 'POST', 'OPTIONS'])
+        async def test():
             return jsonify({"message": "Query executed successfully"}), 200
-        #TRY===========================================================================
-        @app.route('/api', methods=['GET','POST'])
-        def handle_request():
-            text = str(request.args.get('input')) #?input=a
+        
+        # Handle Request (Non-DB)
+        @app.route('/api', methods=['GET', 'POST'])
+        async def handle_request():
+            text = str(request.args.get('input'))  # ?input=a
             character_count = len(text)
-
             data_set = {'input': text, 'timestamp': time.time(), 'character_count': character_count}
             json_dump = json.dumps(data_set)
             return json_dump
-
-        #QUERY EXECUTER============================================================================
-        @app.route('/api/execute', methods=['GET','POST'])
-        def execute_query():
+        
+        # QUERY EXECUTER JSON V2
+        @app.route('/api/executejsonv2', methods=['GET', 'POST'])
+        async def execute_query_json_v2():
             try:
-                with connect_to_db() as (admin_db, mydb):
-
-                    sql = str(request.args.get('query'))
-                    password = str(request.args.get('password'))
-
-                    if "'" in sql:
-                        return jsonify({"error": "query parameter is not valid"}), 400
-                    if not sql:
-                        return jsonify({"error": "query parameter is required"}), 400
-                    if not password:
-                        return jsonify({"error": "password parameter is required"}), 400
-
-                    if password == variables.website_pass:
-                        try:
-                            admin_db.execute(sql)
-                            if admin_db.with_rows: # Check if the query returns rows
-                                results = admin_db.fetchall() # Fetch all results
-                                return jsonify({"results": results}), 200 # Return results in JSON
+                # Synchronously read JSON data
+                data = request.get_json()
+        
+                if 'query' not in data:
+                    return jsonify({"error": "query parameter is required"}), 400
+        
+                if 'password' not in data:
+                    return jsonify({"error": "password parameter is required"}), 400
+        
+                sql = data['query']
+                password = data['password']
+        
+                if password == variables.website_pass:
+                    try:
+                        async with connect_to_db() as (cursor, connection):
+                            # Execute the SQL query asynchronously
+                            await cursor.execute(sql)
+        
+                            # Check if the query returns rows (SELECT query)
+                            if sql.strip().lower().startswith("select"):
+                                columns = [column[0] for column in cursor.description]
+                                rows = await cursor.fetchall()  # Fetch all rows asynchronously
+                                results = [dict(zip(columns, row)) for row in rows]
+                                return jsonify({"results": results}), 200
                             else:
-                                mydb.commit() # Commit for insert, update, delete
+                                # Commit for insert, update, delete
+                                await connection.commit()
                                 return jsonify({"message": "Query executed successfully"}), 200
-                        except mysql.connector.Error as db_err:
-                            mydb.rollback() # Rollback in case of error
-                            return jsonify({"error": f"Database error: {db_err}"}), 500
-                    else:
-                        return jsonify({"error": "Incorrect password"}), 401
+                    except aiomysql.MySQLError as db_err:
+                        return jsonify({"error": f"Database error: {db_err}"}), 500
+                else:
+                    return jsonify({"error": "Incorrect password"}), 401
             except Exception as e:
                 return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
 
-        #QUERY EXECUTER JSON============================================================================
-        @app.route('/api/executejson', methods=['GET','POST'])
-        def execute_query_json():
-            try:
-                with connect_to_db() as (admin_db, mydb):
 
-                    data = request.get_json()
 
-                    if 'query' not in data:
-                        return jsonify({"error": "query parameter is required"}), 400
-
-                    if 'password' not in data:
-                        return jsonify({"error": "password parameter is required"}), 400
-
-                    sql = data['query']
-                    password = data['password']
-
-                    #if "'" in sql:
-                        #return jsonify({"error": "query parameter is not valid"}), 400
-
-                    if password == variables.website_pass:
-                        try:
-                            admin_db.execute(sql)
-                            if admin_db.with_rows: # Check if the query returns rows
-                                results = admin_db.fetchall() # Fetch all results
-                                return jsonify({"results": results}), 200 # Return results in JSON
-                            else:
-                                mydb.commit() # Commit for insert, update, delete
-                                return jsonify({"message": "Query executed successfully"}), 200
-                        except mysql.connector.Error as db_err:
-                            mydb.rollback() # Rollback in case of error
-                            return jsonify({"error": f"Database error: {db_err}"}), 500
-                    else:
-                        return jsonify({"error": "Incorrect password"}), 401
-            except Exception as e:
-                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
-
-        #QUERY EXECUTER JSON V2============================================================================
-        @app.route('/api/executejsonv2', methods=['GET','POST'])
-        def execute_query_json_v2():
-            try:
-                with connect_to_db() as (admin_db, mydb):
-
-                    data = request.get_json()
-
-                    if 'query' not in data:
-                        return jsonify({"error": "query parameter is required"}), 400
-
-                    if 'password' not in data:
-                        return jsonify({"error": "password parameter is required"}), 400
-
-                    sql = data['query']
-                    password = data['password']
-
-                    #if "'" in sql:
-                        #return jsonify({"error": "query parameter is not valid"}), 400
-
-                    if password == variables.website_pass:
-                        try:
-                            admin_db.execute(sql)
-                            if admin_db.with_rows: # Check if the query returns rows
-                                columns = [column[0] for column in admin_db.description] # Get column names
-                                results = []
-                                for row in admin_db.fetchall():
-                                    results.append(dict(zip(columns, row))) # Create dictionary for each row
-                                return jsonify({"results": results}), 200 # Return results in JSON
-                            else:
-                                mydb.commit() # Commit for insert, update, delete
-                                return jsonify({"message": "Query executed successfully"}), 200
-                        except mysql.connector.Error as db_err:
-                            mydb.rollback() # Rollback in case of error
-                            return jsonify({"error": f"Database error: {db_err}"}), 500
-                    else:
-                        return jsonify({"error": "Incorrect password"}), 401
-            except Exception as e:
-                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
-
-        #QUERY EXECUTER JSON TEST============================================================================
-        @app.route('/api/executejsontest', methods=['GET','POST'])
-        def execute_query_json_test():
-            try:
-                with connect_to_db() as (admin_db, mydb):
-
-                    if request.is_json:
-                        data = request.get_json()
-                        return jsonify(data)
-                    else:
-                        return jsonify({"error": "Invalid JSON data provided."}), 400
-
-                    return data
-
-            except Exception as e:
-                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
-
-        #afwan
-        TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"  # Replace with the actual path
-
+        
+        # Serve HTML Pages
         @app.route("/croncheck")
         def cron_check():
-            global last_run_times
-
-            #get time
             now = datetime.now(timezone.utc)
             gmt8 = timezone(timedelta(hours=8))
             current_time_raw = now.astimezone(gmt8)
             current_time_timestamp = current_time_raw.timestamp()
-
-            # get time
+        
             timenowKL = current_time_timestamp
             times = {}
+            cans = {}
+        
             for key in last_run_times.keys():
                 times[key] = datetime.fromtimestamp(last_run_times[key], tz=gmt8).strftime('%Y-%m-%d %I:%M %p')
-
-
-            # get can or not
-            cans = {}
-            for key in times.keys():
-                print(current_time_timestamp)
-                print(last_run_times[key])
-                print(current_time_timestamp - last_run_times[key])
                 if (current_time_timestamp - last_run_times[key]) > ((float(key)*30)-10):
                     last_run_times[key] = current_time_timestamp
                     cans[key] = True
                 else:
                     cans[key] = False
-
+        
             current_time = current_time_raw.strftime('%Y-%m-%d %I:%M %p')
-
+        
             html = f"""
                 <!DOCTYPE html>
                 <html>
                 <head><title>Cron Check</title></head>
                 <body>
                     <h2>Cron Check</h2>
-                    <p>Current time: { current_time }</p>
-                    """
-
+                    <p>Current time: {current_time}</p>
+                    """ 
+        
             for key in times.keys():
-                html += f'<p>Last {key}min: { times[key] }</p>'
+                html += f'<p>Last {key}min: {times[key]}</p>'
             for key in times.keys():
                 html += f'<p class="min{key}">{cans[key]}</p>'
-
+        
             html += f"""
                     <p class="timenowKL">{timenowKL}</p>
                 </body>
                 </html>
             """
-
+        
             return render_template_string(html)
-
-
+        
+        TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"
         @app.route("/")
         def index():
-
             txt_files = [f for f in os.listdir(TXT_FILES_DIR) if f.endswith(".txt")]
             txt_files.sort(reverse=True)
             return render_template("index.html", files=txt_files)
-
+        
         @app.route("/view/<filename>")
         def view_file(filename):
             filepath = os.path.join(TXT_FILES_DIR, filename)
@@ -1173,12 +1081,11 @@ def run_function(program_code, code2=None, info3=None):
                 return render_template("view.html", content=content, filename=filename)
             except FileNotFoundError:
                 return "File not found", 404
-
-
-
-        #APP DEBUG==============================================================================
+        
+        # Start the app using Uvicorn
         if __name__ == '__main__':
             app.run(debug=True)
+
 
     #Run Bot Polling
     elif program == "BP":
@@ -1479,4 +1386,3 @@ def run_function(program_code, code2=None, info3=None):
 
 
 run_function(program)
-
