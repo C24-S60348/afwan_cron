@@ -1381,6 +1381,95 @@ def run_function(program_code, code2=None, info3=None):
                     print("Error: 'universal.apk' not found in extracted_apks.")
                     sys.exit(1)
 
+    #proxy server
+    elif program == "PROXY":
+        import requests
+        from flask import Flask, request, Response
+
+        app = Flask(__name__)
+
+        @app.route('/proxy')
+        def proxy():
+            target_url = request.args.get('url')
+
+            if not target_url:
+                return Response("Missing 'url' parameter", status=400)
+
+            try:
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+                }
+                response = requests.get(target_url, headers=headers)
+
+                # Create a response with CORS headers
+                proxy_response = Response(response.content, status=response.status_code)
+                proxy_response.headers["Access-Control-Allow-Origin"] = "*"
+                proxy_response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+                proxy_response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+
+                return proxy_response
+
+            except requests.RequestException as e:
+                return Response(f"Error: {e}", status=500)
+
+        if __name__ == "__main__":
+            app.run(host="0.0.0.0", port=5000)
+
+    #proxy server with edit html
+    elif program == "PROXYWE":
+        import requests
+        from flask import Flask, request, Response
+        from bs4 import BeautifulSoup  # Requires `pip install beautifulsoup4`
+
+        app = Flask(__name__)
+
+        @app.route('/proxy')
+        def proxy():
+            target_url = request.args.get('url')
+
+            if not target_url:
+                return Response("Missing 'url' parameter", status=400)
+
+            try:
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+                }
+                response = requests.get(target_url, headers=headers)
+
+                # Check content type
+                content_type = response.headers.get("Content-Type", "")
+                if "text/html" in content_type:  # Only modify HTML pages
+                    soup = BeautifulSoup(response.text, "html.parser")
+
+                    # Rewrite all anchor tags <a href="...">
+                    for tag in soup.find_all("a", href=True):
+                        if tag["href"].startswith("http"):  # Only modify absolute URLs
+                            tag["href"] = f"/proxy?url={tag['href']}"
+
+                    # Rewrite all form actions <form action="...">
+                    for tag in soup.find_all("form", action=True):
+                        if tag["action"].startswith("http"):
+                            tag["action"] = f"/proxy?url={tag['action']}"
+
+                    modified_html = str(soup)
+                else:
+                    modified_html = response.text  # Serve non-HTML files as-is
+
+                # Create a response with CORS headers
+                proxy_response = Response(modified_html, status=response.status_code)
+                proxy_response.headers["Content-Type"] = content_type
+                proxy_response.headers["Access-Control-Allow-Origin"] = "*"
+                proxy_response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+                proxy_response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+
+                return proxy_response
+
+            except requests.RequestException as e:
+                return Response(f"Error: {e}", status=500)
+
+        if __name__ == "__main__":
+            app.run(host="0.0.0.0", port=5000)
+
 
 
 
