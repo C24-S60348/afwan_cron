@@ -21,11 +21,6 @@ import json
 program = variables.program
 if program == "":
     program = "CB" 
-
-                # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch ,
-                # TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
-                # CRS - Cron Run Server , CRPC - Cron Run PC , CSFTP - Check SFTP , FW - Flask Website afwanproductions,
-                # CM - Check message telegram , BP - Bot Polling
 #VARIABLES------------------
 
 
@@ -39,11 +34,13 @@ Please input argument:
           
 # A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch ,
 # TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
-# CRM - Cron Run Multiple , CRPC - Cron Run PC , CRS - Cron Run Server, 
+# CRM - Cron Run Multiple , CRPC - Cron Run PC Multiple , CRO - Cron Run Once, 
 # CSFTP - Check SFTP , RP - Reminder Parking , FW - Flask Website afwanproductions,
 # CM - Check message telegram , BP - Bot Polling
 # STL - Summary Today Log , EXPO - Expo go export,
 # PROXY - Proxy server, PROXYWE - Proxy with edit link html
+          
+If you're server, run python3 runner.py CRM and python3 runner.py BP 
                     
 """)
     exit(0)
@@ -753,7 +750,7 @@ def run_function(program_code, code2=None, info3=None):
         e.click()
 
     #CRON RUN
-    elif program == "CRS" or program == "CRPC" or program == "CRF" or program == "CRO" or program == "CRM":
+    elif program == "CRPC" or program == "CRO" or program == "CRM":
         #CRPC - Cron Run PC , CRO - Cron Run Once , CRM - Cron Run Multiple
         import platform
         #from bs4 import BeautifulSoup
@@ -834,7 +831,7 @@ def run_function(program_code, code2=None, info3=None):
                     print(f"\rElapsed {esec}s ...", end="", flush=True)
                     time.sleep(countsec)
                 run_cron()
-        elif program == "CRF" or program == "CRM":
+        elif program == "CRM":
             while True:
                 time.sleep(120)
                 run_cron()
