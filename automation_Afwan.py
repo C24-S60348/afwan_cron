@@ -33,9 +33,22 @@ if program == "":
 #print(len(sys.argv))
 if len(sys.argv) > 1:
     program = sys.argv[1]
+else:
+    print("""
+Please input argument:
+          
+# A - AutoBooking , CB - Check Booking PNR , CT - Celik Tafsir fetch ,
+# TB - Telegram Bot , WS - Web Scraping , AAI - AI Chat test ,
+# CRM - Cron Run Multiple , CRPC - Cron Run PC , CRS - Cron Run Server, 
+# CSFTP - Check SFTP , RP - Reminder Parking , FW - Flask Website afwanproductions,
+# CM - Check message telegram , BP - Bot Polling
+# STL - Summary Today Log , EXPO - Expo go export,
+# PROXY - Proxy server, PROXYWE - Proxy with edit link html
+                    
+""")
+    exit(0)
 
 program = program.upper()
-
 
 if (program == "FW"):
     from flask import Flask, request, jsonify, render_template, render_template_string
@@ -144,6 +157,7 @@ def run_function(program_code, code2=None, info3=None):
         import os
         import platform
         import base64
+        from datetime import datetime
         #needPass()
 
         #VARIABLES------------------
@@ -183,7 +197,8 @@ def run_function(program_code, code2=None, info3=None):
             dom = xml.dom.minidom.parseString(content)
             content = dom.toprettyxml(indent="    ")
 
-        file_name = f"output booking/{pnr} - {bookingtype}.xml"
+        date = datetime.now().strftime("%Y-%m-%d %H%M %S")
+        file_name = f"output booking/{pnr} - {bookingtype} - {date}.xml"
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
 
         with open(file_name, 'w', encoding='utf-8') as file:
@@ -869,7 +884,7 @@ def run_function(program_code, code2=None, info3=None):
             {"time_range": ["08:58", "09:01"], "message": "Bayar parking pagii https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
             ,{"time_range": ["13:58", "14:01"], "message": "Bayar parking petanggg https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
             ,{"time_range": ["20:50", "21:10"], "message": "Cakap SAYANG kat saraa", "days": "all", "to": "Afwan"}
-            ,{"time_range": ["16:30", "16:50"], "message": "ya iya sayang", "days": "all", "to": "Sara"}
+            ,{"time_range": ["16:30", "16:50"], "message": "aip, no sayang, sayang kat afwan", "days": "all", "to": "Sara"}
         ]
 
         for reminder in reminders:
