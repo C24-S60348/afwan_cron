@@ -2,7 +2,6 @@ import sys
 import variables
 from datetime import datetime, timezone, timedelta
 # import logging
-import json
 
 # logging.basicConfig(filename="cron_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
 
@@ -96,9 +95,17 @@ def run_function(program_code, code2=None, info3=None):
         import datetime
         from datetime import datetime, timezone, timedelta
         from decimal import Decimal
+        import platform
         browser_code = 'F' # C - Chrome , F - Firefox , E - Microsoft Edge , S - Safari
         openfileorfolder = 'F' # F - File , FD - Folder
         xmlformatted = True
+        def open_file_path(file_path):
+            if platform.system() == "Windows":
+                os.startfile(file_path)
+            elif platform.system() == "Darwin":  # macOS
+                os.system(f'open "{file_path}"')
+            else:  # Linux
+                os.system(f'xdg-open "{file_path}"')
         def getbrowser(browser_code):
             if browser_code == 'C':
                 trymethod = 0
@@ -206,13 +213,8 @@ def run_function(program_code, code2=None, info3=None):
         file_path = os.path.abspath(file_name)
         if openfileorfolder == "FD":
             file_path = os.path.dirname(file_path)
-
-        if platform.system() == "Windows":
-            os.startfile(file_path)
-        elif platform.system() == "Darwin":  # macOS
-            os.system(f'open "{file_path}"')
-        else:  # Linux
-            os.system(f'xdg-open "{file_path}"')
+        
+        open_file_path(file_path)
 
     #BOOKING FIREFLY - Auto Booking
     elif program == "A":
@@ -572,9 +574,9 @@ def run_function(program_code, code2=None, info3=None):
         file_path = os.path.abspath(file_name)
         if openfileorfolder == "FD":
             file_path = os.path.dirname(file_path)
-
-
-        os.startfile(file_path)  # Windows
+        
+        open_file_path(file_path)
+        # os.startfile(file_path)  # Windows
         # os.system(f'open "{file_path}"') # macOS
         # os.system(f'xdg-open "{file_path}"') # Linux
 
@@ -1242,7 +1244,7 @@ def run_function(program_code, code2=None, info3=None):
         print(current_time2)
         
     #expo react native bundle release
-    elif program == "EXPO":
+    elif program == "EXPO" or program == "EXPOAFTERCLEAN" or program == "EXPOAFTERBUNDLE":
         import textwrap
 
         print(textwrap.dedent(r"""
@@ -1314,9 +1316,10 @@ def run_function(program_code, code2=None, info3=None):
                 sys.exit(1)
 
         # Gradlew clean , bundleRelease
-        if True:
-            print(r"Running: .\gradlew clean")
-            run_command(r".\gradlew clean")
+        if program == "EXPO" or program == "EXPOAFTERCLEAN":
+            if program == "EXPO":
+                print(r"Running: .\gradlew clean")
+                run_command(r".\gradlew clean")
 
             print(r"Running: .\gradlew bundleRelease")
             run_command(r".\gradlew bundleRelease")
@@ -1392,6 +1395,11 @@ def run_function(program_code, code2=None, info3=None):
                 else:
                     print("Error: 'universal.apk' not found in extracted_apks.")
                     sys.exit(1)
+            
+            #go to folder
+            if True:
+                file_path = os.path.dirname(universal_apk_path) 
+                open_file_path(file_path)
 
     #proxy server
     elif program == "PROXY":
