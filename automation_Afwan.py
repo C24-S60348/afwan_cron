@@ -476,7 +476,7 @@ def run_function(program_code, code2=None, info3=None):
         import platform
         isProd = True
 
-        ct_link = variables.CT_LINK
+        ct_link = variables.ct_link
 
         if isProd:
             req = urllib.request.urlopen(ct_link)
