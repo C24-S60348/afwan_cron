@@ -15,5 +15,5 @@ afwanemail = os.getenv("AFWAN_EMAIL", "")
 
 ct_link = os.getenv("CT_LINK", "")
 website_pass = os.getenv("WEBSITE_PASS", "")
-program = os.getenv("PROGRAM", "CRS") #only for the program
+program = os.getenv("PROGRAM", "CRO") #only for the program
 
