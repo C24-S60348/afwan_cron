@@ -865,7 +865,7 @@ def run_function(program_code, code2=None, info3=None):
             #html_data = response
             #print(html_data)
             if (html_data != "connected to NAVITAIRE1SAP<br/>connected to NPS1FIREFLY<br/>connected to ELNVOICE1NAVITAIRE<br/>connected to 2360692 prod<br/>connected to 2360692 staging"): #has changes
-                run_function("TB", "FYSFTP", f"One of the SFTP is not running  \n  \n  {html_data}")
+                run_function("TB", "FYSFTP", f"One of the SFTP is not running  \n  \n  {html_data} \n \n {url}")
             print (html_data)
             print("done CSFTP")
 
