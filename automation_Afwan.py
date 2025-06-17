@@ -623,10 +623,6 @@ def run_function(program_code, code2=None, info3=None):
 
         MESSAGE = info3
 
-
-        # VARIABLES -----------------
-        tb_token = variables.tb_token
-
         # Telegram API URL
         url = f"https://api.telegram.org/bot{tb_token}/sendMessage"
         # data={"chat_id": CHAT_ID, "text": MESSAGE}
