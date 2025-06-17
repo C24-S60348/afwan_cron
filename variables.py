@@ -1,6 +1,7 @@
 import os
 
 tb_token = os.getenv("TB_TOKEN", "")
+tb_token_fy = os.getenv("TB_TOKEN_FY", "")
 csftp_link = os.getenv("CSFTP_LINK" , "")
 fydevlink = os.getenv("FYDEV_LINK", "")
 fy_code = os.getenv("FY_APP_CODE", "")
