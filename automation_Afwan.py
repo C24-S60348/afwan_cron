@@ -1179,6 +1179,8 @@ def run_function(program_code, code2=None, info3=None):
             await update.message.reply_text("Available commands: /start")
         async def sayang_afwan(update: Update, context: CallbackContext):
             await update.message.reply_text("SAYANG SARA JUGAKKKKKKKK")
+        async def sayang_sara(update: Update, context: CallbackContext):
+            await update.message.reply_text("YESHH! AFWAN PATUT DISAYANGI")
 
         async def handle_messages(update: Update, context: CallbackContext):
             user_id = update.effective_user.id
@@ -1201,6 +1203,7 @@ def run_function(program_code, code2=None, info3=None):
             app.add_handler(CommandHandler("start", start))
             app.add_handler(CommandHandler("help", help_command))
             app.add_handler(CommandHandler("sayangafwan", sayang_afwan))
+            app.add_handler(CommandHandler("sayangsara", sayang_sara))
 
             # app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
             app.add_handler(CommandHandler("reminder", reminder_command))
