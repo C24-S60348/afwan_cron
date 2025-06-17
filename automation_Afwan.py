@@ -597,20 +597,29 @@ def run_function(program_code, code2=None, info3=None):
         import requests
 
         # VARIABLES -----------------
-        TOKEN = tbtoken
         if info3 == None:
             code2 = "Afwan" #Custom to
             info3 = "custom" #Custom message
         #VARIABLES ------------------
 
+        tb_token = variables.tb_token
+
         if code2 == "Afwan":
             CHAT_ID = "222338004" # Celik Tafsir website update Warning : -4723012335 , Study with Afwan : -4515480710 , Afwan : 222338004
+            tb_token = variables.tb_token
         elif code2 == "Study":
             CHAT_ID = "-4515480710"
+            tb_token = variables.tb_token
         elif code2 == "Study":
             CHAT_ID = "-4515480710"
+            tb_token = variables.tb_token
         elif code2 == "Sara":
             CHAT_ID = "6238256254"
+            tb_token = variables.tb_token
+        elif code2 == "FYSFTP":
+            CHAT_ID = "-4808008264"
+            tb_token = variables.tb_token_fy
+        
 
         MESSAGE = info3
 
@@ -847,8 +856,7 @@ def run_function(program_code, code2=None, info3=None):
 
     #CHECK SFTP
     elif program == "CSFTP":
-        csftp_link = variables.csftp_link
-        url = csftp_link
+        url = variables.csftp_link
         try:
             print("running CSFTP...")
             req = ur.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -861,7 +869,7 @@ def run_function(program_code, code2=None, info3=None):
             #html_data = response
             #print(html_data)
             if (html_data != "connected to NAVITAIRE1SAP<br/>connected to NPS1FIREFLY<br/>connected to ELNVOICE1NAVITAIRE<br/>connected to 2360692 prod<br/>connected to 2360692 staging"): #has changes
-                run_function("TB", "Afwan", f"One of the SFTP is not running  \n  \n  {html_data}")
+                run_function("TB", "FYSFTP", f"One of the SFTP is not running  \n  \n  {html_data}")
             print (html_data)
             print("done CSFTP")
 
