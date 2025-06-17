@@ -602,13 +602,10 @@ def run_function(program_code, code2=None, info3=None):
             info3 = "custom" #Custom message
         #VARIABLES ------------------
 
-        tb_token = variables.tb_token
+        tb_token = ""
 
         if code2 == "Afwan":
             CHAT_ID = "222338004" # Celik Tafsir website update Warning : -4723012335 , Study with Afwan : -4515480710 , Afwan : 222338004
-            tb_token = variables.tb_token
-        elif code2 == "Study":
-            CHAT_ID = "-4515480710"
             tb_token = variables.tb_token
         elif code2 == "Study":
             CHAT_ID = "-4515480710"
