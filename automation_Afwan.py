@@ -58,6 +58,13 @@ if (program == "FW"):
         allow_headers=["Content-Type", "Authorization"]
     )
 
+if (program == "QT"):
+    from quart import Quart, request, jsonify, render_template, render_template_string
+    from quart_cors import cors
+
+    app = Quart(__name__)
+    app = cors(app, allow_origin="*")
+
 #Public variables
 if True:
     fyuser = ""
@@ -959,6 +966,198 @@ def run_function(program_code, code2=None, info3=None):
         import aiomysql
         import variables 
         from contextlib import asynccontextmanager
+        from flask import Flask, request, jsonify, render_template, render_template_string
+
+        app = Flask(__name__)
+        
+        
+        # Async context manager for MySQL connection
+        @asynccontextmanager
+        def connect_to_db():
+            connection = aiomysql.connect(
+                host="AfwanProductions.mysql.pythonanywhere-services.com",
+                user="AfwanProductions",
+                password="afwan987",
+                db="AfwanProductions$afwan_db",
+                loop=asyncio.get_event_loop()
+            )
+            try:
+                with connection.cursor() as cursor:
+                    yield cursor, connection
+            except aiomysql.MySQLError as err:
+                print(f"Error connecting to database: {err}")
+                raise
+            finally:
+                connection.close()
+        
+        # Test Route
+        @app.route('/api/test', methods=['GET', 'POST', 'OPTIONS'])
+        def test():
+            return jsonify({"message": "Query executed successfully"}), 200
+        
+        # Handle Request (Non-DB)
+        @app.route('/api', methods=['GET', 'POST'])
+        def handle_request():
+            text = str(request.args.get('input'))  # ?input=a
+            character_count = len(text)
+            data_set = {'input': text, 'timestamp': time.time(), 'character_count': character_count}
+            json_dump = json.dumps(data_set)
+            return json_dump
+        
+        # QUERY EXECUTER JSON V2
+        @app.route('/api/executejsonv2', methods=['GET', 'POST'])
+        def execute_query_json_v2():
+            try:
+                # Synchronously read JSON data
+                data = request.get_json()
+        
+                if 'query' not in data:
+                    return jsonify({"error": "query parameter is required"}), 400
+        
+                if 'password' not in data:
+                    return jsonify({"error": "password parameter is required"}), 400
+        
+                sql = data['query']
+                password = data['password']
+        
+                if password == variables.website_pass:
+                    try:
+                        with connect_to_db() as (cursor, connection):
+                            # Execute the SQL query asynchronously
+                            cursor.execute(sql)
+        
+                            # Check if the query returns rows (SELECT query)
+                            if sql.strip().lower().startswith("select"):
+                                columns = [column[0] for column in cursor.description]
+                                rows = cursor.fetchall()  # Fetch all rows asynchronously
+                                results = [dict(zip(columns, row)) for row in rows]
+                                return jsonify({"results": results}), 200
+                            else:
+                                # Commit for insert, update, delete
+                                connection.commit()
+                                return jsonify({"message": "Query executed successfully"}), 200
+                    except aiomysql.MySQLError as db_err:
+                        return jsonify({"error": f"Database error: {db_err}"}), 500
+                else:
+                    return jsonify({"error": "Incorrect password"}), 401
+            except Exception as e:
+                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
+
+
+        
+        # Serve HTML Pages
+        @app.route("/croncheck")
+        def cron_check():
+            now = datetime.now(timezone.utc)
+            gmt8 = timezone(timedelta(hours=8))
+            current_time_raw = now.astimezone(gmt8)
+            current_time_timestamp = current_time_raw.timestamp()
+        
+            timenowKL = current_time_timestamp
+            times = {}
+            cans = {}
+        
+            for key in last_run_times.keys():
+                times[key] = datetime.fromtimestamp(last_run_times[key], tz=gmt8).strftime('%Y-%m-%d %I:%M %p')
+                if (current_time_timestamp - last_run_times[key]) > ((float(key)*30)-10):
+                    last_run_times[key] = current_time_timestamp
+                    cans[key] = True
+                else:
+                    cans[key] = False
+        
+            current_time = current_time_raw.strftime('%Y-%m-%d %I:%M %p')
+        
+            html = f"""
+                <!DOCTYPE html>
+                <html>
+                <head><title>Cron Check</title></head>
+                <body>
+                    <h2>Cron Check</h2>
+                    <p>Current time: {current_time}</p>
+                    """ 
+        
+            for key in times.keys():
+                html += f'<p>Last {key}min: {times[key]}</p>'
+            for key in times.keys():
+                html += f'<p class="min{key}">{cans[key]}</p>'
+        
+            html += f"""
+                    <p class="timenowKL">{timenowKL}</p>
+                </body>
+                </html>
+            """
+        
+            return render_template_string(html)
+        
+        TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"
+        @app.route("/")
+        def index():
+            txt_files = [f for f in os.listdir(TXT_FILES_DIR) if f.endswith(".txt")]
+            txt_files.sort(reverse=True)
+            now = datetime.now(timezone.utc)
+            gmt8 = timezone(timedelta(hours=8))
+            current_time = now.astimezone(gmt8).strftime('%Y-%m-%d %I:%M %p')
+            last_run_time = datetime.fromtimestamp(max(last_run_times.values()), tz=gmt8).strftime('%Y-%m-%d %I:%M %p')
+            html = f"""
+                <!DOCTYPE html>
+                <html>
+                <head><title>TXT Files</title></head>
+                <body>
+                    <h2>TXT Files from afwanhaziq.pythonanywhere.com</h2>
+                    <p>Current time: {current_time}</p>
+                    <p>Last run cron: {last_run_time}</p>
+                    <ul>"""
+            
+            for file in txt_files:
+                html += f"<li><a href='/view/{file}'>{file}</a></li>"
+            html += """
+                    </ul>
+                </body>
+                </html>
+            """
+            return render_template_string(html, files=txt_files)
+        
+        @app.route("/view/<filename>")
+        def view_file(filename):
+            filepath = os.path.join(TXT_FILES_DIR, filename)
+            try:
+                with open(filepath, "r") as f:
+                    content = f.read()
+                
+                html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>{filename}</title></head>
+                    <body>
+                        <h1>{filename}</h1>
+                        <pre>{content}</pre>
+                    </body>
+                    </html>
+                """
+                return render_template_string(html, content=content, filename=filename)
+            except FileNotFoundError:
+                return "File not found", 404
+        
+        # Start the app using Uvicorn
+        if __name__ == '__main__':
+            app.run(debug=True)
+
+    elif program == "QT":
+        import os
+        import json
+        import time
+        import asyncio
+        from datetime import datetime, timedelta, timezone
+        import aiomysql
+        import variables 
+        from contextlib import asynccontextmanager
+        from quart import Quart, request, jsonify, render_template, render_template_string
+        from quart_cors import cors
+
+        app = Quart(__name__)
+        app = cors(app, allow_origin="*")
+        
         
         # Async context manager for MySQL connection
         @asynccontextmanager
@@ -1037,7 +1236,7 @@ def run_function(program_code, code2=None, info3=None):
         
         # Serve HTML Pages
         @app.route("/croncheck")
-        def cron_check():
+        async def cron_check():
             now = datetime.now(timezone.utc)
             gmt8 = timezone(timedelta(hours=8))
             current_time_raw = now.astimezone(gmt8)
@@ -1077,29 +1276,60 @@ def run_function(program_code, code2=None, info3=None):
                 </html>
             """
         
-            return render_template_string(html)
+            return await render_template_string(html)
         
         TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"
         @app.route("/")
-        def index():
+        async def index():
             txt_files = [f for f in os.listdir(TXT_FILES_DIR) if f.endswith(".txt")]
             txt_files.sort(reverse=True)
-            return render_template("index.html", files=txt_files)
+            now = datetime.now(timezone.utc)
+            gmt8 = timezone(timedelta(hours=8))
+            current_time = now.astimezone(gmt8).strftime('%Y-%m-%d %I:%M %p')
+            last_run_time = datetime.fromtimestamp(max(last_run_times.values()), tz=gmt8).strftime('%Y-%m-%d %I:%M %p')
+            html = f"""
+                <!DOCTYPE html>
+                <html>
+                <head><title>TXT Files</title></head>
+                <body>
+                    <h2>TXT Files from afwanhaziq.pythonanywhere.com</h2>
+                    <p>Current time: {current_time}</p>
+                    <p>Last run cron: {last_run_time}</p>
+                    <ul>"""
+            
+            for file in txt_files:
+                html += f"<li><a href='/view/{file}'>{file}</a></li>"
+            html += """
+                    </ul>
+                </body>
+                </html>
+            """
+            return await render_template_string(html, files=txt_files)
         
         @app.route("/view/<filename>")
-        def view_file(filename):
+        async def view_file(filename):
             filepath = os.path.join(TXT_FILES_DIR, filename)
             try:
                 with open(filepath, "r") as f:
                     content = f.read()
-                return render_template("view.html", content=content, filename=filename)
+                
+                html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>{filename}</title></head>
+                    <body>
+                        <h1>{filename}</h1>
+                        <pre>{content}</pre>
+                    </body>
+                    </html>
+                """
+                return await render_template_string(html, content=content, filename=filename)
             except FileNotFoundError:
                 return "File not found", 404
         
         # Start the app using Uvicorn
         if __name__ == '__main__':
             app.run(debug=True)
-
 
     #Run Bot Polling
     elif program == "BP":
@@ -1495,6 +1725,8 @@ def run_function(program_code, code2=None, info3=None):
 
 
 
+if (program == "QT" or program == "FW"):
+    run_function(program, app)
+else:
+    run_function(program)
 
-
-run_function(program)
