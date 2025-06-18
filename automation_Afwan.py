@@ -837,7 +837,7 @@ def run_function(program_code, code2=None, info3=None):
 
         if program == "CRPC":
             while True:
-                totalsec = 120
+                totalsec = 30
                 countsec = 10
                 for remaining in range(0, totalsec, countsec): #sleep 5min
                     esec = remaining
@@ -846,7 +846,7 @@ def run_function(program_code, code2=None, info3=None):
                 run_cron()
         elif program == "CRM":
             while True:
-                time.sleep(120)
+                time.sleep(30)
                 run_cron()
 
     #CHECK SFTP
