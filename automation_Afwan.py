@@ -892,8 +892,9 @@ def run_function(program_code, code2=None, info3=None):
         reminders = [
             {"time_range": ["08:58", "09:01"], "message": "Bayar parking pagii https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
             ,{"time_range": ["13:58", "14:01"], "message": "Bayar parking petanggg https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
-            ,{"time_range": ["20:50", "21:10"], "message": "Cakap SAYANG kat saraa", "days": "all", "to": "Afwan"}
-            ,{"time_range": ["16:30", "16:50"], "message": "aip, no sayang, sayang kat afwan", "days": "all", "to": "Sara"}
+            ,{"time_range": ["20:50", "21:00"], "message": "Cakap SAYANG kat saraa", "days": "all", "to": "Afwan"}
+            ,{"time_range": ["16:30", "16:31"], "message": "jangan lupa cakap sayang kat afwannn", "days": "all", "to": "Sara"}
+            ,{"time_range": ["16:22", "16:30"], "message": "test test", "days": "all", "to": "Afwan"}
         ]
 
         for reminder in reminders:
