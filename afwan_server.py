@@ -23,6 +23,11 @@ DB_CONFIG = {
     "port": variables.db_port,
 }
 
+app = Quart(__name__)
+
+if __name__ == "__main__":
+    app.run()
+
 async def send_telegram_error(error_message):
     """Send error message to Telegram group"""
     try:
@@ -49,11 +54,6 @@ async def get_connection():
         error_msg = f"Database connection error:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
         await send_telegram_error(error_msg)
         raise
-
-app = Quart(__name__)
-
-if __name__ == "__main__":
-    app.run()
 
 @app.route("/")
 async def home():
