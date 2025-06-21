@@ -80,24 +80,23 @@ async def db_test():
 
 
 #saje -----
-if True:
-    @app.route("/sara")
-    async def sara():
-        try:
-            return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
-        except Exception as e:
-            error_msg = f"Error in sara route:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
-            await send_telegram_error(error_msg)
-            return {"error": "Internal server error"}, 500
+@app.route("/sara")
+async def sara():
+    try:
+        return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
+    except Exception as e:
+        error_msg = f"Error in sara route:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
+        await send_telegram_error(error_msg)
+        return {"error": "Internal server error"}, 500
 
-    @app.route("/afwan")
-    async def afwan():
-        try:
-            return {"dari sara":"HAI AFWAN"}
-        except Exception as e:
-            error_msg = f"Error in afwan route:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
-            await send_telegram_error(error_msg)
-            return {"error": "Internal server error"}, 500
+@app.route("/afwan")
+async def afwan():
+    try:
+        return {"dari sara":"HAI AFWAN"}
+    except Exception as e:
+        error_msg = f"Error in afwan route:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
+        await send_telegram_error(error_msg)
+        return {"error": "Internal server error"}, 500
 
 #proxy -----
 @app.route('/proxy')
