@@ -15,7 +15,7 @@ async def home():
 
 @app.route("/sara")
 async def sara():
-    return {"dari afwan":"HAI SARAAAA SAYANGGGGG"}
+    return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
 
 @app.route('/proxy')
 async def proxy():
