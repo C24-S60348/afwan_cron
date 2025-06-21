@@ -4,8 +4,7 @@
 #sudo systemctl daemon-reload
 #sudo systemctl restart quartapp
 #sudo systemctl status quartapp
-
-from quart import Quart, Response, request
+from quart import Quart, request, Response
 import requests
 import asyncpg
 import os
@@ -13,8 +12,32 @@ import datetime
 import json
 import variables
 import traceback
+import httpx  # async HTTP client
 
-# ENV VARS or hardcoded configs
+app = Quart(__name__)
+
+# Error handler ==================================
+async def send_telegram_error(error_message):
+    try:
+        bot_token = variables.tb_token_server
+        chat_id = "-4885373674"
+
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        data = {
+            "chat_id": chat_id,
+            "text": f"🚨 ERROR ALERT 🚨\n\n{error_message}",
+            "parse_mode": "HTML"
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, data=data)
+
+        if response.status_code != 200:
+            print(f"Failed to send Telegram message: {response.text}")
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
+
+# DB ==================================
 DB_CONFIG = {
     "user": variables.db_user,
     "password": variables.db_pass,
@@ -22,30 +45,6 @@ DB_CONFIG = {
     "host": variables.db_host,
     "port": variables.db_port,
 }
-
-app = Quart(__name__)
-
-if __name__ == "__main__":
-    app.run()
-
-async def send_telegram_error(error_message):
-    """Send error message to Telegram group"""
-    try:
-        bot_token = variables.tb_token_server
-        chat_id = "-4885373674"  # Replace with your actual group chat ID
-        
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-        data = {
-            "chat_id": chat_id,
-            "text": f"🚨 ERROR ALERT 🚨\n\n{error_message}",
-            "parse_mode": "HTML"
-        }
-        
-        response = requests.post(url, data=data)
-        if response.status_code != 200:
-            print(f"Failed to send Telegram message: {response.text}")
-    except Exception as e:
-        print(f"Error sending Telegram message: {e}")
 
 async def get_connection():
     try:
@@ -55,21 +54,22 @@ async def get_connection():
         await send_telegram_error(error_msg)
         raise
 
+# Global error handler ==============================
+@app.errorhandler(Exception)
+async def handle_exception(e):
+    error_msg = f"Unhandled exception:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
+    await send_telegram_error(error_msg)
+    return {"error": "Unhandled server error"}, 500
+
 @app.route("/")
 async def home():
-    try:
-        return {"message": "Hello from Quart + Webdock!!!"}
-    except Exception as e:
-        error_msg = f"Error in home route:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
-        await send_telegram_error(error_msg)
-        return {"error": "Internal server error"}, 500
+    return {"message": "Hello from Quart + Webdock!"}
 
-#db test -----
 @app.route("/db-test")
 async def db_test():
     try:
         conn = await get_connection()
-        result = await conn.fetchval("SELECT NOW()")  # Just fetch current time
+        result = await conn.fetchval("SELECT NOW()")
         await conn.close()
         return {"db_time": str(result)}
     except Exception as e:
@@ -77,11 +77,11 @@ async def db_test():
         await send_telegram_error(error_msg)
         return {"error": "DB test failed"}, 500
 
-
 #saje -----
 @app.route("/sara")
 async def sara():
     try:
+        kl
         return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
     except Exception as e:
         error_msg = f"Error in sara route:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
@@ -127,3 +127,10 @@ async def proxy():
         error_msg = f"Unexpected error in proxy route:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
         await send_telegram_error(error_msg)
         return Response(f"Error: {e}", status=500)
+
+
+
+
+
+if __name__ == "__main__":
+    app.run()
