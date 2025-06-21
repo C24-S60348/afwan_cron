@@ -9,7 +9,6 @@ from quart import Quart, Response, request
 import requests
 import asyncpg
 import os
-from db import get_connection
 import datetime
 import json
 import variables
