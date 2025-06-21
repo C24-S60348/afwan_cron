@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=afwanhaziq
 WorkingDirectory=/home/afwanhaziq/quartapp/afwan_cron
-ExecStart=/home/afwanhaziq/.local/bin/gunicorn afwan_server:app --bind 127.0.0.1:8000
+ExecStart=/home/afwanhaziq/.local/bin/gunicorn afwan_server:app --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8000
 
 Restart=always
 RestartSec=3
