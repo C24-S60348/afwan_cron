@@ -85,7 +85,6 @@ async def db_test():
 @app.route("/sara")
 @handle_exceptions("sara")
 async def sara():
-    kl  # This will still cause an error, but now handled by decorator
     return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
 
 @app.route("/afwan")
