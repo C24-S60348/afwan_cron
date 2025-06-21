@@ -1,5 +1,9 @@
 #sudo nano /etc/systemd/system/quartapp.service
 
+#edit then
+#sudo systemctl daemon-reload
+#sudo systemctl restart quartapp
+#sudo systemctl status quartapp
 
 from quart import Quart, Response, request
 import requests
