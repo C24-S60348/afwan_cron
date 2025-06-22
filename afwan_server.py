@@ -99,7 +99,7 @@ async def proxy():
     target_url = request.args.get('url')
 
     if not target_url:
-        return Response("Missing 'url' parameter", status=400)
+        return Response(json.dumps({"error": "Missing 'url' parameter"}), status=400)
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
