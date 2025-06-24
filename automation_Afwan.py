@@ -816,9 +816,11 @@ def run_function(program_code, code2=None, info3=None):
                 print("")
             if min == "1":
                 print("")
-            if min == "2":
-                # logging.info(f"Run RP")
                 run_function("RP")
+            if min == "2":
+                print("")
+                # logging.info(f"Run RP")
+                # run_function("RP")
             if min == "3":
                 print("")
             if min == "5":
@@ -828,9 +830,9 @@ def run_function(program_code, code2=None, info3=None):
             if min == "30":
                 print("")
             if min == "60":
-                if program != "CRF":
-                    # logging.info(f"Run CSFTP")
-                    run_function("CSFTP")
+                print("")
+                # logging.info(f"Run CSFTP")
+                run_function("CSFTP")
             print(f"---------------------- every {min} min")
 
         run_cron()
@@ -893,8 +895,8 @@ def run_function(program_code, code2=None, info3=None):
             {"time_range": ["08:58", "09:01"], "message": "Bayar parking pagii https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
             ,{"time_range": ["13:58", "14:01"], "message": "Bayar parking petanggg https://play.google.com/store/apps/details?id=my.com.lits.flexiparking2", "days": "weekdays", "to": "Afwan"}
             ,{"time_range": ["20:50", "21:00"], "message": "Cakap SAYANG kat saraa", "days": "all", "to": "Afwan"}
-            ,{"time_range": ["16:30", "16:31"], "message": "jangan lupa cakap sayang kat afwannn", "days": "all", "to": "Sara"}
-            ,{"time_range": ["16:31", "16:35"], "message": "test test", "days": "all", "to": "Afwan"}
+            ,{"time_range": ["20:50", "20:53"], "message": "jangan lupa cakap sayang kat afwannn", "days": "all", "to": "Sara"}
+            # ,{"time_range": ["16:31", "16:35"], "message": "test test", "days": "all", "to": "Afwan"}
         ]
 
         for reminder in reminders:
