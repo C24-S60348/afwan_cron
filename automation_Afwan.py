@@ -816,11 +816,11 @@ def run_function(program_code, code2=None, info3=None):
                 print("")
             if min == "1":
                 print("")
-                run_function("RP")
+                # run_function("RP")
             if min == "2":
                 print("")
                 # logging.info(f"Run RP")
-                # run_function("RP")
+                run_function("RP")
             if min == "3":
                 print("")
             if min == "5":
