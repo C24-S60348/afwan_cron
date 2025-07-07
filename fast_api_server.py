@@ -124,16 +124,18 @@ async def afwan():
 @app.get(
     '/proxy',
     summary="Proxy a GET request to another URL",
-    description="Fetches and returns the raw response of the given `url`. CORS headers are included. Returns the page content as-is.",
+    description="Parameter: url --- Fetches and returns the raw response of the given `url`. CORS headers are included. Returns the page content as-is.",
     responses={
         200: {
-            "description": "Successful Response",
+            "description": "HTML content from target URL",
             "content": {
                 "text/html": {
-                    "example": "<!DOCTYPE html><html><head><title>Example</title></head><body>...</body></html>"
+                    "example": "<!DOCTYPE html><html><head><title>Example</title></head><body>Sample content</body></html>"
                 }
-            },
+            }
         },
+        400: {"description": "Missing or invalid 'url' parameter"},
+        500: {"description": "Error fetching from target URL"},
     }
 )
 @handle_exceptions("proxy")
