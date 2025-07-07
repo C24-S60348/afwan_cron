@@ -96,8 +96,8 @@ async def afwan():
 #proxy -----
 @app.get('/proxy')
 @handle_exceptions("proxy")
-async def proxy(request: Request, url: str = Query(..., description="The URL to proxy", example="https://www.celiktafsir.net")):
-    target_url = url
+async def proxy(request: Request):
+    target_url = request.query_params.get('url')
 
     if not target_url:
         raise HTTPException(status_code=400, detail="Missing 'url' parameter")
