@@ -96,10 +96,7 @@ async def afwan():
 #proxy -----
 @app.get('/proxy')
 @handle_exceptions("proxy")
-async def proxy(
-    request: Request,
-    url: str = Query(..., description="The URL to proxy", example="https://www.celiktafsir.net")
-):
+async def proxy(request: Request, url: str = Query(..., description="The URL to proxy", example="https://www.celiktafsir.net")):
     target_url = url
 
     if not target_url:
