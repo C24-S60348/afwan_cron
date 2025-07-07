@@ -98,7 +98,13 @@ async def db_test():
     return {"db_time": str(result)}
 
 #saje -----
-@app.get("/sara")
+@app.get(
+    "/sara",
+    response_model=DBTestSuccess,
+    responses={
+        200: {"description": "Successful Response", "content": {"application/json": {"example": {"dari afwan": "HAI SARAAAA SAYANGGGGGSS"}}}},
+    }
+)
 @handle_exceptions("sara")
 async def sara():
     return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
