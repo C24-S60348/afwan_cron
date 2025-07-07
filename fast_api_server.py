@@ -15,6 +15,13 @@ import variables
 import traceback
 import httpx  # async HTTP client
 from functools import wraps
+from pydantic import BaseModel
+
+class DBTestSuccess(BaseModel):
+    db_time: str
+
+class ErrorResponse(BaseModel):
+    detail: str
 
 app = FastAPI(root_path="/api")
 
@@ -74,7 +81,15 @@ async def get_connection():
 async def home():
     return {"message": "Hello from FastAPI + Webdock!"}
 
-@app.get("/db-test")
+@app.get(
+    "/db-test",
+    response_model=DBTestSuccess,
+    responses={
+        200: {"description": "Successful Response", "content": {"application/json": {"example": {"db_time": "2025-07-07 21:21:52.703991+00:00"}}}},
+        500: {"description": "Internal Server Error", "model": ErrorResponse, "content": {"application/json": {"example": {"detail": "Internal server error"}}}},
+        400: {"description": "Bad Request", "model": ErrorResponse, "content": {"application/json": {"example": {"detail": "Bad request"}}}},
+    }
+)
 @handle_exceptions("db-test")
 async def db_test():
     conn = await get_connection()
