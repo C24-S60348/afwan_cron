@@ -5,7 +5,7 @@
 #sudo systemctl restart quartapp
 #sudo systemctl status quartapp
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import Response, HTMLResponse
 import requests
 import asyncpg
 import os
@@ -125,6 +125,7 @@ async def afwan():
     '/proxy',
     summary="Proxy a GET request to another URL",
     description="Parameter: url --- Fetches and returns the raw response of the given `url`. CORS headers are included. Returns the page content as-is.",
+    response_class=HTMLResponse,
     responses={
         200: {
             "description": "HTML content from target URL",
