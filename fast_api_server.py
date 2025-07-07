@@ -4,7 +4,8 @@
 #sudo systemctl daemon-reload
 #sudo systemctl restart quartapp
 #sudo systemctl status quartapp
-from quart import Quart, request, Response
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import Response
 import requests
 import asyncpg
 import os
@@ -15,7 +16,7 @@ import traceback
 import httpx  # async HTTP client
 from functools import wraps
 
-app = Quart(__name__)
+app = FastAPI()
 
 # Error handler ==================================
 async def send_telegram_error(error_message):
@@ -52,7 +53,7 @@ def handle_exceptions(route_name="Unknown", type="exception"):
                 if type == "raise":
                     raise  # Re-raise the exception
                 else:
-                    return {"error": "Internal server error"}, 500
+                    raise HTTPException(status_code=500, detail="Internal server error")
         return wrapper
     return decorator
 
@@ -69,11 +70,11 @@ DB_CONFIG = {
 async def get_connection():
     return await asyncpg.connect(**DB_CONFIG)
 
-@app.route("/")
+@app.get("/")
 async def home():
-    return {"message": "Hello from Quart + Webdock!"}
+    return {"message": "Hello from FastAPI + Webdock!"}
 
-@app.route("/db-test")
+@app.get("/db-test")
 @handle_exceptions("db-test")
 async def db_test():
     conn = await get_connection()
@@ -82,41 +83,44 @@ async def db_test():
     return {"db_time": str(result)}
 
 #saje -----
-@app.route("/sara")
+@app.get("/sara")
 @handle_exceptions("sara")
 async def sara():
     return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
 
-@app.route("/afwan")
+@app.get("/afwan")
 @handle_exceptions("afwan")
 async def afwan():
     return {"dari sara":"HAI AFWAN"}
 
 #proxy -----
-@app.route('/proxy')
+@app.get('/proxy')
 @handle_exceptions("proxy")
-async def proxy():
-    target_url = request.args.get('url')
+async def proxy(request: Request):
+    target_url = request.query_params.get('url')
 
     if not target_url:
-        return {"error": "Missing 'url' parameter"}, 400
+        raise HTTPException(status_code=400, detail="Missing 'url' parameter")
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
     }
-    response = requests.get(target_url, headers=headers)
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.get(target_url, headers=headers)
 
     # Create a response with CORS headers
-    proxy_response = Response(response.content, status=response.status_code)
+    proxy_response = Response(
+        content=response.content,
+        status_code=response.status_code,
+        media_type=response.headers.get("content-type", "application/octet-stream")
+    )
     proxy_response.headers["Access-Control-Allow-Origin"] = "*"
     proxy_response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     proxy_response.headers["Access-Control-Allow-Headers"] = "Content-Type"
 
     return proxy_response
 
-
-
-
-
 if __name__ == "__main__":
-    app.run()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
