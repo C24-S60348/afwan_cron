@@ -17,8 +17,8 @@ import httpx  # async HTTP client
 from functools import wraps
 from pydantic import BaseModel
 
-class DBTestSuccess(BaseModel):
-    db_time: str
+class ModelResponse(BaseModel):
+    message: str
 
 class ErrorResponse(BaseModel):
     detail: str
@@ -83,11 +83,11 @@ async def home():
 
 @app.get(
     "/db-test",
-    response_model=DBTestSuccess,
+    response_model=ModelResponse,
     responses={
         200: {"description": "Successful Response", "content": {"application/json": {"example": {"db_time": "2025-07-07 21:21:52.703991+00:00"}}}},
-        500: {"description": "Internal Server Error", "model": ErrorResponse, "content": {"application/json": {"example": {"detail": "Internal server error"}}}},
-        400: {"description": "Bad Request", "model": ErrorResponse, "content": {"application/json": {"example": {"detail": "Bad request"}}}},
+        # 500: {"description": "Internal Server Error", "model": ErrorResponse, "content": {"application/json": {"example": {"detail": "Internal server error"}}}},
+        # 400: {"description": "Bad Request", "model": ErrorResponse, "content": {"application/json": {"example": {"detail": "Bad request"}}}},
     }
 )
 @handle_exceptions("db-test")
@@ -100,7 +100,7 @@ async def db_test():
 #saje -----
 @app.get(
     "/sara",
-    response_model=DBTestSuccess,
+    response_model=ModelResponse,
     responses={
         200: {"description": "Successful Response", "content": {"application/json": {"example": {"dari afwan": "HAI SARAAAA SAYANGGGGGSS"}}}},
     }
@@ -109,7 +109,13 @@ async def db_test():
 async def sara():
     return {"dari afwan":"HAI SARAAAA SAYANGGGGGSS"}
 
-@app.get("/afwan")
+@app.get(
+    "/afwan",
+    response_model=ModelResponse,
+    responses={
+        200: {"description": "Successful Response", "content": {"application/json": {"example": {"dari sara": "HAI AFWAN"}}}},
+    }
+)
 @handle_exceptions("afwan")
 async def afwan():
     return {"dari sara":"HAI AFWAN"}
