@@ -125,7 +125,7 @@ async def afwan():
 #proxy -----
 @app.api_route(
     '/proxy',
-    methods=["GET", "POST"],
+    methods=["GET"],
     summary="Proxy a GET request to another URL",
     description="Parameter: url --- Fetches and returns the raw response of the given `url`. CORS headers are included. Returns the page content as-is.",
     response_class=HTMLResponse,
