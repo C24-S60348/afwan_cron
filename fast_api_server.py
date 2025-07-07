@@ -123,8 +123,9 @@ async def afwan():
     return {"dari sara":"HAI AFWAN"}
 
 #proxy -----
-@app.post(
+@app.api_route(
     '/proxy',
+    methods=["GET", "POST"],
     summary="Proxy a GET request to another URL",
     description="Parameter: url --- Fetches and returns the raw response of the given `url`. CORS headers are included. Returns the page content as-is.",
     response_class=HTMLResponse,
