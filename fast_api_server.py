@@ -77,7 +77,12 @@ DB_CONFIG = {
 async def get_connection():
     return await asyncpg.connect(**DB_CONFIG)
 
-@app.get("/")
+@app.get(
+    "/",
+    responses={
+        200: {"description": "Successful Response", "content": {"application/json": {"example": {"message": "Hello from FastAPI + Webdock!"}}}},
+    }
+)
 async def home():
     return {"message": "Hello from FastAPI + Webdock!"}
 
