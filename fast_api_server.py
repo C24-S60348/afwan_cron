@@ -16,7 +16,7 @@ import traceback
 import httpx  # async HTTP client
 from functools import wraps
 
-app = FastAPI()
+app = FastAPI(root_path="/api")
 
 # Error handler ==================================
 async def send_telegram_error(error_message):
