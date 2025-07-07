@@ -121,7 +121,21 @@ async def afwan():
     return {"dari sara":"HAI AFWAN"}
 
 #proxy -----
-@app.get('/proxy')
+@app.get(
+    '/proxy',
+    summary="Proxy a GET request to another URL",
+    description="Fetches and returns the raw response of the given `url`. CORS headers are included. Returns the page content as-is.",
+    responses={
+        200: {
+            "description": "Successful Response",
+            "content": {
+                "text/html": {
+                    "example": "<!DOCTYPE html><html><head><title>Example</title></head><body>...</body></html>"
+                }
+            },
+        },
+    }
+)
 @handle_exceptions("proxy")
 async def proxy(request: Request):
     target_url = request.query_params.get('url')
