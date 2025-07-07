@@ -88,7 +88,6 @@ async def home():
 
 @app.get(
     "/db-test",
-    response_model=ModelResponse,
     responses={
         200: {"description": "Successful Response", "content": {"application/json": {"example": {"db_time": "2025-07-07 21:21:52.703991+00:00"}}}},
         # 500: {"description": "Internal Server Error", "model": ErrorResponse, "content": {"application/json": {"example": {"detail": "Internal server error"}}}},
@@ -105,7 +104,6 @@ async def db_test():
 #saje -----
 @app.get(
     "/sara",
-    response_model=ModelResponse,
     responses={
         200: {"description": "Successful Response", "content": {"application/json": {"example": {"dari afwan": "HAI SARAAAA SAYANGGGGGSS"}}}},
     }
@@ -116,7 +114,6 @@ async def sara():
 
 @app.get(
     "/afwan",
-    response_model=ModelResponse,
     responses={
         200: {"description": "Successful Response", "content": {"application/json": {"example": {"dari sara": "HAI AFWAN"}}}},
     }
