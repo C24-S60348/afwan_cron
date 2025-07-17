@@ -538,7 +538,7 @@ def run_function(program_code, code2=None, info3=None):
             #soup = BeautifulSoup(data, 'html.parser')
             #get all Surah's inside pages
             data = str(data)
-            idx = data.find('entry-title')
+            idx = data.find('display-posts-listing')
             s = data[idx:len(data)]
             idx2 = s.find('</ul>')
             s = s[0:idx2]
@@ -546,11 +546,14 @@ def run_function(program_code, code2=None, info3=None):
 
             #get all href in Array
             pages = re.findall(r'href="(.+?)"', s)
-            #print(pages)
+            # print(pages)
 
             #put all inside txt variable
             for f in pages:
                 txt += (f + " ")
+            
+            # print(txt)
+            # exit()
 
             #albaqarah ada 3 part
             if (not (link == f'{ct_link}surah-002-al-baqarah/' or link == f'{ct_link}surah-002-bahagian-2/')):
