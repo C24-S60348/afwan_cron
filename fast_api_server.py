@@ -143,13 +143,10 @@ async def verify_token(token: str) -> int:
     """Verify token and return user_id if valid"""
     conn = await get_connection()
     try:
-        # Update last_used_at and get user_id
-        user_id = await conn.fetchval("""
-            UPDATE user_sessions 
-            SET last_used_at = NOW() 
-            WHERE token = $1 AND expires_at > NOW() AND is_active = TRUE
-            RETURNING user_id
-        """, token)
+        user_id = await conn.fetchval(
+            "SELECT id FROM users WHERE token = $1 AND token_expires_at > NOW()",
+            token
+        )
         return user_id
     finally:
         await conn.close()
@@ -165,21 +162,9 @@ async def init_database():
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(50) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
+                token VARCHAR(255),
+                token_expires_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT NOW()
-            )
-        """)
-        
-        # Create user_sessions table for multiple device tokens
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS user_sessions (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                token VARCHAR(255) UNIQUE NOT NULL,
-                device_info JSONB DEFAULT '{}',
-                created_at TIMESTAMP DEFAULT NOW(),
-                last_used_at TIMESTAMP DEFAULT NOW(),
-                expires_at TIMESTAMP,
-                is_active BOOLEAN DEFAULT TRUE
             )
         """)
         
@@ -281,7 +266,6 @@ async def handle_login(body: dict):
     """Handle user login"""
     username = body.get("username")
     password = body.get("password")
-    device_info = body.get("device_info", {})  # Optional device information
     
     if not username or not password:
         return JSONResponse(
@@ -305,20 +289,15 @@ async def handle_login(body: dict):
         
         # Generate new token
         token = generate_token()
-        expires_at = datetime.datetime.now() + datetime.timedelta(days=30)
+        token_expires_at = datetime.datetime.now() + datetime.timedelta(days=30)
         
-        # Create new session
-        await conn.execute("""
-            INSERT INTO user_sessions (user_id, token, device_info, expires_at)
-            VALUES ($1, $2, $3, $4)
-        """, user['id'], token, device_info, expires_at)
+        # Update user token
+        await conn.execute(
+            "UPDATE users SET token = $1, token_expires_at = $2 WHERE id = $3",
+            token, token_expires_at, user['id']
+        )
         
-        return {
-            "token": token, 
-            "message": "Login successful",
-            "expires_at": expires_at.isoformat(),
-            "device_info": device_info
-        }
+        return {"token": token, "message": "Login successful"}
     finally:
         await conn.close()
 
@@ -326,7 +305,6 @@ async def handle_register(body: dict):
     """Handle user registration"""
     username = body.get("username")
     password = body.get("password")
-    device_info = body.get("device_info", {})  # Optional device information
     
     if not username or not password:
         return JSONResponse(
@@ -354,28 +332,17 @@ async def handle_register(body: dict):
                 content={"error": "User exists", "message": "Username already exists"}
             )
         
+        # Generate token
+        token = generate_token()
+        token_expires_at = datetime.datetime.now() + datetime.timedelta(days=30)
+        
         # Create new user
         user_id = await conn.fetchval(
-            "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id",
-            username, hash_password(password)
+            "INSERT INTO users (username, password, token, token_expires_at) VALUES ($1, $2, $3, $4) RETURNING id",
+            username, hash_password(password), token, token_expires_at
         )
         
-        # Generate token and create session
-        token = generate_token()
-        expires_at = datetime.datetime.now() + datetime.timedelta(days=30)
-        
-        await conn.execute("""
-            INSERT INTO user_sessions (user_id, token, device_info, expires_at)
-            VALUES ($1, $2, $3, $4)
-        """, user_id, token, device_info, expires_at)
-        
-        return {
-            "token": token, 
-            "message": "Registration successful", 
-            "user_id": user_id,
-            "expires_at": expires_at.isoformat(),
-            "device_info": device_info
-        }
+        return {"token": token, "message": "Registration successful", "user_id": user_id}
     finally:
         await conn.close()
 
@@ -449,132 +416,6 @@ async def handle_data(body: dict):
             )
     finally:
         await conn.close()
-
-# Session Management Endpoints ====================
-@app.post("/logout")
-@handle_exceptions("logout")
-async def logout(request: Request):
-    """Logout from current session"""
-    try:
-        body = await request.json()
-        token = body.get("token")
-        
-        if not token:
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Missing token", "message": "Token is required"}
-            )
-        
-        conn = await get_connection()
-        try:
-            # Deactivate the session
-            result = await conn.execute(
-                "UPDATE user_sessions SET is_active = FALSE WHERE token = $1",
-                token
-            )
-            
-            if result == "UPDATE 0":
-                return JSONResponse(
-                    status_code=404,
-                    content={"error": "Session not found", "message": "Invalid or expired token"}
-                )
-            
-            return {"message": "Logout successful"}
-        finally:
-            await conn.close()
-    except json.JSONDecodeError:
-        return JSONResponse(
-            status_code=400,
-            content={"error": "Invalid JSON", "message": "Invalid JSON body"}
-        )
-
-@app.get("/sessions")
-@handle_exceptions("get-sessions")
-async def get_sessions(token: str):
-    """Get all active sessions for the user"""
-    if not token:
-        return JSONResponse(
-            status_code=400,
-            content={"error": "Missing token", "message": "Token is required"}
-        )
-    
-    # Verify token and get user_id
-    user_id = await verify_token(token)
-    if not user_id:
-        return JSONResponse(
-            status_code=401,
-            content={"error": "Authentication failed", "message": "Invalid or expired token"}
-        )
-    
-    conn = await get_connection()
-    try:
-        sessions = await conn.fetch("""
-            SELECT id, token, device_info, created_at, last_used_at, expires_at, is_active
-            FROM user_sessions 
-            WHERE user_id = $1 AND is_active = TRUE
-            ORDER BY last_used_at DESC
-        """, user_id)
-        
-        return {
-            "sessions": [
-                {
-                    "id": session['id'],
-                    "token": session['token'][:10] + "...",  # Show only first 10 chars for security
-                    "device_info": session['device_info'],
-                    "created_at": session['created_at'].isoformat(),
-                    "last_used_at": session['last_used_at'].isoformat(),
-                    "expires_at": session['expires_at'].isoformat() if session['expires_at'] else None,
-                    "is_active": session['is_active']
-                }
-                for session in sessions
-            ]
-        }
-    finally:
-        await conn.close()
-
-@app.post("/logout-other-sessions")
-@handle_exceptions("logout-other-sessions")
-async def logout_other_sessions(request: Request):
-    """Logout from all other sessions except current one"""
-    try:
-        body = await request.json()
-        token = body.get("token")
-        
-        if not token:
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Missing token", "message": "Token is required"}
-            )
-        
-        conn = await get_connection()
-        try:
-            # Get user_id from token
-            user_id = await conn.fetchval(
-                "SELECT user_id FROM user_sessions WHERE token = $1 AND is_active = TRUE",
-                token
-            )
-            
-            if not user_id:
-                return JSONResponse(
-                    status_code=401,
-                    content={"error": "Authentication failed", "message": "Invalid or expired token"}
-                )
-            
-            # Deactivate all other sessions for this user
-            result = await conn.execute("""
-                UPDATE user_sessions 
-                SET is_active = FALSE 
-                WHERE user_id = $1 AND token != $2 AND is_active = TRUE
-            """, user_id, token)
-            
-            return {"message": "All other sessions logged out successfully"}
-        finally:
-            await conn.close()
-    except json.JSONDecodeError:
-        return JSONResponse(
-            status_code=400,
-            content={"error": "Invalid JSON", "message": "Invalid JSON body"}
-        )
 
 # Alternative GET endpoint for data retrieval ====================
 @app.get("/app")
