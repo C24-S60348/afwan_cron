@@ -1,9 +1,15 @@
 #sudo nano /etc/systemd/system/quartapp.service
 
 #edit then
-#sudo systemctl daemon-reload
-#sudo systemctl restart quartapp
-#sudo systemctl status quartapp
+'''
+To Restart server:
+
+sudo systemctl daemon-reload
+sudo systemctl restart quartapp
+sudo systemctl status quartapp
+sudo systemctl enable quartapp
+'''
+
 from quart import Quart, request, Response
 import requests
 import asyncpg
@@ -71,7 +77,14 @@ async def get_connection():
 
 @app.route("/")
 async def home():
-    return "<html><body><h1>Hello from Quart + Webdock!</h1></body></html>"
+    return """
+    <html><body>
+    <h1>This is Afwan's server</h1>
+    <script>
+    document.location.href = "https://c24-s60348.github.io/index3.html";
+    </script>   
+    </body></html>
+    """
 
 @app.route("/db-test")
 @handle_exceptions("db-test")
