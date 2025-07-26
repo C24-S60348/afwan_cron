@@ -478,28 +478,13 @@ async def get_app_data(type: str = None, appname: str = None, token: str = None)
 async def test_error():
     """Test endpoint to verify error handling and Telegram notifications"""
     try:
-        # Debug information
-        bot_token = variables.tb_token_server
-        chat_id = "-4885373674"
         
         # Test Telegram error sending
         await send_telegram_error("🧪 TEST: This is a test error message from the server")
         
-        return {
-            "message": "Test error sent to Telegram",
-            "debug_info": {
-                "bot_token": bot_token + "..." if bot_token else "None",
-                "chat_id": chat_id,
-                "token_length": len(bot_token) if bot_token else 0,
-            }
-        }
     except Exception as e:
         return {
             "error": f"Failed to send test error: {str(e)}",
-            "debug_info": {
-                "bot_token": variables.tb_token_server + "..." if variables.tb_token_server else "None",
-                "chat_id": "-4885373674"
-            }
         }
 
 #saje -----
