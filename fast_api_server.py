@@ -1,9 +1,15 @@
 #sudo nano /etc/systemd/system/quartapp.service
 
 #edit then
-#sudo systemctl daemon-reload
-#sudo systemctl restart quartapp
-#sudo systemctl status quartapp
+"""
+To Restart server:
+
+sudo systemctl daemon-reload
+sudo systemctl restart fastapi
+sudo systemctl status fastapi
+sudo systemctl enable fastapi
+
+"""
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import Response, HTMLResponse
 import requests
@@ -75,6 +81,9 @@ def handle_exceptions(route_name="Unknown", type="exception"):
         async def wrapper(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
+            except HTTPException:
+                # Re-raise HTTPException as-is (don't catch it)
+                raise
             except Exception as e:
                 error_msg = f"Error in {route_name}:\n{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
                 await send_telegram_error(error_msg)
@@ -213,8 +222,14 @@ async def app_endpoint(request: Request):
             return await handle_data(body)
         else:
             raise HTTPException(status_code=400, detail="Invalid request type")
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        error_msg = f"JSON decode error in app endpoint: {str(e)}"
+        await send_telegram_error(error_msg)
         raise HTTPException(status_code=400, detail="Invalid JSON body")
+    except Exception as e:
+        error_msg = f"Unexpected error in app endpoint: {str(e)}"
+        await send_telegram_error(error_msg)
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 async def handle_login(body: dict):
     """Handle user login"""
@@ -352,6 +367,62 @@ async def handle_data(body: dict):
 @handle_exceptions("app-get")
 async def get_app_data(type: str = None, appname: str = None, token: str = None):
     """GET endpoint for retrieving data"""
+    # If no parameters provided, return API documentation
+    if not type and not appname and not token:
+        return {
+            "message": "API Documentation",
+            "endpoints": {
+                "POST /api/app": {
+                    "description": "Main endpoint for authentication and data operations",
+                    "operations": {
+                        "LOGIN": {
+                            "body": {
+                                "type": "LOGIN",
+                                "username": "string",
+                                "password": "string"
+                            },
+                            "response": {
+                                "token": "string",
+                                "message": "Login successful"
+                            }
+                        },
+                        "REGISTER": {
+                            "body": {
+                                "type": "REGISTER", 
+                                "username": "string",
+                                "password": "string"
+                            },
+                            "response": {
+                                "token": "string",
+                                "message": "Registration successful",
+                                "user_id": "integer"
+                            }
+                        },
+                        "DATA": {
+                            "body": {
+                                "type": "DATA",
+                                "appname": "string",
+                                "token": "string",
+                                "method": "GET|POST",
+                                "calendar_tick": "object (optional)",
+                                "habits": "array (optional)",
+                                "notes": "array (optional)"
+                            }
+                        }
+                    }
+                },
+                "GET /api/app": {
+                    "description": "Get data using query parameters",
+                    "parameters": {
+                        "type": "DATA (required)",
+                        "appname": "string (required)",
+                        "token": "string (required)"
+                    },
+                    "example": "/api/app?type=DATA&appname=habitmultiplayer&token=your_token"
+                }
+            }
+        }
+    
     if type != "DATA" or not appname or not token:
         raise HTTPException(status_code=400, detail="Invalid parameters. Use type=DATA&appname=<appname>&token=<token>")
     
@@ -383,6 +454,17 @@ async def get_app_data(type: str = None, appname: str = None, token: str = None)
         await conn.close()
 
 #======================ABAIKAN======================
+# Test endpoint for debugging ====================
+@app.get("/test-error")
+async def test_error():
+    """Test endpoint to verify error handling and Telegram notifications"""
+    try:
+        # Test Telegram error sending
+        await send_telegram_error("🧪 TEST: This is a test error message from the server")
+        return {"message": "Test error sent to Telegram"}
+    except Exception as e:
+        return {"error": f"Failed to send test error: {str(e)}"}
+
 #saje -----
 @app.get(
     "/sara",
