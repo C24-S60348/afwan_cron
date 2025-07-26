@@ -400,10 +400,16 @@ async def handle_data(body: dict):
                     "notes": []
                 }
             
+            # Parse JSONB data back to Python objects
+            import json
+            calendar_tick = json.loads(data['calendar_tick']) if data['calendar_tick'] else {}
+            habits = json.loads(data['habits']) if data['habits'] else []
+            notes = json.loads(data['notes']) if data['notes'] else []
+            
             return {
-                "calendar_tick": data['calendar_tick'],
-                "habits": data['habits'],
-                "notes": data['notes']
+                "calendar_tick": calendar_tick,
+                "habits": habits,
+                "notes": notes
             }
         
         elif method.upper() == "POST":
@@ -529,10 +535,16 @@ async def get_app_data(type: str = None, appname: str = None, token: str = None)
                 "notes": []
             }
         
+        # Parse JSONB data back to Python objects
+        import json
+        calendar_tick = json.loads(data['calendar_tick']) if data['calendar_tick'] else {}
+        habits = json.loads(data['habits']) if data['habits'] else []
+        notes = json.loads(data['notes']) if data['notes'] else []
+        
         return {
-            "calendar_tick": data['calendar_tick'],
-            "habits": data['habits'],
-            "notes": data['notes']
+            "calendar_tick": calendar_tick,
+            "habits": habits,
+            "notes": notes
         }
     finally:
         await conn.close()
