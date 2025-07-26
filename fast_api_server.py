@@ -488,16 +488,16 @@ async def test_error():
         return {
             "message": "Test error sent to Telegram",
             "debug_info": {
-                "bot_token": bot_token[:10] + "..." if bot_token else "None",
+                "bot_token": bot_token + "..." if bot_token else "None",
                 "chat_id": chat_id,
-                "token_length": len(bot_token) if bot_token else 0
+                "token_length": len(bot_token) if bot_token else 0,
             }
         }
     except Exception as e:
         return {
             "error": f"Failed to send test error: {str(e)}",
             "debug_info": {
-                "bot_token": variables.tb_token_server[:10] + "..." if variables.tb_token_server else "None",
+                "bot_token": variables.tb_token_server + "..." if variables.tb_token_server else "None",
                 "chat_id": "-4885373674"
             }
         }
