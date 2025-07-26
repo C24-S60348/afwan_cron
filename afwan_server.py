@@ -71,7 +71,7 @@ async def get_connection():
 
 @app.route("/")
 async def home():
-    return {"message": "Hello from Quart + Webdock!"}
+    return "<html><body><h1>Hello from Quart + Webdock!</h1></body></html>"
 
 @app.route("/db-test")
 @handle_exceptions("db-test")
@@ -113,34 +113,6 @@ async def proxy():
     proxy_response.headers["Access-Control-Allow-Headers"] = "Content-Type"
 
     return proxy_response
-
-#ipay88 -----
-@app.route('/ipay88')
-@handle_exceptions("ipay88")
-async def ipay88():
-    return """Redirecing... Please wait. DO NOT close or refresh this page.
-<form id="ipay88Form" method="POST" action="https://payment.ipay88.com.my/epayment/entry.asp">
-	<input type="hidden" name="_token" value="jvG1Av2L9fnJhzoIDhxJwWM38FtIwppdOYxJ7CAd">	<input type="hidden" name="MerchantCode" value="M45119">
-	<input type="hidden" name="RefNo" value="2507171113441409">
-	<input type="hidden" name="Amount" value="1.00">
-	<input type="hidden" name="Currency" value="MYR">
-	<input type="hidden" name="PaymentId" value="16">
-	<input type="hidden" name="ProdDesc" value="Booking payment for Escabee.com">
-	<input type="hidden" name="UserName" value="test testste">
-	<input type="hidden" name="UserEmail" value="afwanhaziq987@gmail.com">
-	<input type="hidden" name="UserContact" value="+601152853046">
-	<input type="hidden" name="Remark" value="Booking #2507171113441409">
-	<input type="hidden" name="Lang" value="UTF-8">
-	<input type="hidden" name="SignatureType" value="HMACSHA512">
-	<input type="hidden" name="Signature" value="099022f828069b62d0111beb9aa606bdc8bfe87ff9236e1b2766c9046ed02b1862aa3a47b832624a952efe65bf3e2455d1e69d627ac24fcd94c574fa93cb5e64">
-	<input type="hidden" name="ResponseURL" value="https://dev.escabee.com/checkout/callback">
-	<input type="hidden" name="BackendURL" value="https://dev.escabee.com/ipay88/callback">
-	<input type="hidden" name="Xfield1" value="">
-</form>
-
-<script>
-	document.getElementById('ipay88Form').submit();
-</script>"""
 
 
 
