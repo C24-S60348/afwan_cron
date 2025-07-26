@@ -59,6 +59,10 @@ async def send_telegram_error(error_message):
         bot_token = variables.tb_token_server
         chat_id = "-4885373674"
 
+        if not bot_token:
+            print("ERROR: Bot token is empty or None")
+            return
+
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         data = {
             "chat_id": chat_id,
@@ -66,13 +70,28 @@ async def send_telegram_error(error_message):
             "parse_mode": "HTML"
         }
 
+        print(f"Attempting to send Telegram message to {chat_id}")
+        print(f"URL: {url}")
+        print(f"Data: {data}")
+
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data=data)
 
+        print(f"Telegram API response status: {response.status_code}")
+        print(f"Telegram API response: {response.text}")
+
         if response.status_code != 200:
             print(f"Failed to send Telegram message: {response.text}")
+            return False
+        else:
+            print("Telegram message sent successfully")
+            return True
     except Exception as e:
         print(f"Error sending Telegram message: {e}")
+        print(f"Exception type: {type(e)}")
+        import traceback
+        print(f"Traceback: {traceback.format_exc()}")
+        return False
 
 # Universal exception handler ====================
 def handle_exceptions(route_name="Unknown", type="exception"):
@@ -459,11 +478,29 @@ async def get_app_data(type: str = None, appname: str = None, token: str = None)
 async def test_error():
     """Test endpoint to verify error handling and Telegram notifications"""
     try:
+        # Debug information
+        bot_token = variables.tb_token_server
+        chat_id = "-4885373674"
+        
         # Test Telegram error sending
         await send_telegram_error("🧪 TEST: This is a test error message from the server")
-        return {"message": "Test error sent to Telegram"}
+        
+        return {
+            "message": "Test error sent to Telegram",
+            "debug_info": {
+                "bot_token": bot_token[:10] + "..." if bot_token else "None",
+                "chat_id": chat_id,
+                "token_length": len(bot_token) if bot_token else 0
+            }
+        }
     except Exception as e:
-        return {"error": f"Failed to send test error: {str(e)}"}
+        return {
+            "error": f"Failed to send test error: {str(e)}",
+            "debug_info": {
+                "bot_token": variables.tb_token_server[:10] + "..." if variables.tb_token_server else "None",
+                "chat_id": "-4885373674"
+            }
+        }
 
 #saje -----
 @app.get(
