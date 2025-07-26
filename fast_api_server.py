@@ -11,7 +11,7 @@ sudo systemctl enable fastapi
 
 """
 from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.responses import Response, HTMLResponse
+from fastapi.responses import Response, HTMLResponse, JSONResponse
 import requests
 import asyncpg
 import os
@@ -110,7 +110,10 @@ def handle_exceptions(route_name="Unknown", type="exception"):
                 if type == "raise":
                     raise  # Re-raise the exception
                 else:
-                    raise HTTPException(status_code=500, detail="Internal server error")
+                    return JSONResponse(
+                        status_code=500,
+                        content={"error": "Internal server error", "message": error_msg}
+                    )
         return wrapper
     return decorator
 
@@ -240,15 +243,24 @@ async def app_endpoint(request: Request):
         elif request_type == "DATA":
             return await handle_data(body)
         else:
-            raise HTTPException(status_code=400, message="Invalid request type", detail="Invalid request type")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid request type", "message": "Request type must be LOGIN, REGISTER, or DATA"}
+            )
     except json.JSONDecodeError as e:
         error_msg = f"JSON decode error in app endpoint: {str(e)}"
         await send_telegram_error(error_msg)
-        raise HTTPException(status_code=400, message=error_msg, detail="Invalid JSON body")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Invalid JSON body", "message": error_msg}
+        )
     except Exception as e:
         error_msg = f"Unexpected error in app endpoint: {str(e)}"
         await send_telegram_error(error_msg)
-        raise HTTPException(status_code=500, message=error_msg, detail="Internal server error")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Internal server error", "message": error_msg}
+        )
 
 async def handle_login(body: dict):
     """Handle user login"""
@@ -256,7 +268,10 @@ async def handle_login(body: dict):
     password = body.get("password")
     
     if not username or not password:
-        raise HTTPException(status_code=400, detail="Username and password required")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Missing credentials", "message": "Username and password required"}
+        )
     
     conn = await get_connection()
     try:
@@ -267,7 +282,10 @@ async def handle_login(body: dict):
         )
         
         if not user or user['password'] != hash_password(password):
-            raise HTTPException(status_code=401, detail="Invalid username or password")
+            return JSONResponse(
+                status_code=401,
+                content={"error": "Authentication failed", "message": "Invalid username or password"}
+            )
         
         # Generate new token
         token = generate_token()
@@ -289,10 +307,16 @@ async def handle_register(body: dict):
     password = body.get("password")
     
     if not username or not password:
-        raise HTTPException(status_code=400, detail="Username and password required")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Missing credentials", "message": "Username and password required"}
+        )
     
     if len(password) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Password too short", "message": "Password must be at least 6 characters"}
+        )
     
     conn = await get_connection()
     try:
@@ -303,7 +327,10 @@ async def handle_register(body: dict):
         )
         
         if existing_user:
-            raise HTTPException(status_code=400, detail="Username already exists")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "User exists", "message": "Username already exists"}
+            )
         
         # Generate token
         token = generate_token()
@@ -326,12 +353,18 @@ async def handle_data(body: dict):
     method = body.get("method", "GET")  # GET or POST
     
     if not appname or not token:
-        raise HTTPException(status_code=400, detail="Appname and token required")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Missing parameters", "message": "Appname and token required"}
+        )
     
     # Verify token
     user_id = await verify_token(token)
     if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        return JSONResponse(
+            status_code=401,
+            content={"error": "Authentication failed", "message": "Invalid or expired token"}
+        )
     
     conn = await get_connection()
     try:
@@ -377,7 +410,10 @@ async def handle_data(body: dict):
             return {"message": "Data updated successfully"}
         
         else:
-            raise HTTPException(status_code=400, detail="Invalid method. Use GET or POST")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid method", "message": "Invalid method. Use GET or POST"}
+            )
     finally:
         await conn.close()
 
@@ -443,12 +479,18 @@ async def get_app_data(type: str = None, appname: str = None, token: str = None)
         }
     
     if type != "DATA" or not appname or not token:
-        raise HTTPException(status_code=400, detail="Invalid parameters. Use type=DATA&appname=<appname>&token=<token>")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Invalid parameters", "message": "Invalid parameters. Use type=DATA&appname=<appname>&token=<token>"}
+        )
     
     # Verify token
     user_id = await verify_token(token)
     if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        return JSONResponse(
+            status_code=401,
+            content={"error": "Authentication failed", "message": "Invalid or expired token"}
+        )
     
     conn = await get_connection()
     try:
@@ -478,14 +520,33 @@ async def get_app_data(type: str = None, appname: str = None, token: str = None)
 async def test_error():
     """Test endpoint to verify error handling and Telegram notifications"""
     try:
+        # Debug information
+        bot_token = variables.tb_token_server
+        chat_id = "-1002864663247"
         
         # Test Telegram error sending
         await send_telegram_error("🧪 TEST: This is a test error message from the server")
         
-    except Exception as e:
         return {
-            "error": f"Failed to send test error: {str(e)}",
+            "message": "Test error sent to Telegram",
+            "debug_info": {
+                "bot_token": bot_token[:10] + "..." if bot_token else "None",
+                "chat_id": chat_id,
+                "token_length": len(bot_token) if bot_token else 0
+            }
         }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "Failed to send test error",
+                "message": str(e),
+                "debug_info": {
+                    "bot_token": variables.tb_token_server[:10] + "..." if variables.tb_token_server else "None",
+                    "chat_id": "-1002864663247"
+                }
+            }
+        )
 
 #saje -----
 @app.get(
@@ -533,7 +594,10 @@ async def proxy(request: Request):
     target_url = request.query_params.get('url')
 
     if not target_url:
-        raise HTTPException(status_code=400, detail="Missing 'url' parameter")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Missing parameter", "message": "Missing 'url' parameter"}
+        )
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
