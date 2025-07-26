@@ -412,17 +412,23 @@ async def handle_data(body: dict):
             habits = body.get("habits", [])
             notes = body.get("notes", [])
             
+            # Convert to JSON strings for PostgreSQL JSONB
+            import json
+            calendar_tick_json = json.dumps(calendar_tick)
+            habits_json = json.dumps(habits)
+            notes_json = json.dumps(notes)
+            
             # Upsert data
             await conn.execute("""
                 INSERT INTO user_data (user_id, appname, calendar_tick, habits, notes, updated_at)
-                VALUES ($1, $2, $3, $4, $5, NOW())
+                VALUES ($1, $2, $3::jsonb, $4::jsonb, $5::jsonb, NOW())
                 ON CONFLICT (user_id, appname)
                 DO UPDATE SET
-                    calendar_tick = $3,
-                    habits = $4,
-                    notes = $5,
+                    calendar_tick = $3::jsonb,
+                    habits = $4::jsonb,
+                    notes = $5::jsonb,
                     updated_at = NOW()
-            """, user_id, appname, calendar_tick, habits, notes)
+            """, user_id, appname, calendar_tick_json, habits_json, notes_json)
             
             return {"message": "Data updated successfully"}
         
