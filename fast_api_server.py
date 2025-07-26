@@ -240,15 +240,15 @@ async def app_endpoint(request: Request):
         elif request_type == "DATA":
             return await handle_data(body)
         else:
-            raise HTTPException(status_code=400, detail="Invalid request type")
+            raise HTTPException(status_code=400, message="Invalid request type", detail="Invalid request type")
     except json.JSONDecodeError as e:
         error_msg = f"JSON decode error in app endpoint: {str(e)}"
         await send_telegram_error(error_msg)
-        raise HTTPException(status_code=400, detail="Invalid JSON body")
+        raise HTTPException(status_code=400, message=error_msg, detail="Invalid JSON body")
     except Exception as e:
         error_msg = f"Unexpected error in app endpoint: {str(e)}"
         await send_telegram_error(error_msg)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, message=error_msg, detail="Internal server error")
 
 async def handle_login(body: dict):
     """Handle user login"""
