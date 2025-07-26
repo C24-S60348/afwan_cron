@@ -277,7 +277,7 @@ async def handle_login(body: dict):
     try:
         # Check if user exists and password matches
         user = await conn.fetchrow(
-            "SELECT id, password FROM users WHERE username = $1",
+            "SELECT id, password, token, token_expires_at FROM users WHERE username = $1",
             username
         )
         
@@ -287,9 +287,21 @@ async def handle_login(body: dict):
                 content={"error": "Authentication failed", "message": "Invalid username or password"}
             )
         
-        # Generate new token
+        # Check if current token is still valid
+        current_time = datetime.datetime.now()
+        if (user['token'] and user['token_expires_at'] and 
+            user['token_expires_at'] > current_time):
+            # Use existing valid token
+            return {
+                "token": user['token'], 
+                "message": "Login successful (existing token)",
+                "token_reused": True,
+                "expires_at": user['token_expires_at'].isoformat()
+            }
+        
+        # Generate new token if current one is expired or doesn't exist
         token = generate_token()
-        token_expires_at = datetime.datetime.now() + datetime.timedelta(days=30)
+        token_expires_at = current_time + datetime.timedelta(days=30)
         
         # Update user token
         await conn.execute(
@@ -297,7 +309,12 @@ async def handle_login(body: dict):
             token, token_expires_at, user['id']
         )
         
-        return {"token": token, "message": "Login successful"}
+        return {
+            "token": token, 
+            "message": "Login successful (new token)",
+            "token_reused": False,
+            "expires_at": token_expires_at.isoformat()
+        }
     finally:
         await conn.close()
 
