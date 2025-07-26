@@ -27,7 +27,7 @@ app = Quart(__name__)
 async def send_telegram_error(error_message):
     try:
         bot_token = variables.tb_token_server
-        chat_id = "-4885373674"
+        chat_id = "-1002864663247"
 
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
         data = {

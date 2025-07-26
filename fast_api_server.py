@@ -57,7 +57,7 @@ app = FastAPI(root_path="/api")
 async def send_telegram_error(error_message):
     try:
         bot_token = variables.tb_token_server
-        chat_id = "-4885373674"
+        chat_id = "-1002864663247"
 
         if not bot_token:
             print("ERROR: Bot token is empty or None")
