@@ -590,6 +590,10 @@ def run_function(program_code, code2=None, info3=None):
         # os.system(f'open "{file_path}"') # macOS
         # os.system(f'xdg-open "{file_path}"') # Linux
 
+        # Open the link in the default web browser
+        import webbrowser
+        webbrowser.open("https://github.com/C24-S60348/C24-S60348.github.io/blob/main/CelikTafsirLinkData/data.txt")
+
 
         exit()
 
