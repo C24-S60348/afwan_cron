@@ -1736,6 +1736,91 @@ def run_function(program_code, code2=None, info3=None):
         if __name__ == "__main__":
             app.run(host="0.0.0.0", port=5000)
 
+    #Bundle expo
+    elif program == "BEXPO":
+        import subprocess
+
+        def ask(prompt, default=""):
+            script = f'display dialog "{prompt}" default answer "{default}" with title "Build Script"'
+            result = subprocess.run(
+                ["osascript", "-e", script],
+                capture_output=True,
+                text=True
+            )
+            # Result comes like: "button returned:OK, text returned:escabee-mobile"
+            return result.stdout.strip().split(":")[-1].split(",")[-1].replace("text returned:", "").strip()
+
+        # Ask project
+        project = ask("Enter project folder", "escabee-mobile")
+
+        # Ask build type
+        choice = ask("Enter build type (1=bundleRelease, 2=assembleRelease, 3=assembleDebug)", "1")
+
+        mapping = {
+            "1": "bundleRelease",
+            "2": "assembleRelease",
+            "3": "assembleDebug",
+        }
+        task = mapping.get(choice, "assembleRelease")
+
+        # Set Node path
+        import os
+        os.environ["PATH"] = f"{os.environ['HOME']}/.nvm/versions/node/v22.14.0/bin:" + os.environ["PATH"]
+
+        # Change dir
+        project_path = os.path.expanduser(f"~/Documents/github/{project}/android")
+        os.chdir(project_path)
+
+        # Run Gradle
+        print(f"Running ./gradlew {task} in {project_path}")
+        subprocess.run(["./gradlew", task])
+
+        subprocess.run(["open", f"{project_path}/app/build/outputs"])
+    
+    #Bundle flutter
+    elif program == "BFT":
+        import subprocess
+
+        def ask(prompt, default=""):
+            script = f'display dialog "{prompt}" default answer "{default}" with title "Build Script"'
+            result = subprocess.run(
+                ["osascript", "-e", script],
+                capture_output=True,
+                text=True
+            )
+            # Result comes like: "button returned:OK, text returned:escabee-mobile"
+            return result.stdout.strip().split(":")[-1].split(",")[-1].replace("text returned:", "").strip()
+
+        # Ask project
+        project = ask("Enter project folder", "celiktafsirv4")
+
+        # Ask build type
+        choice = ask("Enter build type (1=bundleRelease, 2=assembleRelease, 3=assembleDebug)", "1")
+
+        mapping = {
+            "1": "bundleRelease",
+            "2": "assembleRelease",
+            "3": "assembleDebug",
+        }
+        task = mapping.get(choice, "assembleRelease")
+
+        # Set Node path
+        import os
+        os.environ["PATH"] = f"{os.environ['HOME']}/.nvm/versions/node/v22.14.0/bin:" + os.environ["PATH"]
+
+        # Change dir
+        project_path = os.path.expanduser(f"~/Documents/github/{project}/android")
+        project_path_main = os.path.expanduser(f"~/Documents/github/{project}")
+        os.chdir(project_path)
+
+        # Run Gradle
+        print(f"Running ./gradlew {task} in {project_path}")
+        subprocess.run(["./gradlew", task])
+
+        print(f"opening {project_path_main}/build/app/outputs")
+        subprocess.run(["open", f"{project_path_main}/build/app/outputs"])
+
+
 
 
 if (program == "QT" or program == "FW"):
