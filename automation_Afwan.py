@@ -1780,7 +1780,7 @@ def run_function(program_code, code2=None, info3=None):
     #Bundle flutter
     elif program == "BFT":
         import subprocess
-
+    
         def ask(prompt, default=""):
             script = f'display dialog "{prompt}" default answer "{default}" with title "Build Script"'
             result = subprocess.run(
