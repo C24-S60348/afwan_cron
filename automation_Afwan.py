@@ -1782,6 +1782,30 @@ def run_function(program_code, code2=None, info3=None):
 
         subprocess.run(["open", f"{project_path}/app/build/outputs"])
     
+    #Bundle expo2
+    elif program == "BEXPO2":
+        import subprocess
+        import sys
+        import os
+
+        project = sys.argv[2] #escabee-mobile, purgo-mobile
+        task = sys.argv[3] #assembleRelease, bundleRelease, assembleDebug
+        project_path = os.path.expanduser(f"~/Documents/github/{project}/android")
+        os.chdir(project_path)
+
+        # Set Node path
+        os.environ["PATH"] = f"{os.environ['HOME']}/.nvm/versions/node/v22.14.0/bin:" + os.environ["PATH"]
+
+        # Change dir
+        project_path = os.path.expanduser(f"~/Documents/github/{project}/android")
+        os.chdir(project_path)
+
+        # Run Gradle
+        print(f"Running ./gradlew {task} in {project_path}")
+        subprocess.run(["./gradlew", task])
+
+        subprocess.run(["open", f"{project_path}/app/build/outputs"])
+    
     #Bundle flutter
     elif program == "BFT":
         import subprocess
@@ -1816,6 +1840,29 @@ def run_function(program_code, code2=None, info3=None):
 
         # Set Node path
         import os
+        os.environ["PATH"] = f"{os.environ['HOME']}/.nvm/versions/node/v22.14.0/bin:" + os.environ["PATH"]
+
+        # Change dir
+        project_path = os.path.expanduser(f"~/Documents/github/{project}/android")
+        project_path_main = os.path.expanduser(f"~/Documents/github/{project}")
+        os.chdir(project_path)
+
+        # Run Gradle
+        print(f"Running ./gradlew {task} in {project_path}")
+        subprocess.run(["./gradlew", task])
+
+        print(f"opening {project_path_main}/build/app/outputs")
+        subprocess.run(["open", f"{project_path_main}/build/app/outputs"])
+
+    elif program == "BFT2":
+        import subprocess
+        import sys
+        import os
+
+        project = sys.argv[2] #celiktafsirv4, escabee-mobile
+        task = sys.argv[3] #assembleRelease, bundleRelease, assembleDebug
+
+        # Set Node path
         os.environ["PATH"] = f"{os.environ['HOME']}/.nvm/versions/node/v22.14.0/bin:" + os.environ["PATH"]
 
         # Change dir
