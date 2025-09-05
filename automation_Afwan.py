@@ -1751,7 +1751,12 @@ def run_function(program_code, code2=None, info3=None):
             return result.stdout.strip().split(":")[-1].split(",")[-1].replace("text returned:", "").strip()
 
         # Ask project
-        project = ask("Enter project folder", "escabee-mobile")
+        choice1 = ask("Enter project folder (1=escabee-mobile, 2=purgo-mobile)", "1")
+        mapping1 = {
+            "1": "escabee-mobile",
+            "2": "purgo-mobile",
+        }
+        project = mapping1.get(choice1, "escabee-mobile")
 
         # Ask build type
         choice = ask("Enter build type (1=bundleRelease, 2=assembleRelease, 3=assembleDebug)", "1")
@@ -1792,7 +1797,12 @@ def run_function(program_code, code2=None, info3=None):
             return result.stdout.strip().split(":")[-1].split(",")[-1].replace("text returned:", "").strip()
 
         # Ask project
-        project = ask("Enter project folder", "celiktafsirv4")
+        choice1 = ask("Enter project folder (1=celiktafsirv4, 2=escabee-mobile)", "1")
+        mapping1 = {
+            "1": "celiktafsirv4",
+            "2": "escabee-mobile",
+        }
+        project = mapping1.get(choice1, "celiktafsirv4")
 
         # Ask build type
         choice = ask("Enter build type (1=bundleRelease, 2=assembleRelease, 3=assembleDebug)", "1")
