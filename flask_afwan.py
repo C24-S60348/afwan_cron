@@ -165,7 +165,7 @@ def home():
         <p>Access via LAN: <b>http://{{ ip }}:5001</b></p>
         <hr/>
         <h3>Laptop Screen:</h3>
-        <img id="screen" src="/screenshot" width="600">
+        <img id="screen" src="" width="600">
         <br/><br/>
         <button onclick="refreshScreen()">🔄 Refresh Screen</button>
 
