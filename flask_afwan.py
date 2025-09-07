@@ -1,8 +1,11 @@
-from flask import Flask, render_template_string, redirect, url_for, jsonify
+from flask import Flask, render_template_string, redirect, url_for, jsonify, send_file, request
 import subprocess
 import threading
 import socket
 import time
+import mss, mss.tools
+import io
+
 
 app = Flask(__name__)
 
@@ -160,6 +163,20 @@ def home():
 
         <h3>Server Info:</h3>
         <p>Access via LAN: <b>http://{{ ip }}:5001</b></p>
+        <hr/>
+        <h3>Laptop Screen:</h3>
+        <img id="screen" src="/screenshot" width="600">
+        <br/><br/>
+        <button onclick="refreshScreen()">🔄 Refresh Screen</button>
+
+        <script>
+            function refreshScreen() {
+                // Add timestamp so browser doesn't use cached image
+                document.getElementById("screen").src = "/screenshot?time=" + new Date().getTime();
+            }
+        </script>
+
+
     </body>
     </html>
     """
@@ -186,6 +203,13 @@ def run_command_with_project(arg):
     task = request.form.get("task", "")
     threading.Thread(target=run_automation_afwan, args=(arg, project, task), daemon=True).start()
     return redirect(url_for("home"))
+
+@app.route("/screenshot")
+def screenshot():
+    with mss.mss() as sct:
+        img = sct.grab(sct.monitors[1])  # capture full screen
+        img_bytes = mss.tools.to_png(img.rgb, img.size)
+        return send_file(io.BytesIO(img_bytes), mimetype="image/png")
 
 
 if __name__ == "__main__":
