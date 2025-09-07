@@ -47,13 +47,13 @@ def run_automation_afwan(arg, project, task):
 @app.route("/")
 def home():
     options = [
-        ("A - AutoBooking", "A"),
+        # ("A - AutoBooking", "A"),
         ("CB - Check Booking PNR", "CB"),
         ("CT - Celik Tafsir fetch", "CT"),
         ("CSFTP - Check SFTP", "CSFTP"),
-        ("BEXPO - Expo assembleDebug", "BEXPO"),
+        # ("BEXPO - Expo assembleDebug", "BEXPO"),
         ("BEXPO2 - Expo export", "BEXPO2"),  # special case
-        ("BFT - Flutter assembleDebug", "BFT"),
+        # ("BFT - Flutter assembleDebug", "BFT"),
         ("BFT2 - Flutter assembleDebug", "BFT2"),
     ]
 
@@ -95,7 +95,11 @@ def home():
         {% for text, arg in options %}
             <hr/>
             {% if arg == "BEXPO2" %}
-                <form action="{{ url_for('run_command_with_project', arg=arg) }}" method="post" style="margin:10px;">
+                <form action="{{ url_for('run_command_with_project', arg=arg) }}" 
+                method="post" 
+                style="margin:10px;"
+                onsubmit="return confirm('Are you sure you want to run {{ text }}?');"
+                >
                     Project:
                     <select name="project" required>
                         <option value="escabee-mobile">escabee-mobile</option>
@@ -115,7 +119,11 @@ def home():
 
             
             {% elif arg == "BFT2" %}
-                <form action="{{ url_for('run_command_with_project', arg=arg) }}" method="post" style="margin:10px;">
+                <form action="{{ url_for('run_command_with_project', arg=arg) }}" 
+                method="post" 
+                style="margin:10px;"
+                onsubmit="return confirm('Are you sure you want to run {{ text }}?');"
+                >
                     Project:
                     <select name="project" required>
                         <option value="celiktafsirv4">celiktafsirv4</option>
@@ -133,7 +141,11 @@ def home():
                 </form>
                 
             {% else %}
-                <form action="{{ url_for('run_command', arg=arg) }}" method="post" style="margin:10px;">
+                <form action="{{ url_for('run_command', arg=arg) }}" 
+                method="post" 
+                style="margin:10px;"
+                onsubmit="return confirm('Are you sure you want to run {{ text }}?');"
+                >
                     <button type="submit" style="padding:10px 20px; font-size:16px;">{{ text }}</button>
                 </form>
             {% endif %}
