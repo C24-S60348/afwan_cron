@@ -1,6 +1,7 @@
 import sys
 import variables
 from datetime import datetime, timezone, timedelta
+from flask_page.publicvar import last_run_times
 # import logging
 
 # logging.basicConfig(filename="cron_log.txt", level=logging.INFO, format="%(asctime)s - %(message)s")
@@ -73,16 +74,7 @@ if True:
     tbtoken = ""
     csftplink = ""
     timenowKL = 0
-    last_run_times = {
-        "0.5":0,
-        "1":0,
-        "2":0,
-        "3":0,
-        "5":0,
-        "10":0,
-        "30":0,
-        "60":0,
-    }
+    # last_run_times = last_run_times
     reminder = {} #todo - get data from user
     #http = urllib3.PoolManager()
 
@@ -971,228 +963,28 @@ def run_function(program_code, code2=None, info3=None):
 
     #Flask website afwanproductions
     elif program == "FW":
-        import os
-        import json
-        import time
-        import asyncio
+        import os, json, time, asyncio, aiomysql, variables
         from datetime import datetime, timedelta, timezone
-        import aiomysql
-        import variables 
         from contextlib import asynccontextmanager
-        from flask import Flask, request, jsonify, render_template, render_template_string
-        from flask import send_file
-        # from flask_page.mmc import home_bp
+        from flask import Flask, request, jsonify, render_template, render_template_string, send_file
+        
         from flask_page.apitest import apitest_bp
         from flask_page.connect_to_db import connect_to_db
         from flask_page.api_bp import api_bp
         from flask_page.home import home_bp
+        from flask_page.croncheck import croncheck_bp
+        from flask_page.executejsonv2 import executejsonv2_bp
+        from flask_page.pelajar_data import pelajar_data_bp
+        
+        # from flask_page.publicvar import last_run_times
 
         app = Flask(__name__)
         app.register_blueprint(apitest_bp)
         app.register_blueprint(api_bp)
         app.register_blueprint(home_bp)
-        
-        # QUERY EXECUTER JSON V2
-        @app.route('/api/executejsonv2', methods=['GET', 'POST'])
-        def execute_query_json_v2():
-            try:
-                # Synchronously read JSON data
-                data = request.get_json()
-        
-                if 'query' not in data:
-                    return jsonify({"error": "query parameter is required"}), 400
-        
-                if 'password' not in data:
-                    return jsonify({"error": "password parameter is required"}), 400
-        
-                sql = data['query']
-                passwordweb = data['password']
-        
-                if passwordweb == variables.website_pass:
-                    try:
-                        with connect_to_db() as (cursor, connection):
-                            # Execute the SQL query asynchronously
-                            cursor.execute(sql)
-        
-                            # Check if the query returns rows (SELECT query)
-                            if sql.strip().lower().startswith("select"):
-                                columns = [column[0] for column in cursor.description]
-                                rows = cursor.fetchall()  # Fetch all rows asynchronously
-                                results = [dict(zip(columns, row)) for row in rows]
-                                return jsonify({"results": results}), 200
-                            else:
-                                # Commit for insert, update, delete
-                                connection.commit()
-                                return jsonify({"message": "Query executed successfully"}), 200
-                    except aiomysql.MySQLError as db_err:
-                        return jsonify({"error": f"Database error: {db_err}"}), 500
-                else:
-                    return jsonify({"error": "Incorrect password"}), 401
-            except Exception as e:
-                return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
-
-
-
-        
-        # Serve HTML Pages
-        @app.route("/croncheck")
-        def cron_check():
-            now = datetime.now(timezone.utc)
-            gmt8 = timezone(timedelta(hours=8))
-            current_time_raw = now.astimezone(gmt8)
-            current_time_timestamp = current_time_raw.timestamp()
-        
-            timenowKL = current_time_timestamp
-            times = {}
-            cans = {}
-        
-            for key in last_run_times.keys():
-                times[key] = datetime.fromtimestamp(last_run_times[key], tz=gmt8).strftime('%Y-%m-%d %I:%M %p')
-                if (current_time_timestamp - last_run_times[key]) > ((float(key)*30)-10):
-                    last_run_times[key] = current_time_timestamp
-                    cans[key] = True
-                else:
-                    cans[key] = False
-        
-            current_time = current_time_raw.strftime('%Y-%m-%d %I:%M %p')
-        
-            html = f"""
-                <!DOCTYPE html>
-                <html>
-                <head><title>Cron Check</title></head>
-                <body>
-                    <h2>Cron Check</h2>
-                    <p>Current time: {current_time}</p>
-                    """ 
-        
-            for key in times.keys():
-                html += f'<p>Last {key}min: {times[key]}</p>'
-            for key in times.keys():
-                html += f'<p class="min{key}">{cans[key]}</p>'
-        
-            html += f"""
-                    <p class="timenowKL">{timenowKL}</p>
-                </body>
-                </html>
-            """
-        
-            return render_template_string(html)
-        
-        @app.route("/pelajar_data")
-        def pelajar_data():
-            import pandas as pd
-            import requests
-            import json
-            import variables
-            import os
-            import time
-            import asyncio
-            import aiomysql
-            import variables 
-            from contextlib import asynccontextmanager
-            from flask import Flask, request, jsonify, render_template, render_template_string
-            
-            def execute_query(query):
-                """
-                Sends a POST request to afwanproductions.pythonanywhere.com/api/executejsonv2
-                with the given query as JSON payload.
-                Returns the JSON response.
-                """
-                url = "https://afwanproductions.pythonanywhere.com/api/executejsonv2"
-                payload = {"query": query, "password": "afwan"}
-                try:
-                    response = requests.post(url, json=payload)
-                    response.raise_for_status()
-                    return response.json()
-                except requests.RequestException as e:
-                    print(f"Error connecting to API: {e}")
-                    return None
-
-            def flatten_semester_data(semdata, sem_label, no_matric, sem_num, extra_fields=None):
-                """
-                Flattens the semester data JSON into a row for the DataFrame.
-                Adds semester label, number, and no_matric.
-                Optionally adds extra fields from the user row.
-                """
-                row = {}
-                if isinstance(semdata, dict):
-                    row.update(semdata)
-                else:
-                    # If semdata is a list or other, skip
-                    return None
-                row["Semester"] = sem_label
-                row["SemesterNum"] = sem_num
-                row["No_Matric"] = no_matric
-                if extra_fields:
-                    row.update(extra_fields)
-                return row
-
-            def extract_and_save_to_excel():
-                # Query the data
-                result = execute_query("SELECT no_matric, sem1, sem1data, sem2, sem2data, sem3, sem3data FROM pointer_calculator_user;")
-                if not result or "results" not in result:
-                    print("No data found or error in response.")
-                    return
-
-                rows = []
-                for row in result["results"]:
-                    no_matric = row.get("no_matric", "")
-                    # Optionally, add more user-level fields here if needed
-                    for idx, (sem_key, sem_label) in enumerate([("sem1data", "Sem 1"), ("sem2data", "Sem 2"), ("sem3data", "Sem 3")], start=1):
-                        semdata = row.get(sem_key)
-                        if semdata:
-                            try:
-                                data = json.loads(semdata)
-                                # If the semester data is a list (e.g. list of subjects), flatten each
-                                if isinstance(data, list):
-                                    for item in data:
-                                        flat = flatten_semester_data(item, sem_label, no_matric, idx)
-                                        if flat:
-                                            rows.append(flat)
-                                elif isinstance(data, dict):
-                                    flat = flatten_semester_data(data, sem_label, no_matric, idx)
-                                    if flat:
-                                        rows.append(flat)
-                                else:
-                                    print(f"Unexpected data type in {sem_key}: {type(data)}")
-                            except Exception as e:
-                                print(f"Error parsing {sem_key}: {e}")
-
-                if not rows:
-                    print("No valid semester data found.")
-                    return
-
-                # Convert to DataFrame
-                df = pd.DataFrame(rows)
-
-                # Try to order columns: No_Matric, Semester, SemesterNum, then the rest
-                cols = df.columns.tolist()
-                order = [c for c in ["No_Matric", "Semester", "SemesterNum"] if c in cols]
-                rest = [c for c in cols if c not in order]
-                df = df[order + rest]
-
-                # Save to Excel
-                output_file = "pelajar_data.xlsx"
-                df.to_excel(output_file, index=False)
-                print(f"Data saved to {output_file}")
-            
-            extract_and_save_to_excel()
-            template = """
-                <!DOCTYPE html>
-                <html>
-                <head><title>Pelajar Data</title></head>
-                <body>
-                    <div>
-                        download pelajar data <a href='/pelajar_data_download'>here</a>
-                    </div>
-                </body>
-                </html>
-            """
-            return render_template_string(template)
-        
-        @app.route("/pelajar_data_download")
-        def pelajar_data_download():
-            return send_file("pelajar_data.xlsx", as_attachment=True, download_name="pelajar_data.xlsx")
+        app.register_blueprint(croncheck_bp)
+        app.register_blueprint(executejsonv2_bp)
+        app.register_blueprint(pelajar_data_bp)
         
         # Start the app using Uvicorn
         if __name__ == '__main__':
