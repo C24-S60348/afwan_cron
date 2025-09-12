@@ -975,6 +975,7 @@ def run_function(program_code, code2=None, info3=None):
         from flask_page.croncheck import croncheck_bp
         from flask_page.executejsonv2 import executejsonv2_bp
         from flask_page.pelajar_data import pelajar_data_bp
+        from flask_page.purgo import purgo_bp
         
         # from flask_page.publicvar import last_run_times
 
@@ -985,6 +986,7 @@ def run_function(program_code, code2=None, info3=None):
         app.register_blueprint(croncheck_bp)
         app.register_blueprint(executejsonv2_bp)
         app.register_blueprint(pelajar_data_bp)
+        app.register_blueprint(purgo_bp)
         
         # Start the app using Uvicorn
         if __name__ == '__main__':
