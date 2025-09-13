@@ -7,7 +7,7 @@ admin_bp = Blueprint("admin_bp", __name__)
 ADMIN_SECRET = variables.website_pass
 
 
-@admin_bp.route("/admin", methods=["GET", "POST"])
+@admin_bp.route("/admin/restart", methods=["GET", "POST"])
 def admin_page():
     if request.method == "POST":
         password = request.form.get("password")
@@ -40,7 +40,6 @@ def admin_page():
 
     # Default GET: show form
     return """
-    ikan
     <h1>Admin Panel</h1>
     <form method="POST">
         <input type="password" name="password" placeholder="Enter password" required/>
