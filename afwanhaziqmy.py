@@ -1,0 +1,30 @@
+from flask import Flask
+from flask_cors import CORS
+
+app = Flask(__name__)
+
+# CORS configuration to allow all origins
+CORS(app, supports_credentials=True,
+    resources={r"/*": {"origins": "*"}},
+    allow_headers=["Content-Type", "Authorization"]
+)
+
+from flask import Flask
+from flask_page.apitest import apitest_bp
+from flask_page.connect_to_db import connect_to_db
+from flask_page.api_bp import api_bp
+from flask_page.home import home_bp
+from flask_page.croncheck import croncheck_bp
+from flask_page.executejsonv2 import executejsonv2_bp
+from flask_page.pelajar_data import pelajar_data_bp
+
+# from flask_page.publicvar import last_run_timesitest_bp)
+app.register_blueprint(api_bp)
+app.register_blueprint(home_bp)
+app.register_blueprint(croncheck_bp)
+app.register_blueprint(executejsonv2_bp)
+app.register_blueprint(pelajar_data_bp)
+
+# Start the app using Uvicorn
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000, debug=True)
