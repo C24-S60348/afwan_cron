@@ -27,9 +27,9 @@ def admin_page():
             <p>The server will attempt to come back online soon.</p>
             <script>
                 setInterval(() => {
-                    fetch("/")
+                    fetch("/croncheck")
                         .then(r => {
-                            if (r.ok) location.href = "/";
+                            if (r.ok) location.href = "/croncheck";
                         })
                         .catch(() => console.log("Waiting for server..."));
                 }, 5000);
