@@ -40,6 +40,7 @@ def admin_page():
 
     # Default GET: show form
     return """
+    ikan
     <h1>Admin Panel</h1>
     <form method="POST">
         <input type="password" name="password" placeholder="Enter password" required/>
