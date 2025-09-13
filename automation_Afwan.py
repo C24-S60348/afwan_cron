@@ -50,6 +50,7 @@ If you're server, run python3 runner.py CRM and python3 runner.py BP
 program = program.upper()
 
 if (program == "FW"):
+    #moved to afwanhaziqmy.py
     from flask import Flask
     from flask_cors import CORS
     
