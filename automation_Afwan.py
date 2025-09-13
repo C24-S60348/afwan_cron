@@ -986,7 +986,7 @@ def run_function(program_code, code2=None, info3=None):
         
         # Start the app using Uvicorn
         if __name__ == '__main__':
-            app.run(debug=True)
+            app.run(host="0.0.0.0", port=5000, debug=True)
 
     elif program == "QT":
         import os
