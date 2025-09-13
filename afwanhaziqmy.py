@@ -1,3 +1,10 @@
+#sudo nano /etc/systemd/system/afwanapp.service
+
+#sudo systemctl daemon-reexec
+#sudo systemctl daemon-reload
+#sudo systemctl enable afwanapp
+#sudo systemctl start afwanapp
+
 from flask import Flask
 from flask_cors import CORS
 
@@ -9,7 +16,6 @@ CORS(app, supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"]
 )
 
-from flask import Flask
 from flask_page.apitest import apitest_bp
 from flask_page.connect_to_db import connect_to_db
 from flask_page.api_bp import api_bp
