@@ -28,6 +28,8 @@ if program == "":
 #print(len(sys.argv))
 if len(sys.argv) > 1:
     program = sys.argv[1]
+elif program == "FW":
+    print("Running server...")
 else:
     print("""
 Please input argument:
@@ -48,7 +50,7 @@ If you're server, run python3 runner.py CRM and python3 runner.py BP
 program = program.upper()
 
 if (program == "FW"):
-    from flask import Flask, request, jsonify, render_template, render_template_string
+    from flask import Flask
     from flask_cors import CORS
     
     app = Flask(__name__)
@@ -963,11 +965,8 @@ def run_function(program_code, code2=None, info3=None):
 
     #Flask website afwanproductions
     elif program == "FW":
-        import os, json, time, asyncio, aiomysql, variables
-        from datetime import datetime, timedelta, timezone
-        from contextlib import asynccontextmanager
-        from flask import Flask, request, jsonify, render_template, render_template_string, send_file
         
+        from flask import Flask
         from flask_page.apitest import apitest_bp
         from flask_page.connect_to_db import connect_to_db
         from flask_page.api_bp import api_bp
@@ -977,8 +976,7 @@ def run_function(program_code, code2=None, info3=None):
         from flask_page.pelajar_data import pelajar_data_bp
         
         # from flask_page.publicvar import last_run_times
-
-        app = Flask(__name__)
+        global app
         app.register_blueprint(apitest_bp)
         app.register_blueprint(api_bp)
         app.register_blueprint(home_bp)
