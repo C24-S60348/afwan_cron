@@ -1,5 +1,3 @@
-import flask
-
 last_run_times = {
     "0.5":0,
     "1":0,

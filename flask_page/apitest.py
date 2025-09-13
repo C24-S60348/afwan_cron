@@ -4,5 +4,6 @@ from flask import Blueprint, jsonify
 apitest_bp = Blueprint('apitest_bp', __name__)
 
 @apitest_bp.route('/api/test', methods=['GET', 'POST', 'OPTIONS'])
-def test():
+async def test():
     return jsonify({"message": "Query executed successfully"}), 200
+    
