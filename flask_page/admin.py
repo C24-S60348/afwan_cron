@@ -1,44 +1,48 @@
-from flask import Blueprint, render_template_string, request, redirect, url_for, flash
+from flask import Blueprint, request
 import subprocess
+import time
 import variables
 
-admin_bp = Blueprint("admin_bp", __name__, url_prefix="/admin")
+admin_bp = Blueprint("admin_bp", __name__)
+ADMIN_SECRET = variables.website_pass
 
-# Set your chosen password here (store securely in production)
-ADMIN_PASSWORD = variables.website_pass
 
-# HTML template for restart page
-HTML_PAGE = """
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Admin Restart</title>
-</head>
-<body style="font-family: Arial; text-align:center; margin-top:50px;">
-    <h2>Restart Server</h2>
-    {% if message %}
-        <p style="color: red;">{{ message }}</p>
-    {% endif %}
-    <form method="post">
-        <input type="password" name="password" placeholder="Enter password" required style="padding:8px;">
-        <button type="submit" style="padding:10px 20px; margin-left:10px;">Restart</button>
-    </form>
-</body>
-</html>
-"""
-
-@admin_bp.route("/restart", methods=["GET", "POST"])
-def restart_server():
-    message = ""
+@admin_bp.route("/admin", methods=["GET", "POST"])
+def admin_page():
     if request.method == "POST":
         password = request.form.get("password")
-        if password == ADMIN_PASSWORD:
-            try:
-                subprocess.run(["sudo", "systemctl", "restart", "afwanapp"], check=True)
-                message = "✅ Server restarted successfully!"
-            except subprocess.CalledProcessError as e:
-                message = f"❌ Failed to restart: {e}"
+
+        if password == ADMIN_SECRET:
+            # Run restart as detached background process
+            subprocess.Popen(
+                ["/usr/bin/sudo", "systemctl", "restart", "afwanapp"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True
+            )
+
+            # Show restarting page that auto-refreshes every 5 seconds
+            return """
+            <h1>Restarting server...</h1>
+            <p>The server will attempt to come back online soon.</p>
+            <script>
+                setInterval(() => {
+                    fetch("/")
+                        .then(r => {
+                            if (r.ok) location.href = "/";
+                        })
+                        .catch(() => console.log("Waiting for server..."));
+                }, 5000);
+            </script>
+            """
         else:
-            message = "❌ Wrong password!"
-    return render_template_string(HTML_PAGE, message=message)
+            return "<h1>Invalid password</h1>", 403
+
+    # Default GET: show form
+    return """
+    <h1>Admin Panel</h1>
+    <form method="POST">
+        <input type="password" name="password" placeholder="Enter password" required/>
+        <button type="submit">Restart Server</button>
+    </form>
+    """
