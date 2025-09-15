@@ -7,7 +7,7 @@ api_bp = Blueprint('api_bp', __name__)
 
 # Handle Request (Non-DB)
 @api_bp.route('/api', methods=['GET', 'POST'])
-async def handle_request():
+def handle_request():
     text = str(request.args.get('input'))  # ?input=a
     character_count = len(text)
     data_set = {'input': text, 'timestamp': time.time(), 'character_count': character_count}
