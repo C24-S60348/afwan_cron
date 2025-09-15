@@ -24,15 +24,21 @@ from flask_page.croncheck import croncheck_bp
 from flask_page.executejsonv2 import executejsonv2_bp
 from flask_page.pelajar_data import pelajar_data_bp
 from flask_page.admin import admin_bp
+from flask_page.ularular import ularular_bp
+from flask_page.postman import postman_bp
 
 
 # from flask_page.publicvar import last_run_timesitest_bp)
+app.register_blueprint(apitest_bp)
 app.register_blueprint(api_bp)
 app.register_blueprint(home_bp)
 app.register_blueprint(croncheck_bp)
 app.register_blueprint(executejsonv2_bp)
 app.register_blueprint(pelajar_data_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(ularular_bp)
+app.register_blueprint(postman_bp)
+
 
 # Start the app using Uvicorn
 if __name__ == '__main__':
