@@ -66,8 +66,8 @@ HTML_FORM = """
   <form method="post">
     <label>Method:</label>
     <select name="method">
-      <option value="GET">GET</option>
-      <option value="POST">POST</option>
+      <option value="GET" {{selected_get}}>GET</option>
+      <option value="POST" {{selected_post}}>POST</option>
     </select>
 
     <label>URL:</label>
@@ -91,6 +91,8 @@ HTML_FORM = """
 def index():
     url = ""
     body = ""
+    selected_get = ""
+    selected_post = ""
     response_text = None
 
     if request.method == "POST":
@@ -101,15 +103,17 @@ def index():
         try:
             if method == "GET":
                 r = requests.get(url)
+                selected_get = "selected"
             else:  # POST
                 import json
                 data = {}
                 if body.strip():
                     data = json.loads(body)
                 r = requests.post(url, json=data)
+                selected_post = "selected"
 
             response_text = r.text
         except Exception as e:
             response_text = f"Error: {e}"
 
-    return render_template_string(HTML_FORM, url=url, body=body, response=response_text)
+    return render_template_string(HTML_FORM, url=url, body=body, response=response_text, selected_get=selected_get, selected_post=selected_post)
