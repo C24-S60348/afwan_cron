@@ -25,6 +25,7 @@ from flask_page.executejsonv2 import executejsonv2_bp
 from flask_page.pelajar_data import pelajar_data_bp
 from flask_page.admin import admin_bp
 from flask_page.ularular import ularular_bp, ularular_init_db, ularular_get_db
+from flask_page.ularulargame import ularulargame_bp
 from flask_page.postman import postman_bp
 
 
@@ -37,6 +38,7 @@ app.register_blueprint(executejsonv2_bp)
 app.register_blueprint(pelajar_data_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(ularular_bp)
+app.register_blueprint(ularulargame_bp)
 app.register_blueprint(postman_bp)
 
 with app.app_context():

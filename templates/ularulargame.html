@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ular Ular Game 🐍🪜</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #log { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h1>Snakes & Ladders</h1>
+
+  <div>
+    <input id="room" placeholder="Room code" />
+    <input id="player" placeholder="Your name" />
+    <button onclick="createRoom()">Create Room</button>
+    <button onclick="joinRoom()">Join Room</button>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <button onclick="rollDice()">Roll Dice</button>
+    <button onclick="refreshState()">Refresh State</button>
+  </div>
+
+  <pre id="log"></pre>
+
+  <script>
+    const api = "http://127.0.0.1:5000/ularular";
+
+    function log(msg) {
+      document.getElementById("log").textContent += msg + "\n";
+    }
+
+    function createRoom() {
+      fetch(api + "/create_room", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: document.getElementById("room").value,
+          player: document.getElementById("player").value
+        })
+      }).then(r => r.json()).then(j => log("Created: " + JSON.stringify(j)));
+    }
+
+    function joinRoom() {
+      fetch(api + "/join_room", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: document.getElementById("room").value,
+          player: document.getElementById("player").value
+        })
+      }).then(r => r.json()).then(j => log("Joined: " + JSON.stringify(j)));
+    }
+
+    function rollDice() {
+      fetch(api + "/roll_dice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: document.getElementById("room").value,
+          player: document.getElementById("player").value
+        })
+      }).then(r => r.json()).then(j => log("Rolled: " + JSON.stringify(j)));
+    }
+
+    function refreshState() {
+      const code = document.getElementById("room").value;
+      fetch(api + "/get_state/" + code)
+        .then(r => r.json())
+        .then(j => log("State: " + JSON.stringify(j, null, 2)));
+    }
+  </script>
+</body>
+</html>
