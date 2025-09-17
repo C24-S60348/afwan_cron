@@ -66,13 +66,21 @@ def apply_dice(pos, dice):
         new_pos = ladders[new_pos]
     return new_pos
 
+import string
+import random
+
+def generate_room_code(length=4):
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choice(chars) for _ in range(length))
+
 # ----------------------
 # Endpoints
 # ----------------------
 @ularular_bp.route("/create_room", methods=["POST"])
 def create_room():
     data = request.json
-    code = data.get("code")
+    #code = data.get("code")
+    code = generate_room_code()
     player = data.get("player")
 
     db = ularular_get_db()
@@ -149,11 +157,7 @@ def roll_dice():
         "dice": dice,
         "pos": new_pos,
         "turn": next_turn,
-        "state": state,
-        "players": {p["player"]: db.execute(
-            "SELECT pos FROM players WHERE room_code=? AND player=?",
-            (code, p["player"])).fetchone()["pos"]
-            for p in players}
+        "state": state
     })
 
 @ularular_bp.route("/get_state/<code>")

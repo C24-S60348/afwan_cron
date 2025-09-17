@@ -30,7 +30,7 @@
     const api = "http://localhost/ularular";
 
     function log(msg) {
-      document.getElementById("log").textContent += msg + "\n";
+      document.getElementById("log").textContent = msg + "\n";
     }
 
     function createRoom() {
@@ -38,7 +38,6 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          code: document.getElementById("room").value,
           player: document.getElementById("player").value
         })
       }).then(r => r.json()).then(j => log("Created: " + JSON.stringify(j)));
@@ -71,6 +70,8 @@
       fetch(api + "/get_state/" + code)
         .then(r => r.json())
         .then(j => log("State: " + JSON.stringify(j, null, 2)));
+      const player = document.getElementById("player").value;
+      
     }
   </script>
 </body>
