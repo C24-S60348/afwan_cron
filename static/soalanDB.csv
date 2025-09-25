@@ -1,0 +1,7 @@
+name,level,type,soalan,soalan2,soalan3,soalan4,soalan5,pilihan1,pilihan2,pilihan3,pilihan4,pilihan5,pilihanjwpn1,pilihanjwpn2,pilihanjwpn3,pilihanjwpn4,pilihanjwpn5,answer,nota
+funderive,1,type,Apakah sayur,,,,,,,,,,,,,,,pilihan,"type = type, abc, suaikan"
+funderive,2,type,Apakah sayaq,,,,,,,,,,,,,,,makanan,"kalau type, kena ada soalan, answer"
+funderive,2,type,Apakah ikang,,,,,,,,,,,,,,,makanan,
+funderive,2,type,Apakah itik,,,,,,,,,,,,,,,makanan,
+funderive,3,abc,Apakah ikan,,,,,ikan,sayur,bayam,tumis,,,,,,,ikan,"kalau abc, kena ada multiple pilihan jawapan"
+funderive,4,suaikan,1,2,3,4,5,jwpn1,jwpn2,jwpn3,jwpn4,jwpn5,1,2,3,4,5,,"kalau suaikan, kena ada pilihan soalan, pilihan jawapan, pilihan jawapan turutan (atau auto)"
