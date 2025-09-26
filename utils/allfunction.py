@@ -1,6 +1,8 @@
 import csv
 import os
 import random
+from werkzeug.utils import secure_filename
+from PIL import Image
 
 from flask import flash, get_flashed_messages, redirect, render_template_string, request, send_from_directory, url_for
 from openpyxl import load_workbook
@@ -265,13 +267,6 @@ def af_requestget(code="ikan"):
         return ""
     else:
         return request.args.get(code)
-    
-def af_requestpost(code="ikan", default=""):
-    return request.form.get(code, default)
-
-def af_requestpostfromjson(code="ikan", defualt=""):
-    rp = request.json
-    return rp.get(code, "")
 
 def af_htmlselectoption(value="1", name="First option", selected=""):
     selectedDIV = ""
@@ -475,195 +470,12 @@ def af_image_exists(image_path="static/images/employees/afwan.png"):
     # Check if the file exists and is a file (not a directory)
     return os.path.isfile(image_path)
 
+def af_requestpost(code="ikan", default=""):
+    return request.form.get(code, default)
 
-def af_htmlselect(id="mat", name="Material", options=af_htmlselectoptionempty()):
-    html = f"""
-    <div>
-        <div>{name}:</div>
-        <select id="{id}" name="{id}">
-           {options}
-        </select>
-    </div>"""
-    return html
-
-def af_htmltextinput(name="ikan", id="ik", placeholder="Put ikan here"):
-    html = f"""
-        <div>
-            <div>{name}</div>
-            <input type="text" class="form-control" id="{id}" name="{id}" placeholder="{placeholder}">
-        </div>"""
-    return html
-
-def af_htmlbutton(name="", typecolor="primary", onclick=""):
-    classbtn = ""
-    if name == "Back":
-        onclick = "window.history.back(); return false;"
-    
-    if typecolor == "primary":
-        classbtn = "btn-primary"
-    else:
-        classbtn = "btn-secondary"
-        
-    html = f"""
-        <button class="btn {classbtn}" onclick="{onclick}">
-            {name}
-        </button>
-    """
-    return html
-
-def af_htmlbuttonlink(name="", typecolor="primary", href=""):
-    classbtn = ""
-    if typecolor == "primary":
-        classbtn = "btn-primary"
-    else:
-        classbtn = "btn-secondary"
-        
-    html = f"""
-        <a href="{href}" class="btn {classbtn}">
-            {name}
-        </a>
-    """
-    return html
-
-def af_htmlformsubmitbutton():
-    html = """<button type="submit" class="btn btn-primary">Submit</button>"""
-    return html
-
-def af_htmlformstart(link="tanam_add/submit"):
-    html = f"<form action='{link}' method='POST'>"
-    return html
-
-def af_htmlformend():
-    html = "</form>"
-    return html
-
-def af_htmlformend2():
-    html = ""
-    html += af_htmlformsubmitbutton()
-    html += "</form>"
-    return html
-
-def af_redirect(link="flangehandle.flangehandle"):
-    return redirect(url_for(link))
-
-def af_htmlhandletemplate(linkdownload="/flangehandle/download", linkupload="/flangehandle/upload", linkimages="/flangehandle/images", name="flange.mdb", linkback="/flangehandle"):
-    html = ""
-    html += """
-        <!doctype html>
-        <html>
-
-            <head>
-                <title>Upload/Download File</title>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-                <style>
-                    body {
-                        background-color: aliceblue;
-                        background-image: url("{{ url_for('static', filename='images/flange.png') }}");
-                        background-repeat: no-repeat;
-                    }
-                    .selectorDIV {
-                        max-width: 800px;
-                        margin: auto;
-                        background-color: rgb(249, 252, 255);
-                        margin-top: 20px;
-                        padding: 20px;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                        text-align: center;
-                    }
-                    .chooseDIV div {
-                        background-color: #fff;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                        width: 50%;
-                        text-align: center;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: center;
-                        padding:10px;
-                        margin:5px;
-                    }
-                    .chooseDIV div form input {
-                        margin-bottom: 10px;
-                    }
-                </style>
-            </head>
-
-            <body>
-                <div class="selectorDIV" style="
-                        font-size: 40px;
-                        padding: 5px;
-                        margin: 10px;
-                        margin-left: 20px;
-                        position: absolute;
-                    ">
-                    <a href=\""""+linkback+"""\" style="
-                        text-decoration: none;
-                    " >🔙</a>
-                </div>
-                <div class="container selectorDIV">
-                    <div class="d-flex justify-content-center chooseDIV">
-                        <div>
-                            <h1>📩Download File</h1>
-                            <div class="form-control">
-                                <a href=\""""+linkdownload+"""\">Download """+name+"""</a>
-                            </div>
-                        </div>
-                        <div>
-                            <h1>⬆️Upload File</h1>
-                            <form action=\""""+linkupload+"""\" method="post" enctype="multipart/form-data">
-                                <input type="file" name="file" class="form-control">
-                                <input type="submit" value="Upload" class="btn btn-warning">
-                            </form>
-                        </div>
-                    </div>"""
-
-    html += af_render_flashed_messages()
-    
-    if linkimages != "":
-        html += """
-                <div class="d-flex justify-content-center align-items-center my-4">
-                    <a href=\""""+linkimages+"""\">
-                        <div class="form-control text-center">
-                            Images
-                        </div>
-                    </a>
-                </div>
-                """
-    html += """
-            </body>
-
-        </html>
-    """
-    return render_template_string(html)
-
-def af_render_flashed_messages():
-    # Assume get_flashed_messages is defined and returns a list of messages
-    messages = get_flashed_messages()
-    if not messages:
-        return ""
-
-    # Start building the HTML string
-    html = "<div class='flashed-messages'><br/><ul>"
-    
-    # Add each message as a list item
-    for message in messages:
-        html += f"<li>{message}</li>"
-    
-    # Close the unordered list and the div
-    html += "</ul></div>"
-    
-    return html
-
-
-def af_htmlbulatcolor(color="#fabcde"):
-    html = f"<div style='border-radius:24px;width:30px;height:30px;background-color:{color};'></div> "
-    return html
-
-def af_image_exists(image_path="static/images/employees/afwan.png"):
-    # Check if the file exists and is a file (not a directory)
-    return os.path.isfile(image_path)
+def af_requestpostfromjson(code="ikan", default=""):
+    requestpost = request.json
+    return requestpost.get(code, default)
 
 def af_htmlimagehandletemplate(image_dir="static/images/flanges", linkrename="/flangehandle/images/rename", linkadd="/flangehandle/images/add"):
 
