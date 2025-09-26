@@ -28,6 +28,8 @@ from flask_page.ularular import ularular_bp, ularular_init_db, ularular_get_db
 from flask_page.ularulargame import ularulargame_bp
 from flask_page.ularulargame2 import ularulargame2_bp
 from flask_page.postman import postman_bp
+from flask_page.bbcode import bbcode_bp
+from flask_page.quiz import quiz_blueprint
 
 
 # from flask_page.publicvar import last_run_timesitest_bp)
@@ -42,6 +44,8 @@ app.register_blueprint(ularular_bp)
 app.register_blueprint(ularulargame_bp)
 app.register_blueprint(ularulargame2_bp)
 app.register_blueprint(postman_bp)
+app.register_blueprint(bbcode_bp)
+app.register_blueprint(quiz_blueprint)
 
 with app.app_context():
     ularular_init_db()  # ✅ Auto-create tables if not found
@@ -49,4 +53,4 @@ with app.app_context():
 
 # Start the app using Uvicorn
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5002, debug=True)
