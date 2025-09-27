@@ -74,7 +74,7 @@ def quizapi():
             random.shuffle(d)
         data4.append(d)
 
-    result = jsonify(data)
+    result = jsonify("data: " + str(data))
     return result
 
 @quiz_blueprint.route("/api/quiz/construct", methods=["GET", "POST"])
@@ -94,7 +94,7 @@ def quizapiconstruct():
             filtered = {k: v for k, v in dr.items() if v != ""}
             data.append(filtered)
 
-    result = jsonify(data)
+    result = jsonify("data: " + str(data))
     return result
 
 @quiz_blueprint.route("/quiz/handle")
