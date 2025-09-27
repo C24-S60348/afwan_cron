@@ -6,7 +6,7 @@ import json
 api_bp = Blueprint('api_bp', __name__)
 
 # Handle Request (Non-DB)
-@api_bp.route('/api', methods=['GET', 'POST'])
+@api_bp.route('/api/test', methods=['GET', 'POST'])
 def handle_request():
     text = str(request.args.get('input'))  # ?input=a
     character_count = len(text)
