@@ -80,6 +80,9 @@ def quizapi():
 @quiz_blueprint.route("/api/quiz/construct", methods=["GET", "POST"])
 def quizapiconstruct():
     #return json of the selected name(game name)
+    requestpost = request.json
+    return jsonify("aaa")
+    return requestpost.get("ayam")
     name = af_requestpostfromjson("name")
     file = af_requestpostfromjson("file","testConstruct.csv")
     return "file: " + file
