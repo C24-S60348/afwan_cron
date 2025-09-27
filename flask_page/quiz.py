@@ -78,7 +78,6 @@ def quizapi():
     return result
 
 @quiz_blueprint.route("/api/quiz/construct", methods=["GET", "POST"])
-@handle_exceptions("quizapiconstruct")
 def quizapiconstruct():
     #return json of the selected name(game name)
     name = af_requestpostfromjson("name")
