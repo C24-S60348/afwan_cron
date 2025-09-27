@@ -1,0 +1,13 @@
+group,type,item,compare,item2,function,item3,posx,posy,timer,frame,bool,notes
+start,start,ikan,,,frame,,,,,10,,
+a,,next,,,appear,,,,,,0,
+a,,ikan,,,pos,,50,60,,,,
+a,,ikan,,,tweenpos,,50,100,1,,,gerak keatas
+a,wait,,,,,,,,1,,,
+a,,next,,,appear,,,,,,1,
+a,wait,,,,,,,,0,,,just separator
+a,,,,,,,,,,,,
+if,cond,ikan,>,ayam,,,,,,,1,
+array,,"0,0",=,"""3""",appear,ikan,,,,,1,
+array,,"0,0",set,"""10""",,,,,,,,set array value
+if,array,"0,0",==,"""10""",tweenpos,ikan,100,200,1,,,"if array(0,0) == ""10"", set another pos"
