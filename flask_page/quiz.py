@@ -78,6 +78,7 @@ def quizapi():
     return result
 
 @quiz_blueprint.route("/api/quiz/construct", methods=["GET", "POST"])
+@handle_exceptions("quizapiconstruct")
 def quizapiconstruct():
     #return json of the selected name(game name)
     name = af_requestpostfromjson("name")
@@ -89,29 +90,6 @@ def quizapiconstruct():
         if dr["group"] == name or name == "all":
             filtered = {k: v for k, v in dr.items() if v != ""}
             data.append(filtered)
-    
-    # #kumpulkan
-    # data3 = []
-    # temp = "1"
-    # dk = []
-    # for d in data:
-    #     level = d["level"]
-    #     if temp != level:
-    #         temp = level
-    #         data3.append(dk)
-    #         dk = []
-    #         dk.append(d)
-    #     else:
-    #         dk.append(d)
-    # data3.append(dk)
-    
-    #shuffle
-    # data4 = []
-    # for d in data3:
-    #     if len(d) > 1:
-    #         #if shuffle, then shuffle
-    #         random.shuffle(d)
-    #     data4.append(d)
 
     result = jsonify(data)
     return result
