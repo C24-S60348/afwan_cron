@@ -82,7 +82,6 @@ HTML_FORM = """
   {% if response %}
   <h3>Response:</h3>
   <pre>{{response}}</pre>
-  <br/> ======================== <br/>
   <div>{{response|safe}}</div>
   {% endif %}
 </body>
