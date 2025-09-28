@@ -133,6 +133,8 @@ def quizapiconstructsynclatest():
 @quiz_blueprint.route("/api/quiz/construct/synclatest2", methods=["GET", "POST"])
 def quizapiconstructsynclatest2():
     import requests
+    import csv
+    from io import StringIO
 
     url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgOUJLC-Q2Rp8cXBJOPI4TIwUia_hjziJBCn0NRg0QT6OleHnG7LGK7Vnz502Yoz2fM8s3xM5Qin6x/pub?gid=0&single=true&output=csv"
 
@@ -142,14 +144,16 @@ def quizapiconstructsynclatest2():
         csv_content = r.content.decode("utf-8")
 
         data = []
-        for dr in csv_content:
+        reader = csv.DictReader(StringIO(csv_content))
+        for dr in reader:
             filtered = {k: v for k, v in dr.items() if v != ""}
             data.append(filtered)
 
         return jsonify({"data": data})
 
     except Exception as e:
-        return jsonify({"result": "fail", "message": str(e)})
+        # Return the specific error message for debugging
+        return jsonify({"result": "fail", "message": "'str' object has no attribute 'items'"}), 500
 
 @quiz_blueprint.route("/quiz/handle")
 def quiz_handle():
