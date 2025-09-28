@@ -130,6 +130,27 @@ def quizapiconstructsynclatest():
     except Exception as e:
         return jsonify({"result": "fail", "message": str(e)})
 
+@quiz_blueprint.route("/api/quiz/construct/synclatest2", methods=["GET", "POST"])
+def quizapiconstructsynclatest2():
+    import requests
+
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgOUJLC-Q2Rp8cXBJOPI4TIwUia_hjziJBCn0NRg0QT6OleHnG7LGK7Vnz502Yoz2fM8s3xM5Qin6x/pub?gid=0&single=true&output=csv"
+
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+        csv_content = r.content.decode("utf-8")
+
+        data = []
+        for dr in csv_content:
+            filtered = {k: v for k, v in dr.items() if v != ""}
+            data.append(filtered)
+
+        return jsonify({"data": data})
+
+    except Exception as e:
+        return jsonify({"result": "fail", "message": str(e)})
+
 @quiz_blueprint.route("/quiz/handle")
 def quiz_handle():
     return af_htmlhandletemplate("/quiz/download", "/quiz/upload", "", "soalanDB.csv", "/quiz")
