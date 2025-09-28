@@ -3,6 +3,7 @@ from flask import jsonify, request, Blueprint, render_template, render_template_
 from datetime import datetime
 import pandas as pd
 from utils.allfunction import *
+import os
 
 quiz_blueprint = Blueprint('quiz', __name__)
 
@@ -84,8 +85,14 @@ def quizapiconstruct():
         name = af_requestpostfromjson("name")
         file = af_requestpostfromjson("file","testConstruct.csv")
     else:
+        name = af_requestget("name")
+        file = af_requestget("file")
+    
+    if name == "":
         name = "all"
+    if file == "":
         file = "testConstruct.csv"
+    
     dataraw = af_getcsvdict("static/" + file)
     data = []
     #filter  = ""  value
@@ -96,6 +103,29 @@ def quizapiconstruct():
 
     result = jsonify({"data": data})
     return result
+
+@quiz_blueprint.route("/api/quiz/construct/synclatest", methods=["GET", "POST"])
+def quizapiconstructsynclatest():
+    import requests
+
+    url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgOUJLC-Q2Rp8cXBJOPI4TIwUia_hjziJBCn0NRg0QT6OleHnG7LGK7Vnz502Yoz2fM8s3xM5Qin6x/pub?gid=0&single=true&output=csv"
+
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+        csv_content = r.content.decode("utf-8")
+
+        # Specify the file name you want to save to
+        file_name = "testConstruct.csv"  # or "funderiveanim.csv"
+        file_path = os.path.join("static", file_name)
+
+        # Write the CSV content to the file
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(csv_content)
+
+        return jsonify({"result": "success", "message": f"Latest version fetched and saved to {file_name}"})
+    except Exception as e:
+        return jsonify({"result": "fail", "message": str(e)})
 
 @quiz_blueprint.route("/quiz/handle")
 def quiz_handle():
