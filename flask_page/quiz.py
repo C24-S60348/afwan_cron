@@ -80,6 +80,8 @@ def quizapi():
 
 @quiz_blueprint.route("/api/quiz/construct", methods=["GET", "POST"])
 def quizapiconstruct():
+    import csv
+    from io import StringIO
     try:
         if request.method == "POST":
             name = af_requestpostfromjson("name")
@@ -93,11 +95,17 @@ def quizapiconstruct():
         if not file:
             file = "testConstruct.csv"
 
-        dataraw = af_getcsvdict("static/" + file)
         data = []
-        for dr in dataraw:
+        reader = csv.DictReader(StringIO(file))
+        for dr in reader:
             filtered = {k: v for k, v in dr.items() if v != ""}
             data.append(filtered)
+
+        # dataraw = af_getcsvdict("static/" + file)
+        # data = []
+        # for dr in dataraw:
+        #     filtered = {k: v for k, v in dr.items() if v != ""}
+        #     data.append(filtered)
 
         return jsonify({"data": data})
     except Exception as e:
@@ -110,6 +118,8 @@ def quizapiconstruct():
 @quiz_blueprint.route("/api/quiz/construct/synclatest", methods=["GET", "POST"])
 def quizapiconstructsynclatest():
     import requests
+    import csv
+    from io import StringIO
 
     url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTgOUJLC-Q2Rp8cXBJOPI4TIwUia_hjziJBCn0NRg0QT6OleHnG7LGK7Vnz502Yoz2fM8s3xM5Qin6x/pub?gid=0&single=true&output=csv"
 
