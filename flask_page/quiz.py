@@ -80,31 +80,32 @@ def quizapi():
 
 @quiz_blueprint.route("/api/quiz/construct", methods=["GET", "POST"])
 def quizapiconstruct():
-    #return json of the selected name(game name)
-    if request.method == "POST":
-        name = af_requestpostfromjson("name")
-        file = af_requestpostfromjson("file","testConstruct.csv")
-    else:
-        name = af_requestget("name")
-        file = af_requestget("file")
-    
-    if name == "":
-        name = "all"
-    if file == "":
-        file = "testConstruct.csv"
-    
-    dataraw = af_getcsvdict("static/" + file)
-    data = []
-    #filter  = ""  value
-    for dr in dataraw:
-        # if dr["group"] == name or name == "all":
-        #     filtered = {k: v for k, v in dr.items() if v != ""}
-        #     data.append(filtered)
-        filtered = {k: v for k, v in dr.items() if v != ""}
-        data.append(filtered)
+    try:
+        if request.method == "POST":
+            name = af_requestpostfromjson("name")
+            file = af_requestpostfromjson("file", "testConstruct.csv")
+        else:
+            name = af_requestget("name")
+            file = af_requestget("file")
 
-    result = jsonify({"data": data})
-    return result
+        if not name:
+            name = "all"
+        if not file:
+            file = "testConstruct.csv"
+
+        dataraw = af_getcsvdict("static/" + file)
+        data = []
+        for dr in dataraw:
+            filtered = {k: v for k, v in dr.items() if v != ""}
+            data.append(filtered)
+
+        return jsonify({"data": data})
+    except Exception as e:
+        # Log the error if you have logging set up, or print for debugging
+        import traceback
+        print("Error in quizapiconstruct:", e)
+        traceback.print_exc()
+        return jsonify({"result": "fail", "message": str(e)}), 500
 
 @quiz_blueprint.route("/api/quiz/construct/synclatest", methods=["GET", "POST"])
 def quizapiconstructsynclatest():
