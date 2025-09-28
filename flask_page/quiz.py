@@ -97,9 +97,11 @@ def quizapiconstruct():
     data = []
     #filter  = ""  value
     for dr in dataraw:
-        if dr["group"] == name or name == "all":
-            filtered = {k: v for k, v in dr.items() if v != ""}
-            data.append(filtered)
+        # if dr["group"] == name or name == "all":
+        #     filtered = {k: v for k, v in dr.items() if v != ""}
+        #     data.append(filtered)
+        filtered = {k: v for k, v in dr.items() if v != ""}
+        data.append(filtered)
 
     result = jsonify({"data": data})
     return result
