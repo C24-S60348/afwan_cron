@@ -12,24 +12,46 @@ resultcsv = "static/soalanDBresult.csv"
 
 @quiz2_blueprint.route("/api/quiz2", methods=["GET"])
 def apiquiz2():
+    import requests
+    import csv
+    from io import StringIO
 
     #name,level,type,soalan,soalan2,soalan3,soalan4,soalan5,pilihan1,pilihan2,pilihan3,pilihan4,pilihan5,pilihanjwpn1,pilihanjwpn2,pilihanjwpn3,pilihanjwpn4,pilihanjwpn5,answer,nota,createdat
     name = af_requestget("name")
-    dataraw = af_getcsvdict(soalancsv) #todo - get from sheet
-    data2 = {}
-    
-    for dr in dataraw:
-        if name == dr["name"]:
-            data2[dr["level"]] = []
-    
-    for dr in dataraw:
-        if name == dr["name"]:
-            filtered = {k: v for k, v in dr.items() if v != ""}
-            data2[dr["level"]].append(filtered)
-    
+    file = af_requestget("file")
 
-    result = jsonify(data2)
-    return result
+    if name == "":
+        return jsonify({"result":"fail", "message":"no name submitted - funderive"})
+    if file == "":
+        return jsonify({"result":"fail", "message":"no file submitted - csvanim or csvsoalan"})
+
+    if file == "csvanim":
+        url = af_afwangetdb("csvanim")
+    elif file == "csvsoalan":
+        url = af_afwangetdb("csvsoalan")
+
+    try:
+        r = requests.get(url)
+        r.raise_for_status()
+        csv_content = r.content.decode("utf-8")
+
+        data = []
+        reader = csv.DictReader(StringIO(csv_content))
+        # return jsonify({"data": list(reader)})
+        data2 = {}
+        
+        for dr in reader:
+            if name == dr["name"]:
+                filtered = {k: v for k, v in dr.items() if v != ""}
+                if dr["level"] not in data2:
+                    data2[dr["level"]] = []
+                data2[dr["level"]].append(filtered)
+
+        return jsonify(data2)
+
+    except Exception as e:
+        return jsonify({"result": "fail", "message": "'str' object has no attribute 'items'", "error": str(e)}), 500
+
 
 @quiz2_blueprint.route("/api/quiz2/result/submit", methods=["POST"])
 def apiquiz2resultsubmit():

@@ -30,7 +30,7 @@ from flask_page.ularulargame2 import ularulargame2_bp
 from flask_page.postman import postman_bp
 from flask_page.bbcode import bbcode_bp
 from flask_page.quiz import quiz_blueprint
-
+from flask_page.quiz2 import quiz2_blueprint
 
 # from flask_page.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -46,6 +46,7 @@ app.register_blueprint(ularulargame2_bp)
 app.register_blueprint(postman_bp)
 app.register_blueprint(bbcode_bp)
 app.register_blueprint(quiz_blueprint)
+app.register_blueprint(quiz2_blueprint)
 
 with app.app_context():
     ularular_init_db()  # ✅ Auto-create tables if not found
