@@ -42,7 +42,7 @@ def apiquiz2():
         
         for dr in reader:
             if name == dr["name"]:
-                filtered = {k: v for k, v in dr.items() if v != ""}
+                filtered = {k: v for k, v in dr.items() if v != "" and k not in ["name", "level"]}
                 if dr["level"] not in data2:
                     data2[dr["level"]] = []
                 data2[dr["level"]].append(filtered)
