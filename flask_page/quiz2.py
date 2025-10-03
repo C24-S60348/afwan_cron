@@ -84,13 +84,24 @@ def apiquiz2result():
         for d in data:
             if name == d[0] or count == 0:
                 html += "<tr>"
-                html += f"<td>{d[0]}</td>"
-                html += f"<td>{d[1]}</td>"
-                html += f"<td>{d[2]}</td>"
-                html += f"<td>{d[3]}</td>"
-                html += f"<td>{d[4]}</td>"
-                html += f"<td>{d[5]}</td>"
-                html += f"<td>{d[6]}</td>"
+                if d[0] != None:
+                    html += f"<td>{d[0]}</td>"
+                if d[1] != None:
+                    html += f"<td>{d[1]}</td>"
+                if d[2] != None:
+                    html += f"<td>{d[2]}</td>"
+                if d[3] != None:
+                    html += f"<td>{d[3]}</td>"
+                if d[4] != None:
+                    html += f"<td>{d[4]}</td>"
+                if d[5] != None:
+                    html += f"<td>{d[5]}</td>"
+                if d[6] != None:
+                    html += f"<td>{d[6]}</td>"
+                if d[7] != None:
+                    html += f"<td>{d[7]}</td>"
+                if d[8] != None:
+                    html += f"<td>{d[8]}</td>"
                 html += "</tr>"
             count += 1
 
