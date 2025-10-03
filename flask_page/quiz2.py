@@ -91,7 +91,6 @@ def apiquiz2result():
                 html += f"<td>{d[4]}</td>"
                 html += f"<td>{d[5]}</td>"
                 html += f"<td>{d[6]}</td>"
-                html += f"<td>{d[7]}</td>"
                 html += "</tr>"
             count += 1
 
