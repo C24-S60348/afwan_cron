@@ -2,7 +2,11 @@ import random
 from flask import jsonify, request, Blueprint, render_template, render_template_string
 from datetime import datetime
 import pandas as pd
-from utils.allfunction import *
+from ..utils.html_helper import *
+from ..utils.csv_helper import *
+from ..utils.adminhandle_helper import *
+from ..utils.data_helper import *
+from ..utils.excel_helper import *
 
 quiz2_blueprint = Blueprint('quiz2', __name__)
 

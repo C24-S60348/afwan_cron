@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timezone, timedelta
 from flask import render_template_string
 from flask import Blueprint
-from flask_page.publicvar import last_run_times
+from .publicvar import last_run_times
 
 croncheck_bp = Blueprint('croncheck_bp', __name__)
 

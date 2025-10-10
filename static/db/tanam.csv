@@ -1,0 +1,7 @@
+id,nameid,name,desc,soil,sunlight,water,harvest,imgsrc
+1,Bunga Raya,Bunga Raya,"A roow vegetable, usually orange in color.","Siram 2x sehari, baja seminggu sekali",6-8 hours,3 times per week,70-80 days,/static/images/tanam/bungaraya.png
+2,Lidah Buaya,Lidah Buaya (Aloe Vera),A fruit commonly used as a vegetable.,"Siram 2 hari sekali, tak perlu banyak baja, suka tempat cerah tapi teduh sikit ☀️",6-8 hours,"Daily, keep soil moist",60-85 days,/static/images/tanam/lidahbuaya.png
+3,Strawberi,Strawberi,testst,"Siram setiap pagi, baja 2 kali seminggu, suka tempat sejuk 🍃",testst,testst,testst,/static/images/tanam/strawberi.png
+4,Pudina,Pudina (Mint),teststmato,"Siram 2x sehari, suka tempat teduh, baja sebulan sekali 🌤️",teststmato,teststmato,teststmato,/static/images/tanam/pudina.png
+5,Bunga Matahari,Bunga Matahari (Sunflower),testtest,"Siram 1x sehari, baja seminggu sekali, suka cahaya penuh ☀️",testtest,testtest,testtest,/static/images/tanam/bungamatahari.png
+6,Bayam,Bayam,test123,"Siram tiap pagi, baja 2 kali seminggu, sesuai tempat lembap 🌧️",test123,test123,test123,/static/images/tanam/bayam.png

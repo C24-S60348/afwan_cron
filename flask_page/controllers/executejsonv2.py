@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_page.connect_to_db import connect_to_db
+from .connect_to_db import connect_to_db
 import variables
 import aiomysql
 

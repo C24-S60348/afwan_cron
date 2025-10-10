@@ -1,0 +1,31 @@
+{# tanam/mula.html #}
+
+{% extends "tanam/base.html" %}
+
+{% block head %}
+<style>
+</style>
+{% endblock %}
+
+
+{% block script %}
+<script>
+    function siram() {
+        if (confirm("Siram?")) {
+            alert("anda telah siram");
+        }
+    }
+
+    function baja() {
+        if (confirm("Baja?")) {
+            alert("anda telah baja");
+        }
+    }
+
+    function cahaya() {
+        if (confirm("Cahaya?")) {
+            alert("anda telah cahaya");
+        }
+    }
+</script>
+{% endblock %}
