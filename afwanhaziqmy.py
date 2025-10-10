@@ -1,9 +1,11 @@
 #sudo nano /etc/systemd/system/afwanapp.service
 
-#sudo systemctl daemon-reexec
-#sudo systemctl daemon-reload
-#sudo systemctl enable afwanapp
-#sudo systemctl start afwanapp
+"""
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable afwanapp
+sudo systemctl start afwanapp
+"""
 
 from flask import Flask
 from flask_cors import CORS
