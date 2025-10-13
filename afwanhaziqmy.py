@@ -1,6 +1,8 @@
 #sudo nano /etc/systemd/system/afwanapp.service
 
 """
+source venv/bin/activate
+
 sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 sudo systemctl enable afwanapp

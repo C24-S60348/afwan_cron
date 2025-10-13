@@ -12,7 +12,7 @@ def excelsoalan():
     data = af_requestpostfromjson("data")
 
     #test here
-    write_to_sheet(data, data.excelname)
+    write_to_sheet(data,)
     
     threading.Thread(
         target=write_to_sheet, args=(data, )
