@@ -7,7 +7,7 @@ import threading
 
 excelsoalan_blueprint = Blueprint('excelsoalan', __name__)
 
-@excelsoalan_blueprint.route("/excelsoalan")
+@excelsoalan_blueprint.route("/api/excelsoalan", methods=["POST"])
 def excelsoalan():
     data = af_requestpostfromjson("data")
 
@@ -19,7 +19,7 @@ def excelsoalan():
     ).start()
     return jsonify({"status": "queued", "data": data})
 
-def write_to_sheet(data, excelname, retries=3, delay=2):
+def write_to_sheet(data, retries=3, delay=2):
     for attempt in range(1, retries + 1):
         try:
             excelname = data.excelname
