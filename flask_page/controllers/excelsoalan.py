@@ -1,6 +1,5 @@
-#apps/controllers/excelsoalan.py
 import time
-from flask import jsonify, request, Blueprint, render_template, render_template_string
+from flask import jsonify, request, Blueprint
 import requests
 from ..utils.html_helper import *
 import threading
@@ -10,27 +9,32 @@ excelsoalan_blueprint = Blueprint('excelsoalan', __name__)
 @excelsoalan_blueprint.route("/api/excelsoalan", methods=["POST"])
 def excelsoalan():
     data = af_requestpostfromjson("data")
+    if not data or not isinstance(data, dict):
+        return jsonify({"status": "error", "message": "Invalid data"}), 400
 
-    #test here
-    write_to_sheet(data,)
-    
+    # Queue writing to sheet in a background thread only
     threading.Thread(
         target=write_to_sheet, args=(data, )
     ).start()
-    return jsonify({"status": "queued", "data": data})
+    if data.get("excelname", "") != "":
+        return jsonify({"status": "success", "message": "Data queued for writing"}), 200
+    else:
+        return jsonify({"status": "error", "message": "No destination link for excelname"}), 400
+    # return jsonify({"status": "queued", "data": data})
 
 def write_to_sheet(data, retries=3, delay=2):
     for attempt in range(1, retries + 1):
         try:
-            excelname = data.excelname
+            excelname = data.get("excelname", "")
             link = ""
-            if (excelname == "testPostData"):
+            if excelname == "testPostData":
                 link = "https://script.google.com/macros/s/AKfycbzinbTaU4Jg-VOWdVfM5APzlHsqIGvpDofiXQMgVruLUWsZjnV0f1aXcdhdeTFbsSmQ/exec"
+            if not link:
+                print(f"❌ No destination link for excelname: {excelname}")
+                return
 
             r = requests.post(link, json=data)
             r.raise_for_status()
-            return r.json()
-            
             print(f"✅ Data written successfully: {data}")
             return
         except Exception as e:
