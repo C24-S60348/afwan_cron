@@ -40,6 +40,7 @@ from flask_page.controllers.quiz2 import quiz2_blueprint
 from flask_page.controllers.takedata import takedata_blueprint
 from flask_page.controllers.purgo import purgo_bp
 from flask_page.controllers.tanam import tanam_blueprint
+from flask_page.controllers.excelsoalan import excelsoalan_blueprint
 
 # from flask_page.controllers.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -59,6 +60,7 @@ app.register_blueprint(quiz2_blueprint)
 app.register_blueprint(takedata_blueprint)
 app.register_blueprint(purgo_bp)
 app.register_blueprint(tanam_blueprint)
+app.register_blueprint(excelsoalan_blueprint)
 
 with app.app_context():
     ularular_init_db()  # ✅ Auto-create tables if not found
