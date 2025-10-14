@@ -1,0 +1,88 @@
+{# base.html #}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ title }}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="{{ url_for('static', filename='lib/bootstrap.min.css') }}" rel="stylesheet"  crossorigin="anonymous">
+        <link rel="icon" type="images/png" href="{{ url_for('static', filename='images/flangelogo.png') }}">
+        <style>
+            .card-body {
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+            }
+            body {
+                background-color: aliceblue;
+                background-image: url("{{ url_for('static', filename='images/flange.png') }}");
+                background-repeat: no-repeat;
+            }
+            table {
+                border-radius: 12px;
+            }
+            .selectorDIV {
+                max-width: 700px;
+                margin: auto;
+                background-color: #fff;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            .selectorDIV div {
+                padding-bottom: 10px;
+            }
+            .selectorDIV div select {
+                border-radius: 4px;
+            }
+            .tableDIV {
+                margin: auto;
+                background-color: #fff;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            .updateDIV {
+                max-width: 600px;
+                margin: auto;
+                background-color: #fff;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            .updateDIV div {
+                padding-bottom: 15px;
+            }
+            .title {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            .title h1 {
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                background-color: rgba(255,255,255,0.9);
+                width: fit-content;
+                padding: 0.5rem;
+            }
+            .btn-primary {
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+            .btn-secondary {
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+            .btn-warning {
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="my-5">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </body>
+</html>

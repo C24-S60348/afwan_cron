@@ -32,7 +32,7 @@ from flask_page.controllers.croncheck import croncheck_bp
 from flask_page.controllers.executejsonv2 import executejsonv2_bp
 from flask_page.controllers.pelajar_data import pelajar_data_bp
 from flask_page.controllers.admin import admin_bp
-from flask_page.controllers.ularular import ularular_bp, ularular_init_db, ularular_get_db
+from flask_page.controllers.ularular import ularular_bp, ularular_init_db
 from flask_page.controllers.ularulargame import ularulargame_bp
 from flask_page.controllers.ularulargame2 import ularulargame2_bp
 from flask_page.controllers.postman import postman_bp
@@ -63,6 +63,9 @@ app.register_blueprint(takedata_blueprint)
 app.register_blueprint(purgo_bp)
 app.register_blueprint(tanam_blueprint)
 app.register_blueprint(excelsoalan_blueprint)
+
+
+
 
 with app.app_context():
     ularular_init_db()  # ✅ Auto-create tables if not found
