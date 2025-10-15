@@ -43,6 +43,9 @@ from flask_page.controllers.takedata import takedata_blueprint
 from flask_page.controllers.purgo import purgo_bp
 from flask_page.controllers.tanam import tanam_blueprint
 from flask_page.controllers.excelsoalan import excelsoalan_blueprint
+from flask_page.controllers.login import login_blueprint
+from flask_page.controllers.register import register_blueprint
+from flask_page.controllers.possystem import possystem_blueprint
 
 # from flask_page.controllers.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -63,6 +66,9 @@ app.register_blueprint(takedata_blueprint)
 app.register_blueprint(purgo_bp)
 app.register_blueprint(tanam_blueprint)
 app.register_blueprint(excelsoalan_blueprint)
+app.register_blueprint(login_blueprint)
+app.register_blueprint(register_blueprint)
+app.register_blueprint(possystem_blueprint)
 
 
 
