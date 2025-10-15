@@ -4,28 +4,48 @@
 
 {% block head %}
 <style>
+    body {
+        background-image: url("{{ url_for('static', filename='images/ladang.jpeg') }}") !important;
+        background-size: cover !important;
+        background-repeat: no-repeat !important;
+    }
+    .container {
+        background-color: rgb(0 0 0 / 28%);
+    }
 </style>
 {% endblock %}
 
 
 {% block script %}
 <script>
+    let currentIndex = 0;
+    
     function siram() {
-        if (confirm("Siram?")) {
-            alert("anda telah siram");
+        if (confirm("Do you want to siram?")) {
+            alert("OK!");
+            //popup quiz
+        } else {
+            // alert("Cancel");
         }
+        console.log("siram");
     }
-
     function baja() {
-        if (confirm("Baja?")) {
-            alert("anda telah baja");
+        if (confirm("Do you want to baja?")) {
+            alert("OK!");
+            //popup quiz
+        } else {
+            // alert("Cancel");
         }
+        console.log("baja");
     }
-
     function cahaya() {
-        if (confirm("Cahaya?")) {
-            alert("anda telah cahaya");
+        if (confirm("Do you want to cahaya?")) {
+            alert("OK!");
+            //popup quiz
+        } else {
+            // alert("Cancel");
         }
+        console.log("cahaya");
     }
 </script>
 {% endblock %}

@@ -4,10 +4,45 @@
 
 {% block head %}
 <style>
-    
+    body {
+        background-image: url("{{ url_for('static', filename='images/ladang.jpeg') }}") !important;
+        background-size: cover !important;
+        background-repeat: no-repeat !important;
+    }
+    .container {
+        background-color: rgb(0 0 0 / 28%);
+    }
+    .card a img {
+        
+        width: 90px;
+        height: 90px;
+
+    }
 </style>
+
 {% endblock %}
 
 
 {% block script %}
+<script>
+    let currentIndex = 0;
+    
+    function slideLeft() {
+        const cardContainer = document.querySelector('.card-container');
+        const cards = document.querySelectorAll('.card');
+        if (currentIndex > 0) {
+            currentIndex--;
+            cardContainer.style.transform = `translateX(${-currentIndex * 360}px)`;
+        }
+    }
+    
+    function slideRight() {
+        const cardContainer = document.querySelector('.card-container');
+        const cards = document.querySelectorAll('.card-container');
+        if (currentIndex < cards.length) {
+            currentIndex++;
+            cardContainer.style.transform = `translateX(${-currentIndex * 360}px)`;
+        }
+    }
+</script>
 {% endblock %}

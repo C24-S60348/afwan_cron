@@ -1,0 +1,27 @@
+class,item,type,price,etime
+items,air suam,minuman air,0.5,2
+items,air kosong,minuman air,0.5,2
+items,air panas,minuman air,0.5,2
+items,Kopi ais,minuman air,4,4
+items,kopi panas,minuman air,3.5,4
+items,Kopi O Ais,minuman air,3,4
+items,Kopi O Panas,minuman air,2.5,
+items,Kopi C Ais,minuman air,4,
+items,Kopi C Panas,minuman air,3.5,
+items,Teh Ais,minuman air,4,
+items,Teh Panas,minuman air,3,
+items,Teh Tarik,minuman air,3,
+items,Teh O Ais,minuman air,3,
+items,Teh O Panas,minuman air,2.5,
+items,Teh C Ais,minuman air,4,
+items,Teh C Panas,minuman air,3,
+items,Teh O Ais L,minuman air,3.5,
+items,Wedges,Side order,6,10
+items,Fries,Side order,6,10
+items,Mee kicap,Mee Kicap/ Kari/ Sup,8,10
+items,Mee kari,Mee Kicap/ Kari/ Sup,8,10
+items,Mee sup,Mee Kicap/ Kari/ Sup,8,10
+items,Keow Teow Goreng,Keow Teow Goreng,6,10
+items,Keow Teow Goreng Kerang,Keow Teow Goreng,10,10
+items,,Mee Goreng,,
+items,,Bihun Goreng,,
