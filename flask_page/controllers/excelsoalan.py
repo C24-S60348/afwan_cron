@@ -6,6 +6,7 @@ import threading
 
 excelsoalan_blueprint = Blueprint('excelsoalan', __name__)
 
+#excelsoalansubmit
 @excelsoalan_blueprint.route("/api/excelsoalan", methods=["POST"])
 def excelsoalan():
     data = af_requestpostfromjson("data")
