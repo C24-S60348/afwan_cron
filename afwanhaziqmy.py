@@ -12,13 +12,21 @@ sudo systemctl start afwanapp
 from flask import Flask
 from flask_cors import CORS
 import os
+import secrets
 
 app = Flask(
     __name__, 
     template_folder=os.path.join('flask_page', 'templates')
     )
-app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
 
+# Generate a secure secret key if not set in environment
+secret_key = os.environ.get('SECRET_KEY')
+if not secret_key:
+    secret_key = secrets.token_hex(32)  # Generate a 64-character hex string
+    print(f"Warning: No SECRET_KEY environment variable set. Generated temporary key: {secret_key}")
+    print("Set SECRET_KEY environment variable for production use.")
+
+app.secret_key = secret_key
 
 # CORS configuration to allow all origins
 CORS(app, supports_credentials=True,
@@ -74,12 +82,8 @@ app.register_blueprint(register_blueprint)
 app.register_blueprint(possystem_blueprint)
 app.register_blueprint(ular_blueprint)
 
-
-
-
 with app.app_context():
     ularular_init_db()  # ✅ Auto-create tables if not found
-
 
 # Start the app using Uvicorn
 if __name__ == '__main__':
