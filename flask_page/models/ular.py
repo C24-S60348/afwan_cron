@@ -1,7 +1,7 @@
 #models/ular.py
 from flask import jsonify
-from apps.utils.csv_helper import *
-from apps.utils.html_helper import *
+from ..utils.csv_helper import *
+from ..utils.html_helper import *
 import random
 import string
 
