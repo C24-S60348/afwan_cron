@@ -17,6 +17,8 @@ app = Flask(
     __name__, 
     template_folder=os.path.join('flask_page', 'templates')
     )
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here-change-in-production')
+
 
 # CORS configuration to allow all origins
 CORS(app, supports_credentials=True,
@@ -46,6 +48,7 @@ from flask_page.controllers.excelsoalan import excelsoalan_blueprint
 from flask_page.controllers.login import login_blueprint
 from flask_page.controllers.register import register_blueprint
 from flask_page.controllers.possystem import possystem_blueprint
+from flask_page.controllers.ular import ular_blueprint
 
 # from flask_page.controllers.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -69,6 +72,7 @@ app.register_blueprint(excelsoalan_blueprint)
 app.register_blueprint(login_blueprint)
 app.register_blueprint(register_blueprint)
 app.register_blueprint(possystem_blueprint)
+app.register_blueprint(ular_blueprint)
 
 
 
