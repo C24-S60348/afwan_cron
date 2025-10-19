@@ -26,7 +26,7 @@ def apiular_createroom():
     player = af_requestget("player")
 
     if inputnotvalidated(player):
-        return jsonifynotvalid(player)
+        return jsonifynotvalid("player")
     
     state = "waiting"
     pos = 0
