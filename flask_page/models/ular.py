@@ -5,16 +5,20 @@ from ..utils.html_helper import *
 import random
 import string
 
+ularconfcsv = "static/db/ular/ularconf.csv"
+ularroomcsv = "static/db/ular/ularroom.csv"
+ularplayerscsv = "static/db/ular/ularplayers.csv"
+
 def modelgetcsvconf():
-    data = af_getcsvdict("static/db/ular/ularconf.csv")
+    data = af_getcsvdict(ularconfcsv)
     return data
 
 def modelgetcsvroom():
-    data = af_getcsvdict("static/db/ular/ularroom.csv")
+    data = af_getcsvdict(ularroomcsv)
     return data
 
 def modelgetcsvplayers(code=""):
-    data = af_getcsvdict("static/db/ular/ularplayers.csv")
+    data = af_getcsvdict(ularplayerscsv)
     result = []
     for d in data:
         if d["code"] == code:
@@ -29,12 +33,12 @@ def modelgenerateroomcode(length=4):
 
 
 def adddataroom(code="", turn="", state=""):
-    af_addcsv("static/db/ularroom.csv", [
+    af_addcsv(ularroomcsv, [
         code, turn, state
     ])
 
 def adddataplayer(code="", player="", pos=0):
-    af_addcsv("static/db/ularplayers.csv", [
+    af_addcsv(ularplayerscsv, [
         code, player, pos
     ])
 
