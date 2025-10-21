@@ -7,45 +7,45 @@
     
     <br/>
     <p>api/createroom</p>
-    <form action="/api/ular/createroom" method="get">
-        <input type="text" name="player" placeholder="player" />
-        <input type="text" name="color" placeholder="color" />
-        <button type="submit">Submit</button>
+    <form>
+        <input type="text" id="player" placeholder="player" />
+        <input type="text" id="color" placeholder="color" />
+        <button type="button" onclick="createroom()">Submit</button>
     </form>
     <p id="outputcreateroom">todo - json output from api/createroom</p>
     <br/>
     <br/>
     <p>api/joinroom</p>
-    <form action="/api/ular/joinroom" method="get">
-        <input type="text" name="code" placeholder="code" />
-        <input type="text" name="player" placeholder="player" />
-        <input type="text" name="color" placeholder="color" />
-        <button type="submit">Submit</button>
+    <form>
+        <input type="text" id="code" placeholder="code" />
+        <input type="text" id="player" placeholder="player" />
+        <input type="text" id="color" placeholder="color" />
+        <button type="button" onclick="joinroom()">Submit</button>
     </form>
     <p id="outputjoinroom">todo - json output from api/joinroom</p>
     <br/>
     <br/>
     <p>api/state</p>
-    <form action="/api/ular/state" method="get">
-        <input type="text" name="code" placeholder="code" />
-        <button type="submit">Submit</button>
+    <form>
+        <input type="text" id="code" placeholder="code" />
+        <button type="button" onclick="state()">Submit</button>
     </form>
     <p id="outputstate">todo - json output from api/state</p>
     <br/>
     <br/>
     <p>api/startgame</p>
-    <form action="/api/ular/startgame" method="get">
-        <input type="text" name="code" placeholder="code" />
-        <button type="submit">Submit</button>
+    <form>
+        <input type="text" id="code" placeholder="code" />
+        <button type="button" onclick="startgame()">Submit</button>
     </form>
     <p id="outputstartgame">todo - json output from api/startgame</p>
     <br/>
     <br/>
     <p>api/rolldice</p>
-    <form action="/api/ular/rolldice" method="get">
-        <input type="text" name="code" placeholder="code" />
-        <input type="text" name="player" placeholder="player" />
-        <button type="submit">Submit</button>
+    <form>
+        <input type="text" id="code" placeholder="code" />
+        <input type="text" id="player" placeholder="player" />
+        <button type="button" onclick="rolldice()">Submit</button>
     </form>
     <p id="outputrolldice">todo - json output from api/rolldice</p>
     <script>
@@ -53,7 +53,6 @@
         function createroom() {
             const player = document.getElementById("player").value;
             const color = document.getElementById("color").value;
-            const code = document.getElementById("code").value;
             const outputcreateroom = document.getElementById("outputcreateroom");
             outputcreateroom.innerHTML = "Creating room...";
             fetch("/api/ular/createroom", {
