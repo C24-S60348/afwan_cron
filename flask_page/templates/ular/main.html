@@ -12,7 +12,7 @@
         <input type="text" id="color" placeholder="color" />
         <button type="button" onclick="createroom()">Submit</button>
     </form>
-    <p id="outputcreateroom">todo - json output from api/createroom</p>
+    <p id="outputcreateroom">json output from api/createroom</p>
     <br/>
     <br/>
     <p>api/joinroom</p>
@@ -22,7 +22,7 @@
         <input type="text" id="color" placeholder="color" />
         <button type="button" onclick="joinroom()">Submit</button>
     </form>
-    <p id="outputjoinroom">todo - json output from api/joinroom</p>
+    <p id="outputjoinroom">json output from api/joinroom</p>
     <br/>
     <br/>
     <p>api/state</p>
@@ -30,7 +30,7 @@
         <input type="text" id="code" placeholder="code" />
         <button type="button" onclick="state()">Submit</button>
     </form>
-    <p id="outputstate">todo - json output from api/state</p>
+    <p id="outputstate">json output from api/state</p>
     <br/>
     <br/>
     <p>api/startgame</p>
@@ -38,7 +38,7 @@
         <input type="text" id="code" placeholder="code" />
         <button type="button" onclick="startgame()">Submit</button>
     </form>
-    <p id="outputstartgame">todo - json output from api/startgame</p>
+    <p id="outputstartgame">json output from api/startgame</p>
     <br/>
     <br/>
     <p>api/rolldice</p>
@@ -47,7 +47,7 @@
         <input type="text" id="player" placeholder="player" />
         <button type="button" onclick="rolldice()">Submit</button>
     </form>
-    <p id="outputrolldice">todo - json output from api/rolldice</p>
+    <p id="outputrolldice">json output from api/rolldice</p>
     <script>
         
         function createroom() {
@@ -55,15 +55,11 @@
             const color = document.getElementById("color").value;
             const outputcreateroom = document.getElementById("outputcreateroom");
             outputcreateroom.innerHTML = "Creating room...";
-            fetch("/api/ular/createroom", {
+            fetch(`/api/ular/createroom?player=${encodeURIComponent(player)}&color=${encodeURIComponent(color)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    player: player,
-                    color: color
-                })
+                }
             }).then(response => response.json()).then(data => {
                 outputcreateroom.innerHTML = JSON.stringify(data);
             }).catch(error => {
@@ -77,16 +73,11 @@
             const color = document.getElementById("color").value;
             const outputjoinroom = document.getElementById("outputjoinroom");
             outputjoinroom.innerHTML = "Joining room...";
-            fetch("/api/ular/joinroom", {
+            fetch(`/api/ular/joinroom?code=${encodeURIComponent(code)}&player=${encodeURIComponent(player)}&color=${encodeURIComponent(color)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    code: code,
-                    player: player,
-                    color: color
-                })
+                }
             }).then(response => response.json()).then(data => {
                 outputjoinroom.innerHTML = JSON.stringify(data);
             }).catch(error => {
@@ -98,14 +89,11 @@
             const code = document.getElementById("code").value;
             const outputstate = document.getElementById("outputstate");
             outputstate.innerHTML = "Getting state...";
-            fetch("/api/ular/state", {
+            fetch(`/api/ular/state?code=${encodeURIComponent(code)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    code: code
-                })
+                }
             }).then(response => response.json()).then(data => {
                 outputstate.innerHTML = JSON.stringify(data);
             }).catch(error => {
@@ -117,14 +105,11 @@
             const code = document.getElementById("code").value;
             const outputstartgame = document.getElementById("outputstartgame");
             outputstartgame.innerHTML = "Starting game...";
-            fetch("/api/ular/startgame", {
+            fetch(`/api/ular/startgame?code=${encodeURIComponent(code)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    code: code
-                })
+                }
             }).then(response => response.json()).then(data => {
                 outputstartgame.innerHTML = JSON.stringify(data);
             }).catch(error => {
@@ -137,15 +122,11 @@
             const player = document.getElementById("player").value;
             const outputrolldice = document.getElementById("outputrolldice");
             outputrolldice.innerHTML = "Rolling dice...";
-            fetch("/api/ular/rolldice", {
+            fetch(`/api/ular/rolldice?code=${encodeURIComponent(code)}&player=${encodeURIComponent(player)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    code: code,
-                    player: player
-                })
+                }
             }).then(response => response.json()).then(data => {
                 outputrolldice.innerHTML = JSON.stringify(data);
             }).catch(error => {
