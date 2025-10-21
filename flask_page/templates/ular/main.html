@@ -1,0 +1,44 @@
+{# ular/main.html #}
+{% extends "ular/base.html" %}
+
+
+{% block content %}
+    <p>Ular</p>
+    
+    <br/>
+    <p>api/createroom</p>
+    <form action="/api/ular/createroom" method="get">
+        <input type="text" name="player" placeholder="player" />
+        <input type="text" name="color" placeholder="color" />
+        <button type="submit">Submit</button>
+    </form>
+    <p id="output">todo - should be call api instead of go to the page</p>
+    <br/>
+    <br/>
+    <p>api/joinroom</p>
+    <form action="/api/ular/joinroom" method="get">
+        <input type="text" name="code" placeholder="code" />
+        <input type="text" name="player" placeholder="player" />
+        <input type="text" name="color" placeholder="color" />
+        <button type="submit">Submit</button>
+    </form>
+    <br/>
+    <br/>
+    <p>api/state</p>
+    <form action="/api/ular/state" method="get">
+        <input type="text" name="code" placeholder="code" />
+        <button type="submit">Submit</button>
+    </form>
+    <br/>
+    <br/>
+    <p>api/startgame</p>
+    <form action="/api/ular/startgame" method="get">
+        <input type="text" name="code" placeholder="code" />
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        
+    </script>
+    
+{% endblock %}
