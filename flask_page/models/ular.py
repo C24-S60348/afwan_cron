@@ -45,12 +45,12 @@ def startroom(code=""):
 
 def adddataroom(code="", turn="", state=""):
     af_addcsv(roomcsv, [
-        code, turn, state
+        code, turn, state, ""
     ])
 
 def adddataplayer(code="", player="", pos=0, color="white"):
     af_addcsv(playerscsv, [
-        code, player, pos, color
+        code, player, pos, color, "", ""
     ])
 
 
@@ -97,31 +97,23 @@ def roomdata(code=""):
         if (d["code"] == code):
             return {
                 "state": d["state"],
-                "turn": d["turn"]
+                "turn": d["turn"],
+                "questionid": d["questionid"]
             }
     
     return {
-        "state": "room not exist",
-        "turn": "room not exist"
+        "state": "",
+        "turn": "",
+        "questionid": ""
     }
 
-def rolldice(code="", player="", currentpos=0):
-    dicenum = random.randint(1,6)
-    newpos = currentpos + dicenum
-
-    #changepos
-    new_data = {"pos":newpos}
-    af_replacecsvtwotarget(playerscsv, 
-                           "player", player, "code", code, 
-                           new_data)
-    
-    #turn
+def modelnextturn(code="", currentplayer=""):
     players = modelgetcsvplayers(code)
     lengtharray = len(players)
     turn = ""
     pnum = 0
     for p in players:
-        if p['player'] == player:
+        if p['player'] == currentplayer:
             if (pnum+1 > lengtharray-1):
                 turn = players[0]['player'] 
             else:
@@ -129,23 +121,101 @@ def rolldice(code="", player="", currentpos=0):
         pnum += 1
     new_data = {"turn":turn}
     af_replacecsv2(roomcsv, "code", code, new_data)
+    return turn
+
+def rolldice(code="", player="", currentpos=0):
+    dicenum = random.randint(1,6)
+    turn = player
+    newpos = currentpos + dicenum
+    questionid = ""
+    if newpos > 100:
+        newpos = 100 - (newpos - 100)
+
+    #changepos
+    new_data = {"pos":newpos}
+    af_replacecsvtwotarget(playerscsv, 
+                           "player", player, "code", code, 
+                           new_data)
+    
+    #if has question, get question
+    qqid = gquestion(newpos, code)
+    question = qqid["question"]
+    questionid = qqid["questionid"]
+
+    if question != []:
+        #turn- if get question, should not next turn, until answered
+        turn = modelnextturn(code, player)
 
     return {
         "player": player,
         "turn": turn,
         "beforepos": currentpos,
         "pos": newpos,
-        "code": code
+        "code": code,
+        "dice": dicenum,
+        "question": question,
+        "questionid": questionid
+    }
+
+def gquestion(newpos="", code=""):
+    #endpos = getendbystartladdersnake(newpos)
+    if getendbystartladdersnake(newpos) == 0:
+        question = []
+        questionid = ""
+    else:
+        question = getrandomquestionlevel("1")
+        questionid = question[0]["id"]
+    
+    new_data = {
+        "questionid": questionid
+    }
+    #room's questionid => number
+    af_replacecsv2(roomcsv, "code", code, new_data)
+
+    return {
+        "question": question,
+        "questionid": questionid
     }
 
 def getsteps(before=0, after=3):
     results = []
 
+    move = "forward"
     step = before
-    for i in range(after-before):
-        step += 1
+    hasreached = False
+
+    for i in range(0,6):
+        if step < after:
+            step += 1
+       
+        if step != after:
+            results.append(step)
+        else:
+            if hasreached == False:
+                hasreached = True
+                results.append(step)
+
+
+    return results
+
+def getstepsdice(before=0, dice=3):
+    results = []
+
+    step = before
+    move = "forward"
+
+    for i in range(0,dice):
+        if step >= 100:
+            move = "backward"
+
+        if move == "forward":
+            step += 1
+        else:
+            step -= 1
+       
         results.append(step)
-        print(step)
+
+
     return results
 
 
@@ -156,3 +226,76 @@ def playeralreadyavailable(player="", code=""):
             return True
     
     return False
+
+def modelgetcsvquestion():
+    data = af_getcsvdict("static/db/ular/questions.csv")
+    return data
+
+def getquestions():
+    data = modelgetcsvquestion()
+    return data
+
+def getquestion(id=""):
+    data = modelgetcsvquestion()
+    result = []
+    for d in data:
+        if d["id"] == id:
+            result.append(d)
+    
+    return result
+
+def getquestionslevel(level=""):
+    data = modelgetcsvquestion()
+    result = []
+    for d in data:
+        if d["level"] == level:
+            result.append(d)
+    
+    return result
+
+def getrandomquestionlevel(level=""):
+    data = modelgetcsvquestion()
+    result = []
+    for d in data:
+        if d["level"] == level:
+            result.append(d)
+
+    return random.choices(result)
+
+def getrandomquestion():
+    data = modelgetcsvquestion()
+    return random.choices(data)
+
+def submitanswer(id="", answer=""):
+    data = modelgetcsvquestion()
+    
+    for d in data:
+        if d["id"] == id:
+            if d["answer"] == answer:
+                return {
+                    "status": "ok",
+                    "answer": True
+                }
+            else:
+                return {
+                    "status": "ok",
+                    "answer": False
+                }
+
+    return {
+        "status": "error",
+        "message": "question not found"
+    }
+
+def getendbystartladdersnake(start=0):
+
+    end = 0
+    data = modelgetcsvconf()
+    for d in data:
+        if d["start"] == str(start):
+            return int(d["end"])
+    return end
+
+def endgame(code=""):
+    new_data = {"state":"ended"}
+    af_replacecsv2(roomcsv, "code", code, new_data)

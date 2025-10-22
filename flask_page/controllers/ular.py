@@ -45,7 +45,7 @@ def apiular_createroom():
         "state": state,
         "pos": pos,
         "message": f"Game {code} created!"
-        })
+    })
 
 @ular_blueprint.route("/api/ular/joinroom")
 def apiular_joinroom():
@@ -67,6 +67,11 @@ def apiular_joinroom():
         if playeralreadyavailable(player, code) == False:
             pos = 0
             adddataplayer(code, player, pos, color)
+        else:
+            return jsonify({
+                "status": "error",
+                "message": f"player {player} is already available"
+            })
         
         return jsonify({
             "status": "ok",
@@ -97,10 +102,10 @@ def apiular_joinroom():
                 "message": f"The room already started, do you want to spectate instead?",
                 "state": rstatus
             })
-    elif rstatus == "finished":
+    elif rstatus == "ended":
         return jsonify({
             "status": "ok",
-            "message": f"The room already finished!",
+            "message": f"The room already ended!",
             "state": rstatus
         })
     else:
@@ -132,7 +137,7 @@ def apiular_startgame():
             "message": f"Room {code} started!",
             "state": "playing"
         })
-    elif rstatus == "playing" or rstatus == "finished":
+    elif rstatus == "playing" or rstatus == "ended":
         return jsonify({
             "status": "error",
             "message": "room already started"
@@ -166,7 +171,7 @@ def apiular_spectate():
     else:
         return jsonify({
             "status": "error",
-            "message": "room is not available or already finished!"
+            "message": "room is not available or already ended!"
         })
     
 @ular_blueprint.route("/api/ular/state")
@@ -179,6 +184,10 @@ def apiular_state():
     rdata = roomdata(code)
     rstate = rdata["state"]
     rturn = rdata["turn"]
+    rquestionid = rdata["questionid"]
+    question = []
+    if rquestionid != "":
+        question = getquestion(rquestionid)
 
     if rstate == "waiting" or rstate == "playing":
         return jsonify({
@@ -187,13 +196,13 @@ def apiular_state():
             "players": modelgetcsvplayers(code),
             "message": f"Room State",
             "turn": rturn,
-            "question": [],
+            "question": question,
             "state": rstate
         })
-    elif rstate == "finished":
+    elif rstate == "ended":
         return jsonify({
             "status": "error",
-            "message": "room is already finished!"
+            "message": "room is already ended!"
         })
     else:
         return jsonify({
@@ -214,6 +223,7 @@ def apiular_rolldice():
     rdata = roomdata(code)
     rstate = rdata["state"]
     rturn = rdata["turn"]
+    rquestionid = rdata["questionid"]
 
     pdata = playerdata(code, player)
     if pdata == []:
@@ -224,39 +234,73 @@ def apiular_rolldice():
     ppos = pdata[0]["pos"]
     ppos = int(ppos)
 
-    if rstate == "playing":
+    if rquestionid != "":
+        #tengah menjawab soalan
+        return jsonify({
+            "status": "error",
+            "message": f"Please answer question first!"
+        })
+    
+    else:
 
-        if rturn == player:
-            rdice = rolldice(code, player, ppos)
+        if rstate == "playing":
+
+            if rturn == player:
+                rdice = rolldice(code, player, ppos)
+                rdata = roomdata(code)
+                rstate = rdata["state"]
+                rturn = rdata["turn"]
+
+                return jsonify({
+                    "status": "ok",
+                    "code": code,
+                    "beforepos": rdice["beforepos"],
+                    "pos": rdice["pos"],
+                    "players": modelgetcsvplayers(code),
+                    "message": f"Room State",
+                    "turn": rdice["turn"],
+                    "question": rdice["question"],
+                    "questionid": rdice["questionid"],
+                    "state": rstate,
+                    "steps": getstepsdice(int(rdice["beforepos"]), int(rdice["dice"])),
+                    "dice": rdice["dice"]
+                })
+            else:
+                return jsonify({
+                    "status": "error",
+                    "message": f"It is {rturn}'s turn!"
+                })
+        elif rstate == "waiting":
             return jsonify({
-                "status": "ok",
-                "code": code,
-                "beforepos": rdice["beforepos"],
-                "pos": rdice["pos"],
-                "players": modelgetcsvplayers(code),
-                "message": f"Room State",
-                "turn": rdice["turn"],
-                "question": [],
-                "state": rstate,
-                "steps": getsteps(int(rdice["beforepos"]), int(rdice["pos"])) 
+                "status": "error",
+                "message": "room is not started yet!"
+            })
+        elif rstate == "ended":
+            return jsonify({
+                "status": "error",
+                "message": "room is already ended!"
             })
         else:
             return jsonify({
                 "status": "error",
-                "message": f"It is {rturn}'s turn!"
+                "message": "room is not available!"
             })
-    elif rstate == "waiting":
-        return jsonify({
-            "status": "error",
-            "message": "room is not started yet!"
-        })
-    elif rstate == "finished":
-        return jsonify({
-            "status": "error",
-            "message": "room is already finished!"
-        })
-    else:
-        return jsonify({
-            "status": "error",
-            "message": "room is not available!"
-        })
+
+    
+@ular_blueprint.route("/api/ular/steps")
+def apiular_teststeps():
+    before = int(af_requestget("before"))
+    dice = int(af_requestget("dice"))
+
+    return getstepsdice(before, dice)
+
+@ular_blueprint.route("/api/ular/endgame")
+def apiular_endgame():
+    code = af_requestget("code")
+
+    endgame(code)
+
+    return jsonify({
+        "status":"ok",
+        "message": f"game {code} ended" 
+    })

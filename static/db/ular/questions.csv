@@ -1,2 +1,7 @@
-question,a1,a2,a3,a4,answer
-apakah ayam,ayam,itik,ikan,ikut,ayam
+id,level,question,a1,a2,a3,a4,answer
+1,1,apakah ayam,ayam,itik,ikan,ikut,ayam
+2,1,apakah ayam2,ayam2,itik2,ikan2,ikut2,ayam2
+3,1,apakah ayam,ayam,itik,ikan,ikut,ayam
+4,2,apakah ayam2,ayam2,itik2,ikan2,ikut2,ayam2
+5,2,apakah ayam,ayam,itik,ikan,ikut,ayam
+6,2,apakah ayam2,ayam2,itik2,ikan2,ikut2,ayam2
