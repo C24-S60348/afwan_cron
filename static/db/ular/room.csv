@@ -1,4 +1,11 @@
-code,turn,state,questionid
+﻿code,turn,state,questionid
 RQZJ,afwan,waiting,
 4WMH,afwan,waiting,
 XIW2,afwan,waiting,
+OTC9,afwan,playing,
+CLRI,afwan,ended,
+QNIU,afwan,playing,
+DU0Y,sara,playing,
+HXL9,sara,ended,
+VX8W,afwan2,ended,
+JUK6,afwan2,ended,

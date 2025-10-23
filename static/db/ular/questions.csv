@@ -1,7 +1,21 @@
 id,level,question,a1,a2,a3,a4,answer
-1,1,apakah ayam,ayam,itik,ikan,ikut,ayam
-2,1,apakah ayam2,ayam2,itik2,ikan2,ikut2,ayam2
-3,1,apakah ayam,ayam,itik,ikan,ikut,ayam
-4,2,apakah ayam2,ayam2,itik2,ikan2,ikut2,ayam2
-5,2,apakah ayam,ayam,itik,ikan,ikut,ayam
-6,2,apakah ayam2,ayam2,itik2,ikan2,ikut2,ayam2
+1,1,Apakah fungsi utama sistem respirasi?,Menukar oksigen kepada karbon dioksida,Mengangkut nutrien ke seluruh badan,Mengawal suhu badan,Mengeluarkan bahan buangan,Menukar oksigen kepada karbon dioksida
+2,1,Apakah nama proses di mana tumbuhan membuat makanan sendiri?,Fotosintesis,Respirasi,Pencernaan,Pembiakan,Fotosintesis
+3,1,Apakah organ utama dalam sistem peredaran darah?,Paru-paru,Hati,Jantung,Otak,Jantung
+4,1,Apakah fungsi klorofil dalam daun?,Menyerap air,Menyerap cahaya matahari,Menyerap karbon dioksida,Mengawal suhu,Menyerap cahaya matahari
+5,1,Apakah nama proses di mana sel membahagi untuk menghasilkan sel baru?,Mitosis,Meiosis,Fotosintesis,Respirasi,Mitosis
+6,1,Apakah fungsi utama sistem saraf?,Mengawal pergerakan badan,Mengawal semua aktiviti badan,Mengangkut darah,Mencerna makanan,Mengawal semua aktiviti badan
+7,1,Apakah nama organ yang menapis darah dalam badan?,Hati,Ginjal,Paru-paru,Jantung,Ginjal
+8,1,Apakah fungsi utama sistem pencernaan?,Mencerna makanan dan menyerap nutrien,Mengangkut oksigen,Mengawal suhu badan,Mengeluarkan hormon,Mencerna makanan dan menyerap nutrien
+9,1,Apakah nama proses di mana tumbuhan menyerap air dari tanah?,Fotosintesis,Transpirasi,Osmosis,Respirasi,Osmosis
+10,1,Apakah fungsi utama sistem imun?,Melindungi badan daripada penyakit,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada penyakit
+11,1,Apakah nama sel darah yang membawa oksigen?,Sel darah putih,Sel darah merah,Platelet,Plasma,Sel darah merah
+12,1,Apakah fungsi utama sistem rangka?,Memberi bentuk dan sokongan kepada badan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Memberi bentuk dan sokongan kepada badan
+13,1,Apakah nama organ yang menghasilkan insulin?,Hati,Pankreas,Ginjal,Paru-paru,Pankreas
+14,1,Apakah fungsi utama sistem endokrin?,Mengeluarkan hormon untuk mengawal badan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Mengeluarkan hormon untuk mengawal badan
+15,1,Apakah nama proses di mana tumbuhan mengeluarkan wap air?,Fotosintesis,Transpirasi,Respirasi,Osmosis,Transpirasi
+16,1,Apakah fungsi utama sistem limfa?,Mengangkut cecair limfa dan melawan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Mengangkut cecair limfa dan melawan jangkitan
+17,1,Apakah nama organ yang menyimpan glikogen?,Hati,Ginjal,Pankreas,Paru-paru,Hati
+18,1,Apakah fungsi utama sistem integumen?,Melindungi badan daripada kecederaan dan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada kecederaan dan jangkitan
+19,1,Apakah nama proses di mana tumbuhan menukar cahaya matahari kepada tenaga?,Fotosintesis,Respirasi,Transpirasi,Osmosis,Fotosintesis
+20,1,Apakah fungsi utama sistem pembiakan?,Menghasilkan keturunan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Menghasilkan keturunan

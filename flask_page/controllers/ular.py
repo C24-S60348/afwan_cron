@@ -11,6 +11,11 @@ def ular():
     html = "afwan"
     return render_template("ular/main.html", html=html)
 
+@ular_blueprint.route("/ular/game")
+def ular_game():
+    html = "afwan"
+    return render_template("ular/game.html", html=html, title="Snakey")
+
 @ular_blueprint.route("/api/ular")
 def apiular():
     return jsonify({"ikan":"ayam"})
@@ -69,17 +74,20 @@ def apiular_joinroom():
             adddataplayer(code, player, pos, color)
         else:
             return jsonify({
-                "status": "error",
-                "message": f"player {player} is already available"
+                "status": "ok",
+                "message": f"player {player} is already available",
+                "code": code,
+                "player": player
+                # "players": modelgetcsvplayers(code)
             })
         
         return jsonify({
             "status": "ok",
             "code": code,
             "player": player,
-            "players": modelgetcsvplayers(code),
-            "message": f"Joined {code} successfully!",
-            "state": rstatus
+            # "players": modelgetcsvplayers(code),
+            "message": f"Joined {code} successfully!"
+            # "state": rstatus
         })
     elif rstatus == "playing":
         players = modelgetcsvplayers(code)
@@ -93,20 +101,26 @@ def apiular_joinroom():
             return jsonify({
                 "status": "ok",
                 "message": f"Rejoin",
-                "state": rstatus
+                "state": rstatus,
+                "code": code,
+                "player": player
             })
         else:
             #if joinroom was the existing player, rejoin
             return jsonify({
                 "status": "ok",
                 "message": f"The room already started, do you want to spectate instead?",
-                "state": rstatus
+                "state": rstatus,
+                "code": code,
+                "player": player
             })
     elif rstatus == "ended":
         return jsonify({
             "status": "ok",
             "message": f"The room already ended!",
-            "state": rstatus
+            "state": rstatus,
+            "code": code,
+            "player": player
         })
     else:
         return jsonify({
@@ -188,21 +202,29 @@ def apiular_state():
     question = []
     if rquestionid != "":
         question = getquestion(rquestionid)
+    
 
-    if rstate == "waiting" or rstate == "playing":
+    if rstate == "waiting" or rstate == "playing" or rstate == "ended":
+
+        if rstate == "waiting":
+            message = f"Waiting players..."
+        elif rstate == "ended":
+            message = f"The game already ended"
+        else:
+            if question == []:
+                message = f"{rturn}'s turn"
+            else:
+                message = f"{rturn}'s turn, Please answer question"
+
         return jsonify({
             "status": "ok",
             "code": code,
             "players": modelgetcsvplayers(code),
-            "message": f"Room State",
+            "message": message,
             "turn": rturn,
             "question": question,
+            "questionid": rquestionid,
             "state": rstate
-        })
-    elif rstate == "ended":
-        return jsonify({
-            "status": "error",
-            "message": "room is already ended!"
         })
     else:
         return jsonify({
@@ -251,24 +273,36 @@ def apiular_rolldice():
                 rstate = rdata["state"]
                 rturn = rdata["turn"]
 
+                ended = checkgameended(rdice["pos"], code)
+
+                if ended == True:
+                    message = f"The game already ended"
+
+                else:
+                    if rdice["question"] == []:
+                        message = f"Roll dice: {rdice["dice"]}, Turn now: {rdice["turn"]}"
+                    else:
+                        message = f"Roll dice: {rdice["dice"]}, Turn now: {rdice["turn"]}, Please answer question"
+
                 return jsonify({
                     "status": "ok",
                     "code": code,
                     "beforepos": rdice["beforepos"],
                     "pos": rdice["pos"],
                     "players": modelgetcsvplayers(code),
-                    "message": f"Room State",
+                    "message": message,
                     "turn": rdice["turn"],
                     "question": rdice["question"],
                     "questionid": rdice["questionid"],
                     "state": rstate,
                     "steps": getstepsdice(int(rdice["beforepos"]), int(rdice["dice"])),
-                    "dice": rdice["dice"]
+                    "dice": rdice["dice"],
+                    "ended": ended
                 })
             else:
                 return jsonify({
                     "status": "error",
-                    "message": f"It is {rturn}'s turn!"
+                    "message": f"It is not your turn!"
                 })
         elif rstate == "waiting":
             return jsonify({

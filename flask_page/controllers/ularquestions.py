@@ -116,30 +116,67 @@ def apiular_submitanswer():
             submitanswerd = submitanswer(rquestionid, answer)
             new_data = {"questionid": ""}
             af_replacecsv2(roomcsv, "code", code, new_data)
-            #todo - kalau tangga, naik, kalau ular, takde
+            
+            #kalau tangga, naik, kalau ular, turun
+            #get player data and ladder or snake info
+            pdata = playerdata(code, player)
+            ppos = pdata[0]['pos']
+            laddersnakeinfo = getladdersnakeinfo(ppos)
+            endpos = laddersnakeinfo['end']
+            ladderorsnake = laddersnakeinfo['ladderorsnake']
+            pos = int(pdata[0]['pos'])
+            additionalmessage = ""
+            
+            modelnextturn(code, player)
             
             if submitanswerd["answer"] == True:
+                #kalau betul, kalau ladder, changepos
+                additionalmessage = "You keep on your place"
+                if ladderorsnake == "ladder":
+                    additionalmessage = "You got ladder!"
+                    pos = endpos
+                    playerchangepos(code, player, endpos)
+                
+                #checker, if pos 100, endgame
+                ended = checkgameended(pos, code)
+
                 return jsonify(
                     {
                         "status": "ok",
-                        "message": f"Congrats! Your answer is right!",
-                        "answer": submitanswerd["answer"]
+                        "message": f"Congrats! Your answer is right! {additionalmessage}",
+                        "answer": submitanswerd["answer"],
+                        "pos": pos,
+                        "ladderorsnake": ladderorsnake,
+                        "players": modelgetcsvplayers(code),
+                        "state": rstate,
+                        "ended": ended
                     }
                 )
             
             else:
+                #kalau betul, kalau snake, changepos
+                additionalmessage = "You keep on your place"
+                if ladderorsnake == "snake":
+                    additionalmessage = "You go down the snake"
+                    pos = endpos
+                    playerchangepos(code, player, endpos)
+
                 return jsonify(
                     {
                         "status": "ok",
-                        "message": f"Awww, you got wrong answer :(",
-                        "answer": submitanswerd["answer"]
+                        "message": f"Awww, you got wrong answer :( {additionalmessage}",
+                        "answer": submitanswerd["answer"],
+                        "pos": pos,
+                        "ladderorsnake": ladderorsnake,
+                        "players": modelgetcsvplayers(code),
+                        "state": rstate,
                     }
                 )
         else:
             return jsonify(
                 {
                     "status": "error",
-                    "message": f"This is not your turn!"
+                    "message": f"It is not your turn!"
                 }
             )
     else:

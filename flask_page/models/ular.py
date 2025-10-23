@@ -123,6 +123,20 @@ def modelnextturn(code="", currentplayer=""):
     af_replacecsv2(roomcsv, "code", code, new_data)
     return turn
 
+def playerchangepos(code="", player="", newpos=""):
+    new_data = {"pos":newpos}
+    af_replacecsvtwotarget(playerscsv, 
+                           "player", player, "code", code, 
+                           new_data)
+
+def checkgameended(pos="", code=""):
+    ended = False
+    if pos == "100" or pos == 100:
+        endgame(code)
+        ended = True
+    
+    return ended
+
 def rolldice(code="", player="", currentpos=0):
     dicenum = random.randint(1,6)
     turn = player
@@ -132,18 +146,14 @@ def rolldice(code="", player="", currentpos=0):
         newpos = 100 - (newpos - 100)
 
     #changepos
-    new_data = {"pos":newpos}
-    af_replacecsvtwotarget(playerscsv, 
-                           "player", player, "code", code, 
-                           new_data)
+    playerchangepos(code, player, newpos)
     
     #if has question, get question
     qqid = gquestion(newpos, code)
     question = qqid["question"]
     questionid = qqid["questionid"]
 
-    if question != []:
-        #turn- if get question, should not next turn, until answered
+    if question == []:
         turn = modelnextturn(code, player)
 
     return {
@@ -295,6 +305,29 @@ def getendbystartladdersnake(start=0):
         if d["start"] == str(start):
             return int(d["end"])
     return end
+
+def getladdersnakeinfo(start=0):
+
+    ladderorsnake = ""
+
+    end = 0
+    data = modelgetcsvconf()
+    for d in data:
+        if d["start"] == str(start):
+            end = int(d["end"])
+            if int(start) > int(end):
+                ladderorsnake = "snake"
+            else:
+                ladderorsnake = "ladder"
+            
+            return {
+                "end": end,
+                "ladderorsnake": ladderorsnake
+            }
+    return {
+        "end": end,
+        "ladderorsnake": ladderorsnake
+    }
 
 def endgame(code=""):
     new_data = {"state":"ended"}
