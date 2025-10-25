@@ -8,6 +8,7 @@ import string
 confcsv = "static/db/ular/conf.csv"
 roomcsv = "static/db/ular/room.csv"
 playerscsv = "static/db/ular/players.csv"
+maxbox = 100
 
 def modelgetcsvconf():
     data = af_getcsvdict(confcsv)
@@ -43,9 +44,9 @@ def startroom(code=""):
 
 
 
-def adddataroom(code="", turn="", state=""):
+def adddataroom(code="", turn="", state="", maxbox=100, topic="biologi"):
     af_addcsv(roomcsv, [
-        code, turn, state, ""
+        code, turn, state, "", maxbox, topic
     ])
 
 def adddataplayer(code="", player="", pos=0, color="white"):
@@ -92,19 +93,28 @@ def roomstatus(code=""):
     return "not exist"
 
 def roomdata(code=""):
+    maxbox = 0
     data = modelgetcsvroom()
     for d in data:
+        maxbox = d["maxbox"]
+        if maxbox == "":
+            maxbox = 0
+        else:
+            maxbox = int(maxbox)
+
         if (d["code"] == code):
             return {
                 "state": d["state"],
                 "turn": d["turn"],
-                "questionid": d["questionid"]
+                "questionid": d["questionid"],
+                "maxbox": maxbox
             }
     
     return {
         "state": "",
         "turn": "",
-        "questionid": ""
+        "questionid": "",
+        "maxbox": maxbox
     }
 
 def modelnextturn(code="", currentplayer=""):
@@ -129,21 +139,22 @@ def playerchangepos(code="", player="", newpos=""):
                            "player", player, "code", code, 
                            new_data)
 
-def checkgameended(pos="", code=""):
+
+def checkgameended(pos="", code="", maxbox=100):
     ended = False
-    if pos == "100" or pos == 100:
+    if pos == str(maxbox) or pos == maxbox:
         endgame(code)
         ended = True
     
     return ended
 
-def rolldice(code="", player="", currentpos=0):
+def rolldice(code="", player="", currentpos=0, maxbox=100):
     dicenum = random.randint(1,6)
     turn = player
     newpos = currentpos + dicenum
     questionid = ""
-    if newpos > 100:
-        newpos = 100 - (newpos - 100)
+    if newpos > maxbox:
+        newpos = maxbox - (newpos - maxbox)
 
     #changepos
     playerchangepos(code, player, newpos)
@@ -208,14 +219,14 @@ def getsteps(before=0, after=3):
 
     return results
 
-def getstepsdice(before=0, dice=3):
+def getstepsdice(before=0, dice=3, maxbox=100):
     results = []
 
     step = before
     move = "forward"
 
     for i in range(0,dice):
-        if step >= 100:
+        if step >= maxbox:
             move = "backward"
 
         if move == "forward":

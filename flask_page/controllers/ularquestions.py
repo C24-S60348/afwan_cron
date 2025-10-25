@@ -109,6 +109,7 @@ def apiular_submitanswer():
     rstate = rdata["state"]
     rturn = rdata["turn"]
     rquestionid = rdata["questionid"]
+    rmaxbox = rdata["maxbox"]
 
     if rquestionid != "":
 
@@ -138,7 +139,7 @@ def apiular_submitanswer():
                     playerchangepos(code, player, endpos)
                 
                 #checker, if pos 100, endgame
-                ended = checkgameended(pos, code)
+                ended = checkgameended(pos, code, rmaxbox)
 
                 return jsonify(
                     {

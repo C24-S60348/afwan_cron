@@ -21,6 +21,145 @@ def apiular():
     return jsonify({"ikan":"ayam"})
     return render_template("main.html", html=html)
 
+@ular_blueprint.route("/api/ular/getsetup")
+def apiular_getsetup():
+    cells = cellsget()
+    
+    return jsonify({
+        "conf": modelgetcsvconf(),
+        "cells": cells['cells'],
+        "gaps": cells['gaps']
+    })
+
+def cellsget():
+
+    gaps = 5
+    size = 30
+    ox = 20 #offset x
+    oy = 20 #offset y
+    return {
+        "cells":
+        [
+            { #0
+                "x": -10,
+                "y": 110 
+            },
+            { #1
+                "x": 0*size,
+                "y": 3*size
+            },
+            {
+                "x": 1*size,
+                "y": 3*size
+            },
+            {
+                "x": 2*size,
+                "y": 3*size
+            },
+            {
+                "x": 3*size,
+                "y": 3*size
+            },
+            {
+                "x": 4*size,
+                "y": 3*size
+            },
+            {
+                "x": 5*size,
+                "y": 3*size
+            },
+            {
+                "x": 6*size,
+                "y": 3*size
+            },
+            { #8
+                "x": 6*size,
+                "y": 2*size
+            },
+            { 
+                "x": 5*size,
+                "y": 2*size
+            },
+            { 
+                "x": 4*size,
+                "y": 2*size
+            },
+            { 
+                "x": 3*size,
+                "y": 2*size
+            },
+            { 
+                "x": 2*size,
+                "y": 2*size
+            },
+            { 
+                "x": 1*size,
+                "y": 2*size
+            },
+            { 
+                "x": 0*size,
+                "y": 2*size
+            },
+            { #15
+                "x": 0*size,
+                "y": 1*size
+            },
+            { 
+                "x": 1*size,
+                "y": 1*size
+            },
+            { 
+                "x": 2*size,
+                "y": 1*size
+            },
+            { 
+                "x": 3*size,
+                "y": 1*size
+            },
+            { 
+                "x": 4*size,
+                "y": 1*size
+            },
+            { 
+                "x": 5*size,
+                "y": 1*size
+            },
+            { 
+                "x": 6*size,
+                "y": 1*size
+            },
+            { #22
+                "x": 6*size,
+                "y": 0*size
+            },
+            { 
+                "x": 5*size,
+                "y": 0*size
+            },
+            { 
+                "x": 4*size,
+                "y": 0*size
+            },
+            { 
+                "x": 3*size,
+                "y": 0*size
+            },
+            { 
+                "x": 2*size,
+                "y": 0*size
+            },
+            { 
+                "x": 1*size,
+                "y": 0*size
+            },
+            { 
+                "x": 0*size,
+                "y": 0*size
+            },
+        ],
+        "gaps": gaps
+    }
+
 @ular_blueprint.route("/api/ular/getconfig")
 def apiular_getconfig():
     return jsonify(modelgetcsvconf())
@@ -30,6 +169,8 @@ def apiular_createroom():
     code = modelgenerateroomcode(4)
     player = af_requestget("player")
     color = af_requestget("color")
+    maxbox = af_requestget("maxbox")
+    topic = af_requestget("topic")
 
     if inputnotvalidated(player):
         return jsonifynotvalid("player")
@@ -39,7 +180,7 @@ def apiular_createroom():
     state = "waiting"
     pos = 0
 
-    adddataroom(code, player, state)
+    adddataroom(code, player, state, int(maxbox), topic)
     adddataplayer(code, player, pos, color)
 
     return jsonify({
@@ -199,6 +340,7 @@ def apiular_state():
     rstate = rdata["state"]
     rturn = rdata["turn"]
     rquestionid = rdata["questionid"]
+    rmaxbox = int(rdata["maxbox"])
     question = []
     if rquestionid != "":
         question = getquestion(rquestionid)
@@ -246,6 +388,7 @@ def apiular_rolldice():
     rstate = rdata["state"]
     rturn = rdata["turn"]
     rquestionid = rdata["questionid"]
+    rmaxbox = int(rdata["maxbox"])
 
     pdata = playerdata(code, player)
     if pdata == []:
@@ -268,12 +411,14 @@ def apiular_rolldice():
         if rstate == "playing":
 
             if rturn == player:
-                rdice = rolldice(code, player, ppos)
+                rdice = rolldice(code, player, ppos, rmaxbox)
                 rdata = roomdata(code)
                 rstate = rdata["state"]
                 rturn = rdata["turn"]
+                rquestionid = rdata["questionid"]
+                rmaxbox = int(rdata["maxbox"])
 
-                ended = checkgameended(rdice["pos"], code)
+                ended = checkgameended(rdice["pos"], code, rmaxbox)
 
                 if ended == True:
                     message = f"The game already ended"
@@ -295,7 +440,7 @@ def apiular_rolldice():
                     "question": rdice["question"],
                     "questionid": rdice["questionid"],
                     "state": rstate,
-                    "steps": getstepsdice(int(rdice["beforepos"]), int(rdice["dice"])),
+                    "steps": getstepsdice(int(rdice["beforepos"]), int(rdice["dice"]), rmaxbox),
                     "dice": rdice["dice"],
                     "ended": ended
                 })
@@ -325,8 +470,9 @@ def apiular_rolldice():
 def apiular_teststeps():
     before = int(af_requestget("before"))
     dice = int(af_requestget("dice"))
+    rmaxbox = 100
 
-    return getstepsdice(before, dice)
+    return getstepsdice(before, dice, rmaxbox)
 
 @ular_blueprint.route("/api/ular/endgame")
 def apiular_endgame():
