@@ -82,11 +82,8 @@ def af_htmltitle(text="Title"):
     return html
     # html += af_htmltitle("Title")
 
-def af_requestget(code="ikan"):
-    if request.args.get(code) == None:
-        return ""
-    else:
-        return request.args.get(code)
+def af_requestget(code="ikan", default=""):
+    return request.args.get(code, default)
     
 def af_requestpost(code="ikan", default=""):
     return request.form.get(code, default)

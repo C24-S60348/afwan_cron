@@ -14,7 +14,7 @@ def ular():
 @ular_blueprint.route("/ular/game")
 def ular_game():
     html = "afwan"
-    return render_template("ular/game.html", html=html, title="Snakey")
+    return render_template("ular/game.html", html=html, title="Ular Ular")
 
 @ular_blueprint.route("/api/ular")
 def apiular():
@@ -168,9 +168,9 @@ def apiular_getconfig():
 def apiular_createroom():
     code = modelgenerateroomcode(4)
     player = af_requestget("player")
-    color = af_requestget("color")
-    maxbox = af_requestget("maxbox")
-    topic = af_requestget("topic")
+    color = af_requestget("color", "black")
+    maxbox = af_requestget("maxbox", 28)
+    topic = af_requestget("topic", "biologi")
 
     if inputnotvalidated(player):
         return jsonifynotvalid("player")
@@ -197,7 +197,7 @@ def apiular_createroom():
 def apiular_joinroom():
     code = af_requestget("code")
     player = af_requestget("player")
-    color = af_requestget("color")
+    color = af_requestget("color", "black")
     
     if inputnotvalidated(code):
         return jsonifynotvalid("code")

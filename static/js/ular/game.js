@@ -337,13 +337,20 @@ function setstate(state) {
 }
 function setdice(dice) {
     const result = document.getElementById("diceR");
+    const result2 = document.getElementById("diceR2");
     if (dice == "" || dice == undefined)
     {
         result.innerHTML = "";
     }
     else
     {
-        result.innerHTML = "dice: 🎲" +dice;
+        result.innerHTML = "Dice: " + dice;
+        result2.innerHTML = "🎲";
+        result2.style.transition = "transform 0.5s ease";
+        result2.style.transform = "rotate(360deg)";
+        setTimeout(() => {
+            result2.style.transform = "rotate(0deg)";
+        }, 500);
     }
     
 }
