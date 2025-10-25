@@ -74,6 +74,60 @@
                 margin-top: 10px;
                 margin-bottom: 10px;
             }
+            body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            }
+            .board {
+            display: grid;
+            /* grid-template-columns: repeat(10, 30px);
+            grid-template-rows: repeat(10, 30px); */
+            grid-template-columns: repeat(7, 30px);
+            grid-template-rows: repeat(4, 30px);
+            justify-content: center;
+            position: relative;
+            /* gap: 1px; */
+            /* margin: 20px auto; */
+            /* width: 200px;
+            height: 200px; */
+            /* border: 2px solid black; */
+            }
+            .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            }
+            .cell:nth-child(odd) {
+            background-color: #d4e6f1;
+            }
+            .snake {
+            background-color: #ffcccc !important;
+            }
+            .ladder {
+            background-color: #ccffcc !important;
+            }
+            .player {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            /* position: relative; */
+            animation: slide 1s ease-in-out;
+            transition: transform 0.5s ease;
+            border: 1px solid #ccc;
+            }
+            @keyframes slide {
+            from {
+                transform: translateY(0px);
+            }
+            to {
+                transform: translateY(0);
+            }
+            }
         </style>
     </head>
 

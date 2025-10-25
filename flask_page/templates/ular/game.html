@@ -3,79 +3,20 @@
 
 
 {% block content %}
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snakes and Ladders</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    .board {
-      display: grid;
-      /* grid-template-columns: repeat(10, 30px);
-      grid-template-rows: repeat(10, 30px); */
-      grid-template-columns: repeat(7, 30px);
-      grid-template-rows: repeat(4, 30px);
-      justify-content: center;
-      position: relative;
-      /* gap: 1px; */
-      /* margin: 20px auto; */
-      /* width: 200px;
-      height: 200px; */
-      /* border: 2px solid black; */
-    }
-    .cell {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 12px;
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-    }
-    .cell:nth-child(odd) {
-      background-color: #d4e6f1;
-    }
-    .snake {
-      background-color: #ffcccc !important;
-    }
-    .ladder {
-      background-color: #ccffcc !important;
-    }
-    .player {
-      width: 20px;
-      height: 20px;
-      background-color: red;
-      border-radius: 50%;
-      position: absolute;
-      /* position: relative; */
-      animation: slide 1s ease-in-out;
-      transition: transform 0.5s ease;
-    }
-    @keyframes slide {
-      from {
-        transform: translateY(0px);
-      }
-      to {
-        transform: translateY(0);
-      }
-    }
-  </style>
-</head>
-    
     <br/>
     <div>
+        <h1>Ular Ular</h1>
         <div id="divrefreshgame">
+            <label for="statecode">Code</label>
             <input type="text" placeholder="Game Code" id="statecode" oninput="this.value = this.value.toUpperCase();"/>
-            <button onclick="refreshgame();">Refresh game</button>
+            <label for="playercode">Player</label>
             <input type="text" placeholder="Player" id="playercode"/>
+            <!-- <button onclick="refreshgame();" class="btn btn-info">Refresh game</button> -->
+            
         </div>
         <div id="divcreatejoin" style="display: flex; gap: 0; border-bottom: 2px solid #ccc;">
-            <button onclick="opentab('create', 'yes');" style="padding: 10px 20px; border: none; background-color: #f0f0f0; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;">Create</button>
-            <button onclick="opentab('join', 'yes');" style="padding: 10px 20px; border: none; background-color: #f0f0f0; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;">Join</button>
+            <button onclick="opentab('create', 'yes');" style="padding: 10px 20px; border: none; background-color: #4CAF50; color: white; cursor: pointer; border-bottom: 2px solid #4CAF50; margin-bottom: -2px; transition: all 0.3s ease;" id="btnCreate">Create</button>
+            <button onclick="opentab('join', 'yes');" style="padding: 10px 20px; border: none; background-color: #f0f0f0; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.3s ease;" id="btnJoin">Join</button>
         </div>
         <br/>
         <div id="divboard">
@@ -93,162 +34,175 @@
             </div>
             <!-- <button id="rollDice">rexample</button> -->
             <div id="boardinfo2">
-                <button type="button" onclick="rolldice()">roll</button>
+                <button type="button" onclick="rolldice()" class="btn btn-warning">Roll</button>
                 <div style="display:flex;justify-content:center;align-items:center;"><p id="diceR">Dice: </p><p style="margin: 0 10px;"> </p><p id="diceR2">🎲</p></div>
                 
             </div>
         </div>
         <div id="divcreateroom">
-            <p>Create Room</p>
+            <!-- <p>Create Room</p> -->
             <form>
                 <div>
-                    <input type="text" id="playercreateroom" placeholder="player" />
-                    <select id="colorcreateroom">
-                        <option value="black">Color</option>
-                        <option value="aliceblue">Alice Blue</option>
-                        <option value="antiquewhite">Antique White</option>
-                        <option value="aqua">Aqua</option>
-                        <option value="aquamarine">Aquamarine</option>
-                        <option value="azure">Azure</option>
-                        <option value="beige">Beige</option>
-                        <option value="bisque">Bisque</option>
-                        <option value="black">Black</option>
-                        <option value="blanchedalmond">Blanched Almond</option>
-                        <option value="blue">Blue</option>
-                        <option value="blueviolet">Blue Violet</option>
-                        <option value="brown">Brown</option>
-                        <option value="burlywood">Burlywood</option>
-                        <option value="cadetblue">Cadet Blue</option>
-                        <option value="chartreuse">Chartreuse</option>
-                        <option value="chocolate">Chocolate</option>
-                        <option value="coral">Coral</option>
-                        <option value="cornflowerblue">Cornflower Blue</option>
-                        <option value="cornsilk">Cornsilk</option>
-                        <option value="crimson">Crimson</option>
-                        <option value="cyan">Cyan</option>
-                        <option value="darkblue">Dark Blue</option>
-                        <option value="darkcyan">Dark Cyan</option>
-                        <option value="darkgoldenrod">Dark Goldenrod</option>
-                        <option value="darkgray">Dark Gray</option>
-                        <option value="darkgreen">Dark Green</option>
-                        <option value="darkkhaki">Dark Khaki</option>
-                        <option value="darkmagenta">Dark Magenta</option>
-                        <option value="darkolivegreen">Dark Olive Green</option>
-                        <option value="darkorange">Dark Orange</option>
-                        <option value="darkorchid">Dark Orchid</option>
-                        <option value="darkred">Dark Red</option>
-                        <option value="darksalmon">Dark Salmon</option>
-                        <option value="darkseagreen">Dark Sea Green</option>
-                        <option value="darkslateblue">Dark Slate Blue</option>
-                        <option value="darkslategray">Dark Slate Gray</option>
-                        <option value="darkturquoise">Dark Turquoise</option>
-                        <option value="darkviolet">Dark Violet</option>
-                        <option value="deeppink">Deep Pink</option>
-                        <option value="deepskyblue">Deep Sky Blue</option>
-                        <option value="dimgray">Dim Gray</option>
-                        <option value="dodgerblue">Dodger Blue</option>
-                        <option value="firebrick">Firebrick</option>
-                        <option value="floralwhite">Floral White</option>
-                        <option value="forestgreen">Forest Green</option>
-                        <option value="fuchsia">Fuchsia</option>
-                        <option value="gainsboro">Gainsboro</option>
-                        <option value="ghostwhite">Ghost White</option>
-                        <option value="gold">Gold</option>
-                        <option value="goldenrod">Goldenrod</option>
-                        <option value="gray">Gray</option>
-                        <option value="green">Green</option>
-                        <option value="greenyellow">Green Yellow</option>
-                        <option value="honeydew">Honeydew</option>
-                        <option value="hotpink">Hot Pink</option>
-                        <option value="indianred">Indian Red</option>
-                        <option value="indigo">Indigo</option>
-                        <option value="ivory">Ivory</option>
-                        <option value="khaki">Khaki</option>
-                        <option value="lavender">Lavender</option>
-                        <option value="lavenderblush">Lavender Blush</option>
-                        <option value="lawngreen">Lawn Green</option>
-                        <option value="lemonchiffon">Lemon Chiffon</option>
-                        <option value="lightblue">Light Blue</option>
-                        <option value="lightcoral">Light Coral</option>
-                        <option value="lightcyan">Light Cyan</option>
-                        <option value="lightgoldenrodyellow">Light Goldenrod Yellow</option>
-                        <option value="lightgray">Light Gray</option>
-                        <option value="lightgreen">Light Green</option>
-                        <option value="lightpink">Light Pink</option>
-                        <option value="lightsalmon">Light Salmon</option>
-                        <option value="lightseagreen">Light Sea Green</option>
-                        <option value="lightskyblue">Light Sky Blue</option>
-                        <option value="lightslategray">Light Slate Gray</option>
-                        <option value="lightsteelblue">Light Steel Blue</option>
-                        <option value="lightyellow">Light Yellow</option>
-                        <option value="lime">Lime</option>
-                        <option value="limegreen">Lime Green</option>
-                        <option value="linen">Linen</option>
-                        <option value="magenta">Magenta</option>
-                        <option value="maroon">Maroon</option>
-                        <option value="mediumaquamarine">Medium Aquamarine</option>
-                        <option value="mediumblue">Medium Blue</option>
-                        <option value="mediumorchid">Medium Orchid</option>
-                        <option value="mediumpurple">Medium Purple</option>
-                        <option value="mediumseagreen">Medium Sea Green</option>
-                        <option value="mediumslateblue">Medium Slate Blue</option>
-                        <option value="mediumspringgreen">Medium Spring Green</option>
-                        <option value="mediumturquoise">Medium Turquoise</option>
-                        <option value="mediumvioletred">Medium Violet Red</option>
-                        <option value="midnightblue">Midnight Blue</option>
-                        <option value="mintcream">Mint Cream</option>
-                        <option value="mistyrose">Misty Rose</option>
-                        <option value="moccasin">Moccasin</option>
-                        <option value="navajowhite">Navajo White</option>
-                        <option value="navy">Navy</option>
-                        <option value="oldlace">Old Lace</option>
-                        <option value="olive">Olive</option>
-                        <option value="olivedrab">Olive Drab</option>
-                        <option value="orange">Orange</option>
-                        <option value="orangered">Orange Red</option>
-                        <option value="orchid">Orchid</option>
-                        <option value="palegoldenrod">Pale Goldenrod</option>
-                        <option value="palegreen">Pale Green</option>
-                        <option value="paleturquoise">Pale Turquoise</option>
-                        <option value="palevioletred">Pale Violet Red</option>
-                        <option value="papayawhip">Papaya Whip</option>
-                        <option value="peachpuff">Peach Puff</option>
-                        <option value="peru">Peru</option>
-                        <option value="pink">Pink</option>
-                        <option value="plum">Plum</option>
-                        <option value="powderblue">Powder Blue</option>
-                        <option value="purple">Purple</option>
-                        <option value="rebeccapurple">Rebecca Purple</option>
-                        <option value="red">Red</option>
-                        <option value="rosybrown">Rosy Brown</option>
-                        <option value="royalblue">Royal Blue</option>
-                        <option value="saddlebrown">Saddle Brown</option>
-                        <option value="salmon">Salmon</option>
-                        <option value="sandybrown">Sandy Brown</option>
-                        <option value="seagreen">Sea Green</option>
-                        <option value="seashell">Seashell</option>
-                        <option value="sienna">Sienna</option>
-                        <option value="silver">Silver</option>
-                        <option value="skyblue">Sky Blue</option>
-                        <option value="slateblue">Slate Blue</option>
-                        <option value="slategray">Slate Gray</option>
-                        <option value="snow">Snow</option>
-                        <option value="springgreen">Spring Green</option>
-                        <option value="steelblue">Steel Blue</option>
-                        <option value="tan">Tan</option>
-                        <option value="teal">Teal</option>
-                        <option value="thistle">Thistle</option>
-                        <option value="tomato">Tomato</option>
-                        <option value="turquoise">Turquoise</option>
-                        <option value="violet">Violet</option>
-                        <option value="wheat">Wheat</option>
-                        <option value="white">White</option>
-                        <option value="whitesmoke">White Smoke</option>
-                        <option value="yellow">Yellow</option>
-                        <option value="yellowgreen">Yellow Green</option>
-                    </select>
+                    <label for="playercreateroom">Player</label>
+                    <input type="text" id="playercreateroom" placeholder="player" class="form-control" />
+                    <label for="colorcreateroom">Color</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <select id="colorcreateroom" class="form-control" style="flex: 1;">
+                            <option value="black">Color</option>
+                            <option value="aliceblue">Alice Blue</option>
+                            <option value="antiquewhite">Antique White</option>
+                            <option value="aqua">Aqua</option>
+                            <option value="aquamarine">Aquamarine</option>
+                            <option value="azure">Azure</option>
+                            <option value="beige">Beige</option>
+                            <option value="bisque">Bisque</option>
+                            <option value="black">Black</option>
+                            <option value="blanchedalmond">Blanched Almond</option>
+                            <option value="blue">Blue</option>
+                            <option value="blueviolet">Blue Violet</option>
+                            <option value="brown">Brown</option>
+                            <option value="burlywood">Burlywood</option>
+                            <option value="cadetblue">Cadet Blue</option>
+                            <option value="chartreuse">Chartreuse</option>
+                            <option value="chocolate">Chocolate</option>
+                            <option value="coral">Coral</option>
+                            <option value="cornflowerblue">Cornflower Blue</option>
+                            <option value="cornsilk">Cornsilk</option>
+                            <option value="crimson">Crimson</option>
+                            <option value="cyan">Cyan</option>
+                            <option value="darkblue">Dark Blue</option>
+                            <option value="darkcyan">Dark Cyan</option>
+                            <option value="darkgoldenrod">Dark Goldenrod</option>
+                            <option value="darkgray">Dark Gray</option>
+                            <option value="darkgreen">Dark Green</option>
+                            <option value="darkkhaki">Dark Khaki</option>
+                            <option value="darkmagenta">Dark Magenta</option>
+                            <option value="darkolivegreen">Dark Olive Green</option>
+                            <option value="darkorange">Dark Orange</option>
+                            <option value="darkorchid">Dark Orchid</option>
+                            <option value="darkred">Dark Red</option>
+                            <option value="darksalmon">Dark Salmon</option>
+                            <option value="darkseagreen">Dark Sea Green</option>
+                            <option value="darkslateblue">Dark Slate Blue</option>
+                            <option value="darkslategray">Dark Slate Gray</option>
+                            <option value="darkturquoise">Dark Turquoise</option>
+                            <option value="darkviolet">Dark Violet</option>
+                            <option value="deeppink">Deep Pink</option>
+                            <option value="deepskyblue">Deep Sky Blue</option>
+                            <option value="dimgray">Dim Gray</option>
+                            <option value="dodgerblue">Dodger Blue</option>
+                            <option value="firebrick">Firebrick</option>
+                            <option value="floralwhite">Floral White</option>
+                            <option value="forestgreen">Forest Green</option>
+                            <option value="fuchsia">Fuchsia</option>
+                            <option value="gainsboro">Gainsboro</option>
+                            <option value="ghostwhite">Ghost White</option>
+                            <option value="gold">Gold</option>
+                            <option value="goldenrod">Goldenrod</option>
+                            <option value="gray">Gray</option>
+                            <option value="green">Green</option>
+                            <option value="greenyellow">Green Yellow</option>
+                            <option value="honeydew">Honeydew</option>
+                            <option value="hotpink">Hot Pink</option>
+                            <option value="indianred">Indian Red</option>
+                            <option value="indigo">Indigo</option>
+                            <option value="ivory">Ivory</option>
+                            <option value="khaki">Khaki</option>
+                            <option value="lavender">Lavender</option>
+                            <option value="lavenderblush">Lavender Blush</option>
+                            <option value="lawngreen">Lawn Green</option>
+                            <option value="lemonchiffon">Lemon Chiffon</option>
+                            <option value="lightblue">Light Blue</option>
+                            <option value="lightcoral">Light Coral</option>
+                            <option value="lightcyan">Light Cyan</option>
+                            <option value="lightgoldenrodyellow">Light Goldenrod Yellow</option>
+                            <option value="lightgray">Light Gray</option>
+                            <option value="lightgreen">Light Green</option>
+                            <option value="lightpink">Light Pink</option>
+                            <option value="lightsalmon">Light Salmon</option>
+                            <option value="lightseagreen">Light Sea Green</option>
+                            <option value="lightskyblue">Light Sky Blue</option>
+                            <option value="lightslategray">Light Slate Gray</option>
+                            <option value="lightsteelblue">Light Steel Blue</option>
+                            <option value="lightyellow">Light Yellow</option>
+                            <option value="lime">Lime</option>
+                            <option value="limegreen">Lime Green</option>
+                            <option value="linen">Linen</option>
+                            <option value="magenta">Magenta</option>
+                            <option value="maroon">Maroon</option>
+                            <option value="mediumaquamarine">Medium Aquamarine</option>
+                            <option value="mediumblue">Medium Blue</option>
+                            <option value="mediumorchid">Medium Orchid</option>
+                            <option value="mediumpurple">Medium Purple</option>
+                            <option value="mediumseagreen">Medium Sea Green</option>
+                            <option value="mediumslateblue">Medium Slate Blue</option>
+                            <option value="mediumspringgreen">Medium Spring Green</option>
+                            <option value="mediumturquoise">Medium Turquoise</option>
+                            <option value="mediumvioletred">Medium Violet Red</option>
+                            <option value="midnightblue">Midnight Blue</option>
+                            <option value="mintcream">Mint Cream</option>
+                            <option value="mistyrose">Misty Rose</option>
+                            <option value="moccasin">Moccasin</option>
+                            <option value="navajowhite">Navajo White</option>
+                            <option value="navy">Navy</option>
+                            <option value="oldlace">Old Lace</option>
+                            <option value="olive">Olive</option>
+                            <option value="olivedrab">Olive Drab</option>
+                            <option value="orange">Orange</option>
+                            <option value="orangered">Orange Red</option>
+                            <option value="orchid">Orchid</option>
+                            <option value="palegoldenrod">Pale Goldenrod</option>
+                            <option value="palegreen">Pale Green</option>
+                            <option value="paleturquoise">Pale Turquoise</option>
+                            <option value="palevioletred">Pale Violet Red</option>
+                            <option value="papayawhip">Papaya Whip</option>
+                            <option value="peachpuff">Peach Puff</option>
+                            <option value="peru">Peru</option>
+                            <option value="pink">Pink</option>
+                            <option value="plum">Plum</option>
+                            <option value="powderblue">Powder Blue</option>
+                            <option value="purple">Purple</option>
+                            <option value="rebeccapurple">Rebecca Purple</option>
+                            <option value="red">Red</option>
+                            <option value="rosybrown">Rosy Brown</option>
+                            <option value="royalblue">Royal Blue</option>
+                            <option value="saddlebrown">Saddle Brown</option>
+                            <option value="salmon">Salmon</option>
+                            <option value="sandybrown">Sandy Brown</option>
+                            <option value="seagreen">Sea Green</option>
+                            <option value="seashell">Seashell</option>
+                            <option value="sienna">Sienna</option>
+                            <option value="silver">Silver</option>
+                            <option value="skyblue">Sky Blue</option>
+                            <option value="slateblue">Slate Blue</option>
+                            <option value="slategray">Slate Gray</option>
+                            <option value="snow">Snow</option>
+                            <option value="springgreen">Spring Green</option>
+                            <option value="steelblue">Steel Blue</option>
+                            <option value="tan">Tan</option>
+                            <option value="teal">Teal</option>
+                            <option value="thistle">Thistle</option>
+                            <option value="tomato">Tomato</option>
+                            <option value="turquoise">Turquoise</option>
+                            <option value="violet">Violet</option>
+                            <option value="wheat">Wheat</option>
+                            <option value="white">White</option>
+                            <option value="whitesmoke">White Smoke</option>
+                            <option value="yellow">Yellow</option>
+                            <option value="yellowgreen">Yellow Green</option>
+                        </select>
+                        <div id="colorpreview" style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ccc; background-color: black;"></div>
+                    </div>
+                    <script>
+                        document.getElementById('colorcreateroom').addEventListener('change', function() {
+                            const selectedColor = this.value;
+                            document.getElementById('colorpreview').style.backgroundColor = selectedColor;
+                        });
+                    </script>
                     <input type="hidden" id="maxboxcreateroom" placeholder="maxbox (100/28 kotak sahaja)" />
-                    <select id="topiccreateroom">
+                    
+                    <label for="topiccreateroom">Topic</label>
+                    <select id="topiccreateroom" class="form-control">
                         <option value="biologi">Topic</option>
                         <option value="biologi">Biologi</option>
                         <option value="fizik">Fizik</option>
@@ -256,66 +210,31 @@
                         <option value="sains">Sains</option>
                         <option value="matematik">Matematik</option>
                     </select>
-                    <button type="button" onclick="createroom()">Create</button>
+                    <button type="button" class="btn btn-success" onclick="createroom()">Create</button>
                 </div>
             </form>
             <!-- <pre id="outputcreateroom"></pre> -->
         </div>
         <div id="divjoinroom">
-            <p>Join Room</p>
+            <!-- <p>Join Room</p> -->
             <form>
                 <div>
                     <input type="text" id="codejoinroom" placeholder="code" oninput="this.value = this.value.toUpperCase();"/>
                     <input type="text" id="playerjoinroom" placeholder="player" />
                     <input type="text" id="colorjoinroom" placeholder="color (green/yellow/blue etc.)" />
-                    <button type="button" onclick="joinroom()">Join</button>
+                    <button type="button" class="btn btn-success" onclick="joinroom()">Join</button>
                 </div>
             </form>
             <!-- <pre id="outputjoinroom"></pre> -->
-        </div>
-        <div style="display:none;">
-            <p>api/ular/state</p>
-            <form>
-                <input type="text" id="codestate" placeholder="code" />
-                <button type="button" onclick="state()">Submit</button>
-            </form>
-            <pre id="outputstate"></pre>
-            <br/>
-            <br/>
-            <p>api/ular/startgame</p>
-            <form>
-                <input type="text" id="codestartgame" placeholder="code" />
-                <button type="button" onclick="startgame()">Submit</button>
-            </form>
-            <pre id="outputstartgame"></pre>
-            <br/>
-            <br/>
-            <p>api/ular/rolldice</p>
-            <form>
-                <input type="text" id="coderolldice" placeholder="code" />
-                <input type="text" id="playerrolldice" placeholder="player" />
-                <button type="button" onclick="rolldice()">Submit</button>
-            </form>
-            <pre id="outputrolldice"></pre>
-            <br/>
-            <br/>
-            <p>api/ular/submitanswer</p>
-            <form>
-                <input type="text" id="codesubmitanswer" placeholder="code" />
-                <input type="text" id="playersubmitanswer" placeholder="player" />
-                <input type="text" id="answersubmitanswer" placeholder="answer" />
-                <button type="button" onclick="submitanswer()">Submit</button>
-            </form>
-            <pre id="outputsubmitanswer"></pre>
         </div>
 
         <div id="divquestion">
             <div id="questionplayertext" style="margin-bottom:15px;font-weight: bold;">Answerer: </div>
             <div id="questiontext">Question: ayam</div>
-            <button id="a1text" onclick="jawab(this.innerHTML)">1</button>
-            <button id="a2text" onclick="jawab(this.innerHTML)">2</button>
-            <button id="a3text" onclick="jawab(this.innerHTML)">3</button>
-            <button id="a4text" onclick="jawab(this.innerHTML)">4</button>
+            <button id="a1text" onclick="jawab(this.innerHTML)" class="btn btn-info">1</button>
+            <button id="a2text" onclick="jawab(this.innerHTML)" class="btn btn-info">2</button>
+            <button id="a3text" onclick="jawab(this.innerHTML)" class="btn btn-info">3</button>
+            <button id="a4text" onclick="jawab(this.innerHTML)" class="btn btn-info">4</button>
         </div>
 
         
