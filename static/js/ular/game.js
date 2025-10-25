@@ -5,6 +5,8 @@ function opentab(tab, close = "no")
     const divcreateroom = document.getElementById('divcreateroom');
     const divjoinroom = document.getElementById('divjoinroom');
     const divboard = document.getElementById('divboard');
+    const btnCreate = document.getElementById('btnCreate');
+    const btnJoin = document.getElementById('btnJoin');
 
     if (tab == "create")
     {
@@ -13,6 +15,14 @@ function opentab(tab, close = "no")
         {
             divjoinroom.style.display = "none";
             divboard.style.display = "none";
+            // Style active tab
+            btnCreate.style.backgroundColor = "#4CAF50";
+            btnCreate.style.color = "white";
+            btnCreate.style.borderBottom = "2px solid #4CAF50";
+            // Reset inactive tab
+            btnJoin.style.backgroundColor = "#f0f0f0";
+            btnJoin.style.color = "black";
+            btnJoin.style.borderBottom = "2px solid transparent";
         }
     }
     else if (tab == "join")
@@ -22,6 +32,14 @@ function opentab(tab, close = "no")
         {
             divcreateroom.style.display = "none";
             divboard.style.display = "none";
+            // Style active tab
+            btnJoin.style.backgroundColor = "#2196F3";
+            btnJoin.style.color = "white";
+            btnJoin.style.borderBottom = "2px solid #2196F3";
+            // Reset inactive tab
+            btnCreate.style.backgroundColor = "#f0f0f0";
+            btnCreate.style.color = "black";
+            btnCreate.style.borderBottom = "2px solid transparent";
         }
     }
     else if (tab == "board")
@@ -208,7 +226,6 @@ const cells = [
     }
   ];
 
-// ------------------ FUNCTIONS ------------------
 function addPlayer(playerId, color = 'red') {
   // prevent duplicates
   if (playerElements[playerId]) return;
@@ -290,7 +307,7 @@ function setplayers(players) {
 
         players.forEach(item => {
             html += "<div style='display:flex;justify-content:center;align-items:center;'>";
-            html += `ID: ${item.player}, color: ${item.color}, pos: ${item.pos} `
+            html += `${item.player} - ${item.pos} `
             html += `<div style='border-radius:24px;background-color:${item.color};width:28px;height:28px;'> </div> `
             html += "</div>"
             setpos("")
@@ -327,7 +344,7 @@ function setstate(state) {
     const result = document.getElementById("stateR");
     if (state == "waiting")
     {
-        result.innerHTML = "state: " +state + "<button onclick='startgame();'>Start</button>";
+        result.innerHTML = "state: " +state + "<button class='btn btn-success' onclick='startgame();'>Start</button>";
     }
     else
     {
