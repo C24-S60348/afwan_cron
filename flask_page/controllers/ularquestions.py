@@ -17,17 +17,17 @@ def apiular_getquestions():
         }
     )
 
-@ularq_blueprint.route("/api/ular/getquestionslevel")
-def apiular_getquestionslevel():
-    level = af_requestget("level")
-    if inputnotvalidated(level):
-        return jsonifynotvalid("level")
+@ularq_blueprint.route("/api/ular/getquestionstopic")
+def apiular_getquestionstopic():
+    topic = af_requestget("topic")
+    if inputnotvalidated(topic):
+        return jsonifynotvalid("topic")
     
     return jsonify(
         {
             "status": "ok",
-            "message": f"all questions level {level}",
-            "result": getquestionslevel(level)
+            "message": f"all questions topic {topic}",
+            "result": getquestionstopic(topic)
         }
     )
 
@@ -47,8 +47,8 @@ def apiular_getquestion():
 
 
    
-@ularq_blueprint.route("/api/ular/getquestionlevel")
-def apiular_getquestionlevel():
+@ularq_blueprint.route("/api/ular/getquestiontopic")
+def apiular_getquestiontopic():
     level = af_requestget("level")
     if inputnotvalidated(level):
         return jsonifynotvalid("level")
@@ -56,8 +56,8 @@ def apiular_getquestionlevel():
     return jsonify(
         {
             "status": "ok",
-            "message": f"get random question on level {level}",
-            "result": getrandomquestionlevel(level)
+            "message": f"get random question on topic {topic}",
+            "result": getrandomquestiontopic(topic)
         }
     )
 

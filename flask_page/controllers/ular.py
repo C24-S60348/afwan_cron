@@ -40,121 +40,63 @@ def cellsget():
     return {
         "cells":
         [
-            { #0
-                "x": -10,
-                "y": 110 
+            { "x": -10,"y": 110 
             },
-            { #1
-                "x": 0*size,
-                "y": 3*size
+            { "x": 0*size,"y": 3*size
             },
-            {
-                "x": 1*size,
-                "y": 3*size
+            {"x": 1*size,"y": 3*size
             },
-            {
-                "x": 2*size,
-                "y": 3*size
+            {"x": 2*size,"y": 3*size
             },
-            {
-                "x": 3*size,
-                "y": 3*size
+            {"x": 3*size,"y": 3*size
             },
-            {
-                "x": 4*size,
-                "y": 3*size
+            {"x": 4*size,"y": 3*size
             },
-            {
-                "x": 5*size,
-                "y": 3*size
+            {"x": 5*size,"y": 3*size
             },
-            {
-                "x": 6*size,
-                "y": 3*size
+            {"x": 6*size,"y": 3*size
             },
-            { #8
-                "x": 6*size,
-                "y": 2*size
+            { "x": 6*size,"y": 2*size
             },
-            { 
-                "x": 5*size,
-                "y": 2*size
+            { "x": 5*size,"y": 2*size
             },
-            { 
-                "x": 4*size,
-                "y": 2*size
+            { "x": 4*size,"y": 2*size
             },
-            { 
-                "x": 3*size,
-                "y": 2*size
+            { "x": 3*size,"y": 2*size
             },
-            { 
-                "x": 2*size,
-                "y": 2*size
+            { "x": 2*size,"y": 2*size
             },
-            { 
-                "x": 1*size,
-                "y": 2*size
+            { "x": 1*size,"y": 2*size
             },
-            { 
-                "x": 0*size,
-                "y": 2*size
+            { "x": 0*size,"y": 2*size
             },
-            { #15
-                "x": 0*size,
-                "y": 1*size
+            { "x": 0*size,"y": 1*size
             },
-            { 
-                "x": 1*size,
-                "y": 1*size
+            { "x": 1*size,"y": 1*size
             },
-            { 
-                "x": 2*size,
-                "y": 1*size
+            { "x": 2*size,"y": 1*size
             },
-            { 
-                "x": 3*size,
-                "y": 1*size
+            { "x": 3*size,"y": 1*size
             },
-            { 
-                "x": 4*size,
-                "y": 1*size
+            { "x": 4*size,"y": 1*size
             },
-            { 
-                "x": 5*size,
-                "y": 1*size
+            { "x": 5*size,"y": 1*size
             },
-            { 
-                "x": 6*size,
-                "y": 1*size
+            { "x": 6*size,"y": 1*size
             },
-            { #22
-                "x": 6*size,
-                "y": 0*size
+            { "x": 6*size,"y": 0*size
             },
-            { 
-                "x": 5*size,
-                "y": 0*size
+            { "x": 5*size,"y": 0*size
             },
-            { 
-                "x": 4*size,
-                "y": 0*size
+            { "x": 4*size,"y": 0*size
             },
-            { 
-                "x": 3*size,
-                "y": 0*size
+            { "x": 3*size,"y": 0*size
             },
-            { 
-                "x": 2*size,
-                "y": 0*size
+            { "x": 2*size,"y": 0*size
             },
-            { 
-                "x": 1*size,
-                "y": 0*size
+            { "x": 1*size,"y": 0*size
             },
-            { 
-                "x": 0*size,
-                "y": 0*size
+            { "x": 0*size,"y": 0*size
             },
         ],
         "gaps": gaps

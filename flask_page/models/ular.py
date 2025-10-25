@@ -180,11 +180,14 @@ def rolldice(code="", player="", currentpos=0, maxbox=100):
 
 def gquestion(newpos="", code=""):
     #endpos = getendbystartladdersnake(newpos)
+    rdata = roomdata(code)
+    topic = rdata["topic"]
+
     if getendbystartladdersnake(newpos) == 0:
         question = []
         questionid = ""
     else:
-        question = getrandomquestionlevel("1")
+        question = getrandomquestiontopic(topic)
         questionid = question[0]["id"]
     
     new_data = {
@@ -265,20 +268,20 @@ def getquestion(id=""):
     
     return result
 
-def getquestionslevel(level=""):
+def getquestionstopic(topic=""):
     data = modelgetcsvquestion()
     result = []
     for d in data:
-        if d["level"] == level:
+        if d["topic"] == topic:
             result.append(d)
     
     return result
 
-def getrandomquestionlevel(level=""):
+def getrandomquestiontopic(topic=""):
     data = modelgetcsvquestion()
     result = []
     for d in data:
-        if d["level"] == level:
+        if d["topic"] == topic:
             result.append(d)
 
     return random.choices(result)

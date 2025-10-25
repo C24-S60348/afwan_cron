@@ -1,21 +1,101 @@
-id,level,question,a1,a2,a3,a4,answer
-1,1,Apakah fungsi utama sistem respirasi?,Menukar oksigen kepada karbon dioksida,Mengangkut nutrien ke seluruh badan,Mengawal suhu badan,Mengeluarkan bahan buangan,Menukar oksigen kepada karbon dioksida
-2,1,Apakah nama proses di mana tumbuhan membuat makanan sendiri?,Fotosintesis,Respirasi,Pencernaan,Pembiakan,Fotosintesis
-3,1,Apakah organ utama dalam sistem peredaran darah?,Paru-paru,Hati,Jantung,Otak,Jantung
-4,1,Apakah fungsi klorofil dalam daun?,Menyerap air,Menyerap cahaya matahari,Menyerap karbon dioksida,Mengawal suhu,Menyerap cahaya matahari
-5,1,Apakah nama proses di mana sel membahagi untuk menghasilkan sel baru?,Mitosis,Meiosis,Fotosintesis,Respirasi,Mitosis
-6,1,Apakah fungsi utama sistem saraf?,Mengawal pergerakan badan,Mengawal semua aktiviti badan,Mengangkut darah,Mencerna makanan,Mengawal semua aktiviti badan
-7,1,Apakah nama organ yang menapis darah dalam badan?,Hati,Ginjal,Paru-paru,Jantung,Ginjal
-8,1,Apakah fungsi utama sistem pencernaan?,Mencerna makanan dan menyerap nutrien,Mengangkut oksigen,Mengawal suhu badan,Mengeluarkan hormon,Mencerna makanan dan menyerap nutrien
-9,1,Apakah nama proses di mana tumbuhan menyerap air dari tanah?,Fotosintesis,Transpirasi,Osmosis,Respirasi,Osmosis
-10,1,Apakah fungsi utama sistem imun?,Melindungi badan daripada penyakit,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada penyakit
-11,1,Apakah nama sel darah yang membawa oksigen?,Sel darah putih,Sel darah merah,Platelet,Plasma,Sel darah merah
-12,1,Apakah fungsi utama sistem rangka?,Memberi bentuk dan sokongan kepada badan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Memberi bentuk dan sokongan kepada badan
-13,1,Apakah nama organ yang menghasilkan insulin?,Hati,Pankreas,Ginjal,Paru-paru,Pankreas
-14,1,Apakah fungsi utama sistem endokrin?,Mengeluarkan hormon untuk mengawal badan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Mengeluarkan hormon untuk mengawal badan
-15,1,Apakah nama proses di mana tumbuhan mengeluarkan wap air?,Fotosintesis,Transpirasi,Respirasi,Osmosis,Transpirasi
-16,1,Apakah fungsi utama sistem limfa?,Mengangkut cecair limfa dan melawan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Mengangkut cecair limfa dan melawan jangkitan
-17,1,Apakah nama organ yang menyimpan glikogen?,Hati,Ginjal,Pankreas,Paru-paru,Hati
-18,1,Apakah fungsi utama sistem integumen?,Melindungi badan daripada kecederaan dan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada kecederaan dan jangkitan
-19,1,Apakah nama proses di mana tumbuhan menukar cahaya matahari kepada tenaga?,Fotosintesis,Respirasi,Transpirasi,Osmosis,Fotosintesis
-20,1,Apakah fungsi utama sistem pembiakan?,Menghasilkan keturunan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Menghasilkan keturunan
+id,topic,question,a1,a2,a3,a4,answer
+1,biologi,Apakah fungsi utama sistem respirasi?,Menukar oksigen kepada karbon dioksida,Mengangkut nutrien ke seluruh badan,Mengawal suhu badan,Mengeluarkan bahan buangan,Menukar oksigen kepada karbon dioksida
+2,biologi,Apakah nama proses di mana tumbuhan membuat makanan sendiri?,Fotosintesis,Respirasi,Pencernaan,Pembiakan,Fotosintesis
+3,biologi,Apakah organ utama dalam sistem peredaran darah?,Paru-paru,Hati,Jantung,Otak,Jantung
+4,biologi,Apakah fungsi klorofil dalam daun?,Menyerap air,Menyerap cahaya matahari,Menyerap karbon dioksida,Mengawal suhu,Menyerap cahaya matahari
+5,biologi,Apakah nama proses di mana sel membahagi untuk menghasilkan sel baru?,Mitosis,Meiosis,Fotosintesis,Respirasi,Mitosis
+6,biologi,Apakah fungsi utama sistem saraf?,Mengawal pergerakan badan,Mengawal semua aktiviti badan,Mengangkut darah,Mencerna makanan,Mengawal semua aktiviti badan
+7,biologi,Apakah nama organ yang menapis darah dalam badan?,Hati,Ginjal,Paru-paru,Jantung,Ginjal
+8,biologi,Apakah fungsi utama sistem pencernaan?,Mencerna makanan dan menyerap nutrien,Mengangkut oksigen,Mengawal suhu badan,Mengeluarkan hormon,Mencerna makanan dan menyerap nutrien
+9,biologi,Apakah nama proses di mana tumbuhan menyerap air dari tanah?,Fotosintesis,Transpirasi,Osmosis,Respirasi,Osmosis
+10,biologi,Apakah fungsi utama sistem imun?,Melindungi badan daripada penyakit,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada penyakit
+11,biologi,Apakah nama sel darah yang membawa oksigen?,Sel darah putih,Sel darah merah,Platelet,Plasma,Sel darah merah
+12,biologi,Apakah fungsi utama sistem rangka?,Memberi bentuk dan sokongan kepada badan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Memberi bentuk dan sokongan kepada badan
+13,biologi,Apakah nama organ yang menghasilkan insulin?,Hati,Pankreas,Ginjal,Paru-paru,Pankreas
+14,biologi,Apakah fungsi utama sistem endokrin?,Mengeluarkan hormon untuk mengawal badan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Mengeluarkan hormon untuk mengawal badan
+15,biologi,Apakah nama proses di mana tumbuhan mengeluarkan wap air?,Fotosintesis,Transpirasi,Respirasi,Osmosis,Transpirasi
+16,biologi,Apakah fungsi utama sistem limfa?,Mengangkut cecair limfa dan melawan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Mengangkut cecair limfa dan melawan jangkitan
+17,biologi,Apakah nama organ yang menyimpan glikogen?,Hati,Ginjal,Pankreas,Paru-paru,Hati
+18,biologi,Apakah fungsi utama sistem integumen?,Melindungi badan daripada kecederaan dan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada kecederaan dan jangkitan
+19,biologi,Apakah nama proses di mana tumbuhan menukar cahaya matahari kepada tenaga?,Fotosintesis,Respirasi,Transpirasi,Osmosis,Fotosintesis
+20,biologi,Apakah fungsi utama sistem pembiakan?,Menghasilkan keturunan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Menghasilkan keturunan
+21,fizik,Apakah unit SI untuk daya?,Newton,Joule,Watt,Pascal,Newton
+22,fizik,Apakah hukum gerakan pertama Newton?,Objek bergerak akan kekal bergerak kecuali ada daya luar,Objek pegun akan kekal pegun,Dayan sama dengan jisim kali pecutan,Daya tindak sama dengan daya tindak balas,Objek bergerak akan kekal bergerak kecuali ada daya luar
+23,fizik,Apakah formula untuk tenaga kinetik?,Ek = 1/2 mv²,Ek = mv,Ek = mgh,Ek = Fd,Ek = 1/2 mv²
+24,fizik,Apakah unit SI untuk tenaga?,Joule,Watt,Newton,Pascal,Joule
+25,fizik,Apakah hukum pemuliharaan tenaga?,Tenaga tidak boleh dicipta atau dimusnahkan,Tenaga boleh dicipta,Tenaga boleh dimusnahkan,Tenaga sentiasa berkurang,Tenaga tidak boleh dicipta atau dimusnahkan
+26,fizik,Apakah formula untuk daya?,F = ma,F = mv,F = mg,F = E/t,F = ma
+27,fizik,Apakah unit SI untuk kuasa?,Watt,Joule,Newton,Pascal,Watt
+28,fizik,Apakah formula untuk kuasa?,P = E/t,P = Fd,P = mv,P = ma,P = E/t
+29,fizik,Apakah hukum graviti universal Newton?,Dua objek menarik antara satu sama lain dengan daya berkadar songsang dengan jarak kuasa dua,Dua objek menolak antara satu sama lain,Daya berkadar langsung dengan jarak,Tiada daya antara objek,Dua objek menarik antara satu sama lain dengan daya berkadar songsang dengan jarak kuasa dua
+30,fizik,Apakah formula untuk tenaga keupayaan graviti?,Ep = mgh,Ep = mv²,Ep = Fd,Ep = ma,Ep = mgh
+31,fizik,Apakah unit SI untuk tekanan?,Pascal,Newton,Joule,Watt,Pascal
+32,fizik,Apakah formula untuk tekanan?,P = F/A,P = Fd,P = mv,P = ma,P = F/A
+33,fizik,Apakah hukum Ohm?,Voltan sama dengan arus kali rintangan,Voltan sama dengan kuasa kali masa,Arus sama dengan voltan kali rintangan,Rintangan sama dengan kuasa kali voltan,Voltan sama dengan arus kali rintangan
+34,fizik,Apakah unit SI untuk voltan?,Volt,Ampere,Ohm,Watt,Volt
+35,fizik,Apakah formula untuk momentum?,p = mv,p = ma,p = Fd,p = E/t,p = mv
+36,fizik,Apakah hukum pemuliharaan momentum?,Momentum sebelum perlanggaran sama dengan momentum selepas perlanggaran,Momentum sentiasa berkurang,Momentum sentiasa bertambah,Tiada momentum dalam perlanggaran,Momentum sebelum perlanggaran sama dengan momentum selepas perlanggaran
+37,fizik,Apakah unit SI untuk frekuensi?,Hertz,Watt,Joule,Newton,Hertz
+38,fizik,Apakah formula untuk gelombang?,v = fλ,v = ma,v = Fd,v = mv,v = fλ
+39,fizik,Apakah hukum pantulan?,Sudut tuju sama dengan sudut pantulan,Sudut tuju lebih besar daripada sudut pantulan,Sudut tuju lebih kecil daripada sudut pantulan,Tiada pantulan,Sudut tuju sama dengan sudut pantulan
+40,fizik,Apakah formula untuk kerja?,W = Fd,W = mv,W = ma,W = E/t,W = Fd
+41,kimia,Apakah simbol kimia untuk air?,H2O,CO2,NaCl,O2,H2O
+42,kimia,Apakah nombor atom untuk hidrogen?,1,2,3,4,1
+43,kimia,Apakah nama proses di mana pepejal bertukar kepada cecair?,Peleburan,Pemejalwapan,Pembekuan,Penyulingan,Peleburan
+44,kimia,Apakah formula untuk asid sulfurik?,H2SO4,HCl,HNO3,NaOH,H2SO4
+45,kimia,Apakah pH untuk larutan neutral?,7,0,14,1,7
+46,kimia,Apakah nama proses di mana cecair bertukar kepada gas?,Pemejalwapan,Peleburan,Pembekuan,Penyulingan,Pemejalwapan
+47,kimia,Apakah simbol kimia untuk karbon dioksida?,CO2,H2O,NaCl,O2,CO2
+48,kimia,Apakah nombor atom untuk karbon?,6,7,8,9,6
+49,kimia,Apakah nama proses di mana gas bertukar kepada cecair?,Pemeluwapan,Pemejalwapan,Peleburan,Pembekuan,Pemeluwapan
+50,kimia,Apakah formula untuk natrium klorida?,NaCl,H2O,CO2,O2,NaCl
+51,kimia,Apakah pH untuk asid kuat?,0-3,4-6,7,8-14,0-3
+52,kimia,Apakah nama proses di mana cecair bertukar kepada pepejal?,Pembekuan,Pemejalwapan,Peleburan,Pemeluwapan,Pembekuan
+53,kimia,Apakah simbol kimia untuk oksigen?,O2,H2O,CO2,NaCl,O2
+54,kimia,Apakah nombor atom untuk oksigen?,8,7,6,9,8
+55,kimia,Apakah nama proses di mana pepejal bertukar kepada gas?,Pemejalwapan,Peleburan,Pembekuan,Pemeluwapan,Pemejalwapan
+56,kimia,Apakah formula untuk asid hidroklorik?,HCl,H2SO4,HNO3,NaOH,HCl
+57,kimia,Apakah pH untuk alkali kuat?,11-14,0-3,4-6,7,11-14
+58,kimia,Apakah nama proses di mana gas bertukar kepada pepejal?,Pemejalwapan,Pemeluwapan,Peleburan,Pembekuan,Pemejalwapan
+59,kimia,Apakah simbol kimia untuk nitrogen?,N2,O2,H2O,CO2,N2
+60,kimia,Apakah nombor atom untuk nitrogen?,7,6,8,9,7
+61,matematik,Apakah hasil tambah 5 + 3?,8,7,9,6,8
+62,matematik,Apakah hasil tolak 10 - 4?,6,5,7,8,6
+63,matematik,Apakah hasil darab 6 × 7?,42,41,43,40,42
+64,matematik,Apakah hasil bahagi 20 ÷ 4?,5,4,6,7,5
+65,matematik,Apakah nilai π (pi) kepada 2 tempat perpuluhan?,3.14,3.15,3.13,3.16,3.14
+66,matematik,Apakah hasil tambah 15 + 8?,23,22,24,21,23
+67,matematik,Apakah hasil tolak 25 - 12?,13,12,14,15,13
+68,matematik,Apakah hasil darab 9 × 8?,72,71,73,70,72
+69,matematik,Apakah hasil bahagi 36 ÷ 6?,6,5,7,8,6
+70,matematik,Apakah formula untuk luas segi empat?,L = panjang × lebar,L = ½ × tapak × tinggi,L = πr²,L = sisi × sisi,L = panjang × lebar
+71,matematik,Apakah hasil tambah 22 + 11?,33,32,34,31,33
+72,matematik,Apakah hasil tolak 50 - 18?,32,31,33,34,32
+73,matematik,Apakah hasil darab 12 × 5?,60,59,61,58,60
+74,matematik,Apakah hasil bahagi 48 ÷ 8?,6,5,7,8,6
+75,matematik,Apakah formula untuk luas segi tiga?,L = ½ × tapak × tinggi,L = panjang × lebar,L = πr²,L = sisi × sisi,L = ½ × tapak × tinggi
+76,matematik,Apakah hasil tambah 35 + 17?,52,51,53,50,52
+77,matematik,Apakah hasil tolak 100 - 45?,55,54,56,57,55
+78,matematik,Apakah hasil darab 15 × 4?,60,59,61,58,60
+79,matematik,Apakah hasil bahagi 63 ÷ 9?,7,6,8,9,7
+80,matematik,Apakah formula untuk luas bulatan?,L = πr²,L = panjang × lebar,L = ½ × tapak × tinggi,L = sisi × sisi,L = πr²
+81,sains,Apakah planet ketiga dari matahari?,Bumi,Mars,Venus,Merkuri,Bumi
+82,sains,Apakah lapisan terluar bumi?,Kerak bumi,Mantel,Teras luar,Teras dalam,Kerak bumi
+83,sains,Apakah gas paling banyak dalam atmosfera bumi?,Nitrogen,Oksigen,Karbon dioksida,Argon,Nitrogen
+84,sains,Apakah proses di mana air bertukar kepada wap?,Pemejalwapan,Pemeluwapan,Peleburan,Pembekuan,Pemejalwapan
+85,sains,Apakah sumber tenaga utama bumi?,Matahari,Angin,Air,Nuklear,Matahari
+86,sains,Apakah planet terbesar dalam sistem suria?,Musytari,Zuhal,Uranus,Neptun,Musytari
+87,sains,Apakah lapisan atmosfera paling dekat dengan bumi?,Troposfera,Stratosfera,Mesosfera,Termosfera,Troposfera
+88,sains,Apakah gas yang diperlukan untuk pembakaran?,Oksigen,Nitrogen,Karbon dioksida,Hidrogen,Oksigen
+89,sains,Apakah proses di mana tumbuhan membuat makanan?,Fotosintesis,Respirasi,Pencernaan,Pembiakan,Fotosintesis
+90,sains,Apakah nama satelit semula jadi bumi?,Bulan,Mars,Venus,Merkuri,Bulan
+91,sains,Apakah planet paling panas dalam sistem suria?,Zuhrah,Merkuri,Bumi,Mars,Zuhrah
+92,sains,Apakah lapisan bumi yang paling panas?,Teras dalam,Teras luar,Mantel,Kerak bumi,Teras dalam
+93,sains,Apakah gas rumah hijau utama?,Karbon dioksida,Nitrogen,Oksigen,Hidrogen,Karbon dioksida
+94,sains,Apakah proses di mana wap bertukar kepada air?,Pemeluwapan,Pemejalwapan,Peleburan,Pembekuan,Pemeluwapan
+95,sains,Apakah sumber tenaga boleh diperbaharui?,Tenaga suria,Arang batu,Minyak,Gas asli,Tenaga suria
+96,sains,Apakah planet paling kecil dalam sistem suria?,Merkuri,Bumi,Mars,Venus,Merkuri
+97,sains,Apakah lapisan atmosfera yang mengandungi ozon?,Stratosfera,Troposfera,Mesosfera,Termosfera,Stratosfera
+98,sains,Apakah gas yang dihasilkan semasa fotosintesis?,Oksigen,Karbon dioksida,Nitrogen,Hidrogen,Oksigen
+99,sains,Apakah proses di mana air bertukar kepada ais?,Pembekuan,Pemejalwapan,Pemeluwapan,Peleburan,Pembekuan
+100,sains,Apakah sumber tenaga tidak boleh diperbaharui?,Arang batu,Tenaga suria,Angin,Air,Arang batu
