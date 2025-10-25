@@ -1,27 +1,27 @@
 id,topic,question,a1,a2,a3,a4,answer
 1,biologi,Apakah fungsi utama sistem respirasi?,Menukar oksigen kepada karbon dioksida,Mengangkut nutrien ke seluruh badan,Mengawal suhu badan,Mengeluarkan bahan buangan,Menukar oksigen kepada karbon dioksida
-2,biologi,Apakah nama proses di mana tumbuhan membuat makanan sendiri?,Fotosintesis,Respirasi,Pencernaan,Pembiakan,Fotosintesis
+2,biologi,Apakah nama proses di mana tumbuhan membuat makanan sendiri?,Respirasi,Fotosintesis,Pencernaan,Pembiakan,Fotosintesis
 3,biologi,Apakah organ utama dalam sistem peredaran darah?,Paru-paru,Hati,Jantung,Otak,Jantung
-4,biologi,Apakah fungsi klorofil dalam daun?,Menyerap air,Menyerap cahaya matahari,Menyerap karbon dioksida,Mengawal suhu,Menyerap cahaya matahari
+4,biologi,Apakah fungsi klorofil dalam daun?,Menyerap air,Menyerap karbon dioksida,Menyerap cahaya matahari,Mengawal suhu,Menyerap cahaya matahari
 5,biologi,Apakah nama proses di mana sel membahagi untuk menghasilkan sel baru?,Mitosis,Meiosis,Fotosintesis,Respirasi,Mitosis
 6,biologi,Apakah fungsi utama sistem saraf?,Mengawal pergerakan badan,Mengawal semua aktiviti badan,Mengangkut darah,Mencerna makanan,Mengawal semua aktiviti badan
 7,biologi,Apakah nama organ yang menapis darah dalam badan?,Hati,Ginjal,Paru-paru,Jantung,Ginjal
-8,biologi,Apakah fungsi utama sistem pencernaan?,Mencerna makanan dan menyerap nutrien,Mengangkut oksigen,Mengawal suhu badan,Mengeluarkan hormon,Mencerna makanan dan menyerap nutrien
+8,biologi,Apakah fungsi utama sistem pencernaan?,Mengangkut oksigen,Mencerna makanan dan menyerap nutrien,Mengawal suhu badan,Mengeluarkan hormon,Mencerna makanan dan menyerap nutrien
 9,biologi,Apakah nama proses di mana tumbuhan menyerap air dari tanah?,Fotosintesis,Transpirasi,Osmosis,Respirasi,Osmosis
 10,biologi,Apakah fungsi utama sistem imun?,Melindungi badan daripada penyakit,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada penyakit
 11,biologi,Apakah nama sel darah yang membawa oksigen?,Sel darah putih,Sel darah merah,Platelet,Plasma,Sel darah merah
-12,biologi,Apakah fungsi utama sistem rangka?,Memberi bentuk dan sokongan kepada badan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Memberi bentuk dan sokongan kepada badan
+12,biologi,Apakah fungsi utama sistem rangka?,Mengangkut darah,Memberi bentuk dan sokongan kepada badan,Mencerna makanan,Mengawal suhu badan,Memberi bentuk dan sokongan kepada badan
 13,biologi,Apakah nama organ yang menghasilkan insulin?,Hati,Pankreas,Ginjal,Paru-paru,Pankreas
-14,biologi,Apakah fungsi utama sistem endokrin?,Mengeluarkan hormon untuk mengawal badan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Mengeluarkan hormon untuk mengawal badan
+14,biologi,Apakah fungsi utama sistem endokrin?,Mengangkut darah,Mengeluarkan hormon untuk mengawal badan,Mencerna makanan,Mengawal pergerakan badan,Mengeluarkan hormon untuk mengawal badan
 15,biologi,Apakah nama proses di mana tumbuhan mengeluarkan wap air?,Fotosintesis,Transpirasi,Respirasi,Osmosis,Transpirasi
-16,biologi,Apakah fungsi utama sistem limfa?,Mengangkut cecair limfa dan melawan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Mengangkut cecair limfa dan melawan jangkitan
+16,biologi,Apakah fungsi utama sistem limfa?,Mengangkut darah,Mengangkut cecair limfa dan melawan jangkitan,Mencerna makanan,Mengawal suhu badan,Mengangkut cecair limfa dan melawan jangkitan
 17,biologi,Apakah nama organ yang menyimpan glikogen?,Hati,Ginjal,Pankreas,Paru-paru,Hati
-18,biologi,Apakah fungsi utama sistem integumen?,Melindungi badan daripada kecederaan dan jangkitan,Mengangkut darah,Mencerna makanan,Mengawal pergerakan badan,Melindungi badan daripada kecederaan dan jangkitan
+18,biologi,Apakah fungsi utama sistem integumen?,Mengangkut darah,Mencerna makanan,Melindungi badan daripada kecederaan dan jangkitan,Mengawal pergerakan badan,Melindungi badan daripada kecederaan dan jangkitan
 19,biologi,Apakah nama proses di mana tumbuhan menukar cahaya matahari kepada tenaga?,Fotosintesis,Respirasi,Transpirasi,Osmosis,Fotosintesis
-20,biologi,Apakah fungsi utama sistem pembiakan?,Menghasilkan keturunan,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Menghasilkan keturunan
+20,biologi,Apakah fungsi utama sistem pembiakan?,Mengangkut darah,Mencerna makanan,Mengawal suhu badan,Menghasilkan keturunan,Menghasilkan keturunan
 21,fizik,Apakah unit SI untuk daya?,Newton,Joule,Watt,Pascal,Newton
 22,fizik,Apakah hukum gerakan pertama Newton?,Objek bergerak akan kekal bergerak kecuali ada daya luar,Objek pegun akan kekal pegun,Dayan sama dengan jisim kali pecutan,Daya tindak sama dengan daya tindak balas,Objek bergerak akan kekal bergerak kecuali ada daya luar
-23,fizik,Apakah formula untuk tenaga kinetik?,Ek = 1/2 mv²,Ek = mv,Ek = mgh,Ek = Fd,Ek = 1/2 mv²
+23,fizik,Apakah formula untuk tenaga kinetik?,Ek = mv,Ek = 1/2 mv²,Ek = mgh,Ek = Fd,Ek = 1/2 mv²
 24,fizik,Apakah unit SI untuk tenaga?,Joule,Watt,Newton,Pascal,Joule
 25,fizik,Apakah hukum pemuliharaan tenaga?,Tenaga tidak boleh dicipta atau dimusnahkan,Tenaga boleh dicipta,Tenaga boleh dimusnahkan,Tenaga sentiasa berkurang,Tenaga tidak boleh dicipta atau dimusnahkan
 26,fizik,Apakah formula untuk daya?,F = ma,F = mv,F = mg,F = E/t,F = ma
