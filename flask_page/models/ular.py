@@ -8,7 +8,6 @@ import string
 confcsv = "static/db/ular/conf.csv"
 roomcsv = "static/db/ular/room.csv"
 playerscsv = "static/db/ular/players.csv"
-maxbox = 100
 
 def modelgetcsvconf():
     data = af_getcsvdict(confcsv)
@@ -44,7 +43,7 @@ def startroom(code=""):
 
 
 
-def adddataroom(code="", turn="", state="", maxbox=100, topic="biologi"):
+def adddataroom(code="", turn="", state="", maxbox=28, topic="biologi"):
     af_addcsv(roomcsv, [
         code, turn, state, "", maxbox, topic
     ])
@@ -136,7 +135,7 @@ def playerchangepos(code="", player="", newpos=""):
                            new_data)
 
 
-def checkgameended(pos="", code="", maxbox=100):
+def checkgameended(pos="", code="", maxbox=28):
     ended = False
     if pos == str(maxbox) or pos == maxbox:
         endgame(code)
@@ -144,7 +143,7 @@ def checkgameended(pos="", code="", maxbox=100):
     
     return ended
 
-def rolldice(code="", player="", currentpos=0, maxbox=100):
+def rolldice(code="", player="", currentpos=0, maxbox=28):
     dicenum = random.randint(1,6)
     turn = player
     newpos = currentpos + dicenum
@@ -218,7 +217,7 @@ def getsteps(before=0, after=3):
 
     return results
 
-def getstepsdice(before=0, dice=3, maxbox=100):
+def getstepsdice(before=0, dice=3, maxbox=28):
     results = []
 
     step = before

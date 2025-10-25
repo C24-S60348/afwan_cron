@@ -109,7 +109,7 @@ def apiular_submitanswer():
     rstate = rdata["state"]
     rturn = rdata["turn"]
     rquestionid = rdata["questionid"]
-    rmaxbox = rdata["maxbox"]
+    rmaxbox = int(rdata["maxbox"])
 
     if rquestionid != "":
 
