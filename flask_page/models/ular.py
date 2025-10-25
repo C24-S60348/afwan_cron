@@ -103,18 +103,14 @@ def roomdata(code=""):
             maxbox = int(maxbox)
 
         if (d["code"] == code):
-            return {
-                "state": d["state"],
-                "turn": d["turn"],
-                "questionid": d["questionid"],
-                "maxbox": maxbox
-            }
+            return d
     
     return {
         "state": "",
         "turn": "",
         "questionid": "",
-        "maxbox": maxbox
+        "maxbox": maxbox,
+        "topic": ""
     }
 
 def modelnextturn(code="", currentplayer=""):
