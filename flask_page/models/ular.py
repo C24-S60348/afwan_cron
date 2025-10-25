@@ -97,7 +97,7 @@ def roomdata(code=""):
     data = modelgetcsvroom()
     for d in data:
         maxbox = d["maxbox"]
-        if maxbox == "":
+        if maxbox == "" or maxbox == None:
             maxbox = 0
         else:
             maxbox = int(maxbox)
