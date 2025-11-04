@@ -58,6 +58,7 @@ from flask_page.controllers.register import register_blueprint
 from flask_page.controllers.possystem import possystem_blueprint
 from flask_page.controllers.ular import ular_blueprint
 from flask_page.controllers.ularquestions import ularq_blueprint
+from flask_page.controllers.habitmultiplayer import habitmultiplayer_bp
 
 # from flask_page.controllers.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -83,6 +84,7 @@ app.register_blueprint(register_blueprint)
 app.register_blueprint(possystem_blueprint)
 app.register_blueprint(ular_blueprint)
 app.register_blueprint(ularq_blueprint)
+app.register_blueprint(habitmultiplayer_bp)
 
 with app.app_context():
     ularular_init_db()  # ✅ Auto-create tables if not found
