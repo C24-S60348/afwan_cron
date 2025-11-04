@@ -142,10 +142,7 @@ def af_htmlbutton(name="", typecolor="primary", onclick=""):
 
 def af_htmlbuttonlink(name="", typecolor="primary", href=""):
     classbtn = ""
-    if typecolor == "primary":
-        classbtn = "btn-primary"
-    else:
-        classbtn = "btn-secondary"
+    classbtn = "btn-"+typecolor
         
     html = f"""
         <a href="{href}" class="btn {classbtn}">
