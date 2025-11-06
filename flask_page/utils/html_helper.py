@@ -171,3 +171,10 @@ def af_htmlformend2():
 
 def af_redirect(link="flangehandle.flangehandle"):
     return redirect(url_for(link))
+
+def getpostget(name="habitid"):
+    if request.method == 'POST':
+        return af_requestpostfromjson(name, "")
+    
+    else:
+        return af_requestget(name, "")

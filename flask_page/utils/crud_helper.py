@@ -136,6 +136,32 @@ def cupdate2(data={}):
     else:
         return False
 
+def cupdate3(data={}):
+    linkcsv = data['csv']
+    targetname = data['targetname'] #"habitid"
+    targetdata = data['targetdata'] #"4"
+    targetname2 = data['targetname2'] #"username"
+    targetdata2 = data['targetdata2'] #"afwan"
+    targetname3 = data['targetname3'] #"historydate"
+    targetdata3 = data['targetdata3'] #"2025-11-05"
+
+    
+    
+    newname = data['newname'] #"name"
+    newdata = data['newdata'] #"afwan"
+    if newname == None or newname == "":
+        return False
+    if newdata == None or newdata == "":
+        return False
+    
+    new_data = {newname:newdata}
+
+    result = af_replacecsvthreetarget(linkcsv, targetname, targetdata, targetname2, targetdata2, targetname3, targetdata3, new_data)
+    if result:
+        return True
+    else:
+        return False
+
 def cdelete(data={}):
     linkcsv = data['csv']
     targetname = data['targetname'] #"id"

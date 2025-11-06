@@ -1,0 +1,16 @@
+{# rsvp/main3.html #}
+{% extends "rsvp/base.html" %}
+
+{% block content %}
+
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.0/classic/ckeditor.js"></script>
+
+<form method="post"><textarea name="content" id="editor">Hello, World!</textarea></form><script>
+    ClassicEditor
+        .create( document.querySelector( '#editor' ) )
+        .catch( error => {
+            console.error( error );
+        } );
+</script>
+
+{% endblock %}

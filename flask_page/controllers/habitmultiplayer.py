@@ -15,6 +15,7 @@ habitcsv = "static/db/habit/habit.csv"
 notescsv  = "static/db/habit/notes.csv"
 playerscsv = "static/db/habit/players.csv"
 userscsv = "static/db/habit/users.csv"
+historycsv = "static/db/habit/history.csv"
 
 """
 Nota:
@@ -35,7 +36,12 @@ Note
 Member
 -Add/Update/Delete username 
 
+History
+-Read
+-Update/Add
+
 Todo:
+-history
 -implement
 
 Additional:
@@ -62,6 +68,10 @@ Additional:
 
 #member
 #http://127.0.0.1:5001/api/habit/addmember?habitid=4&member=afwanhaziq
+
+#history
+#http://127.0.0.1:5001/api/habit/readhistory?habitid=1
+#http://127.0.0.1:5001/api/habit/updatehistory?habitid=1&historydate=2025-10-11&historystatus=-1
 
 
 habitmultiplayer_blueprint = Blueprint('habitmultiplayer', __name__, url_prefix="/api/habit")
@@ -392,6 +402,9 @@ def readnote():
     token = getpostget("token")
     habitid = getpostget("habitid")
 
+    if inputnotvalidated(habitid):
+        return jsonifynotvalid("habitid")
+
     mydata = modelchecktokendata(token, userscsv)
     if mydata or inputnotvalidated(token):
         if inputnotvalidated(token):
@@ -503,6 +516,115 @@ def addmember():
                 {
                     "status": "error",
                     "message": "The id was not your habit"
+                }
+            )
+    else:
+        return jsonify(
+        {
+            "status": "error",
+            "message": "Your token has expired"
+        }
+    )
+
+@habitmultiplayer_blueprint.route('/readhistory', methods=['GET', 'POST'])
+def readhistory():
+
+    token = getpostget("token")
+    habitid = getpostget("habitid")
+
+    if inputnotvalidated(habitid):
+        return jsonifynotvalid("habitid")
+
+    mydata = modelchecktokendata(token, userscsv)
+    if mydata or inputnotvalidated(token):
+        if inputnotvalidated(token):
+            username = "guest"
+        else:
+            username = mydata['username']
+        # print(username)
+        data = {}
+        data['csv'] = historycsv
+        data['targetname'] = "habitid"
+        data['targetdata'] = habitid
+        # data['targetname2'] = "username"
+        # data['targetdata2'] = username
+
+        getdata = cread(data)
+        # getdata = cread2(data)
+
+        return jsonify({
+            "status": "ok",
+            "message": "get history",
+            "data" : getdata
+        })
+    else:
+        return jsonify(
+        {
+            "status": "error",
+            "message": "Your token has expired"
+        }
+    )
+ 
+
+@habitmultiplayer_blueprint.route('/updatehistory', methods=['GET', 'POST'])
+def updatehistory():
+    habitid = getpostget("habitid")
+    historydate = getpostget("historydate")
+    historystatus = getpostget("historystatus")
+    token = getpostget("token")
+    
+    if inputnotvalidated(habitid):
+        return jsonifynotvalid("habitid")
+    if inputnotvalidated(historydate):
+        return jsonifynotvalid("historydate")
+    if inputnotvalidated(historystatus):
+        return jsonifynotvalid("historystatus")
+    
+
+    mydata = modelchecktokendata(token, userscsv)
+    if mydata or inputnotvalidated(token):
+        if inputnotvalidated(token):
+            username = "guest"
+        else:
+            username = mydata['username']
+        
+        data = {}
+        data['csv'] = historycsv
+        data['targetname'] = "habitid"
+        data['targetdata'] = str(habitid)
+        data['targetname2'] = "username"
+        data['targetdata2'] = str(username)
+        data['targetname3'] = "historydate"
+        data['targetdata3'] = str(historydate)
+        data['newname'] = "historystatus"
+        data['newdata'] = str(historystatus)
+        updateddata = cupdate3(data)
+        if updateddata:
+            readdata = cread2(data)
+            return jsonify(
+                {
+                    "status": "ok",
+                    "message": "history updated",
+                    "data": readdata
+                }
+            )
+        else:
+            
+            data = {}
+            data['csv'] = historycsv
+            data['username'] = username
+            data['habitid'] = habitid
+            data['historydate'] = historydate
+            data['historystatus'] = historystatus
+            data['created_at'] = datetime.now()
+            data['deleted_at'] = ""
+            createdata = ccreate(data)
+
+            return jsonify(
+                {
+                    "status": "ok",
+                    "message": "history careated",
+                    "data": createdata
                 }
             )
     else:

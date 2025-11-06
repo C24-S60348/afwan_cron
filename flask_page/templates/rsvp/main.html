@@ -1,0 +1,84 @@
+{# rsvp/main.html #}
+{% extends "rsvp/base.html" %}
+
+{% block content %}
+    <div style="display: flex;">
+        <h3>RSVP</h3>
+        <button onclick="readuniquename()">Read Unique Name</button>
+    </div>
+    <form id="myForm">
+        <div class="form-group">
+            <label for="name1">Name1</label>
+            <input type="text" class="form-control" id="name1" placeholder="Name1" value="{{name1}}" required>
+        </div>
+        <div class="form-group">
+            <label for="name2">Name2</label>
+            <input type="text" class="form-control" id="name2" placeholder="Name2" value="{{name2}}" required>
+        </div>
+        <div class="form-group">
+            <label for="name3">Name3</label>
+            <input type="text" class="form-control" id="name3" placeholder="Name3" value="{{name3}}" required>
+        </div>
+        <div class="form-group">
+            <label for="name4">Name4</label>
+            <input type="text" class="form-control" id="name4" placeholder="Name4" value="{{name4}}" required>
+        </div>
+        <div class="form-group">
+            <label for="uniquename">Unique Name #</label>
+            <input type="text" class="form-control" id="uniquename" placeholder="#AfwanSara" value="{{uniquename}}" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" class="form-control" id="email" placeholder="Email" value="{{email}}" required>
+        </div>
+        <div class="form-group">
+            <label for="message">Message</label>
+            <input type="text" class="form-control" id="message" placeholder="Message" value="{{message}}" required>
+        </div>
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+
+        function readuniquename() {
+            var uniquename = document.getElementById("uniquename").value;
+            //alert(uniquename);
+            window.location = "/api/rsvp?uniquename=" + uniquename;
+        }
+
+
+        document.getElementById('myForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            var uniquename = event.target.uniquename.value;
+            // Create an object to hold the form data
+            const formData = {
+                name1: event.target.name1.value,
+                name2: event.target.name2.value,
+                name3: event.target.name3.value,
+                name4: event.target.name4.value,
+                email: event.target.email.value,
+                message: event.target.message.value
+            };
+
+            const formData2 = {
+                uniquename: uniquename,
+                mydata: JSON.stringify(formData)
+            };
+
+            // Send the data using Fetch API
+            fetch('http://127.0.0.1:5001/api/rsvp/cudrsvp?', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData2) // Convert the data to JSON
+            })
+            .then(response => response.json())
+            .then(data => console.log('Success:', data))
+            .catch((error) => console.error('Error:', error));
+        });
+    </script>
+
+{% endblock %}
