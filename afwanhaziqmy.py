@@ -9,10 +9,16 @@ sudo systemctl enable afwanapp
 sudo systemctl start afwanapp
 """
 
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_page.utils.csv_helper import *
+from datetime import datetime
 import os
 import secrets
+import httpx
+import variables
+import traceback
+
 
 app = Flask(
     __name__, 
@@ -33,6 +39,75 @@ CORS(app, supports_credentials=True,
     resources={r"/*": {"origins": "*"}},
     allow_headers=["Content-Type", "Authorization"]
 )
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+
+    errorname = str(e)
+    type = e.__class__.__name__
+    datetimeget = str(datetime.now())
+    url = request.url
+    method = request.method
+    # headers = request.headers
+    data = None
+
+    # Safely try to get JSON body, if it exists
+    try:
+        data = request.get_json()
+    except:
+        pass
+
+    if method == "POST":
+        data = request.form.to_dict()
+
+    errormessage = f"""Have error on {url}.
+    message: {errorname}
+    type: {type}
+    traceback: {traceback.format_exc()}
+    """
+
+    send_telegram_error(errormessage)
+
+    #If url not found, dont log
+    if type != "NotFound":
+        new_data = [
+            type,
+            errorname,
+            datetimeget,
+            url,
+            method,
+            # str(headers),
+            str(data)
+        ]
+        #log here
+        af_addcsv("static/db/error/error.csv", new_data)
+    
+    return jsonify({
+        "status" : "error",
+        "message": errorname,
+        "type": type
+    })
+
+
+def send_telegram_error(error_message):
+    try:
+        bot_token = variables.tb_token_server
+        chat_id = "-1002864663247"
+
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        data = {
+            "chat_id": chat_id,
+            "text": f"🚨 ERROR ALERT 🚨\n\n{error_message}",
+            "parse_mode": "HTML"
+        }
+
+        with httpx.Client() as client:
+            response = client.post(url, data=data)
+
+        if response.status_code != 200:
+            print(f"Failed to send Telegram message: {response.text}")
+    except Exception as e:
+        print(f"Error sending Telegram message: {e}")
 
 from flask_page.controllers.apitest import apitest_bp
 from flask_page.controllers.connect_to_db import connect_to_db

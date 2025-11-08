@@ -1,0 +1,4 @@
+type,errorname,datetime,url,method,data
+FileNotFoundError,[Errno 2] No such file or directory: '/home/AfwanProductions/mysite/cron_output/',2025-11-09 01:08:42.761700,http://127.0.0.1:5002/,GET,None
+FileNotFoundError,[Errno 2] No such file or directory: '/home/AfwanProductions/mysite/cron_output/',2025-11-09 01:09:17.069718,http://127.0.0.1:5002/,GET,None
+FileNotFoundError,[Errno 2] No such file or directory: '/home/AfwanProductions/mysite/cron_output/',2025-11-09 01:10:25.987118,http://127.0.0.1:5002/,GET,None
