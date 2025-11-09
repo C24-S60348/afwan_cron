@@ -5,7 +5,7 @@ from flask import Blueprint
 
 home_bp = Blueprint('home_bp', __name__)
 
-TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"
+# TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"
 @home_bp.route("/")
 def index():
     html = """
@@ -43,24 +43,24 @@ def index():
     # return render_template_string(html, files=txt_files)
 
 
-@home_bp.route("/view/<filename>")
-def view_file(filename):
-    filepath = os.path.join(TXT_FILES_DIR, filename)
-    try:
-        with open(filepath, "r") as f:
-            content = f.read()
+# @home_bp.route("/view/<filename>")
+# def view_file(filename):
+#     filepath = os.path.join(TXT_FILES_DIR, filename)
+#     try:
+#         with open(filepath, "r") as f:
+#             content = f.read()
         
-        html = f"""
-            <!DOCTYPE html>
-            <html>
-            <head><title>{filename}</title></head>
-            <body>
-                <h1>{filename}</h1>
-                <pre>{content}</pre>
-            </body>
-            </html>
-        """
-        return render_template_string(html, content=content, filename=filename)
-    except FileNotFoundError:
-        return "File not found", 404
+#         html = f"""
+#             <!DOCTYPE html>
+#             <html>
+#             <head><title>{filename}</title></head>
+#             <body>
+#                 <h1>{filename}</h1>
+#                 <pre>{content}</pre>
+#             </body>
+#             </html>
+#         """
+#         return render_template_string(html, content=content, filename=filename)
+#     except FileNotFoundError:
+#         return "File not found", 404
 
