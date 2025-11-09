@@ -8,6 +8,14 @@ home_bp = Blueprint('home_bp', __name__)
 TXT_FILES_DIR = "/home/AfwanProductions/mysite/cron_output/"
 @home_bp.route("/")
 def index():
+    return """
+    <html>
+        <body>
+            <h1>This is Afwan's server</h1>
+        </body>
+    </html>
+    """
+    
     txt_files = [f for f in os.listdir(TXT_FILES_DIR) if f.endswith(".txt")]
     txt_files.sort(reverse=True)
     now = datetime.now(timezone.utc)

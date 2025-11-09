@@ -66,7 +66,7 @@ def handle_exception(e):
     traceback: {traceback.format_exc()}
     """
 
-    send_telegram_error(errormessage)
+    
 
     #If url not found, dont log
     if type != "NotFound":
@@ -80,6 +80,7 @@ def handle_exception(e):
             str(data)
         ]
         #log here
+        send_telegram_error(errormessage)
         af_addcsv("static/db/error/error.csv", new_data)
     
     return jsonify({
