@@ -69,7 +69,7 @@ def handle_exception(e):
     
 
     #If url not found, dont log
-    if type != "NotFound":
+    if type != "NotFound" and type != "MethodNotAllowed":
         new_data = [
             type,
             errorname,
