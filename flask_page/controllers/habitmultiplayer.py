@@ -16,6 +16,7 @@ notescsv  = "static/db/habit/notes.csv"
 playerscsv = "static/db/habit/players.csv"
 userscsv = "static/db/habit/users.csv"
 historycsv = "static/db/habit/history.csv"
+membercsv = "static/db/habit/member.csv"
 
 """
 Nota:
@@ -34,19 +35,15 @@ Note
 -Update/Add
 
 Member
--Add/Update/Delete username 
+-Add
+-Delete
 
 History
 -Read
 -Update/Add
 
-Todo:
--history
--implement
-
 Additional:
 -addmember - should not guest
-
 
 ---All based on token, if no token, == "guest"
 
@@ -59,8 +56,8 @@ Additional:
 #http://127.0.0.1:5001/api/habit/createhabit?url=ayammm&name=ikan23
 #http://127.0.0.1:5001/api/habit/readhabit?targetname=id&targetdata=6
 #http://127.0.0.1:5001/api/habit/readhabit
-#http://127.0.0.1:5001/api/habit/updatehabit?targetname=id&targetdata=2&newname=name&newdata=afwan
-#http://127.0.0.1:5001/api/habit/deletehabit?targetname=id&targetdata=1
+#http://127.0.0.1:5001/api/habit/updatehabit?id=12&newname=name&newdata=afwan1234
+#http://127.0.0.1:5001/api/habit/deletehabit?id=12
 
 #note
 #http://127.0.0.1:5001/api/habit/readnote?habitid=2
@@ -68,6 +65,7 @@ Additional:
 
 #member
 #http://127.0.0.1:5001/api/habit/addmember?habitid=4&member=afwanhaziq
+#http://127.0.0.1:5001/api/habit/deletemember?habitid=4&member=afwanhaziq
 
 #history
 #http://127.0.0.1:5001/api/habit/readhistory?habitid=1
@@ -78,7 +76,6 @@ habitmultiplayer_blueprint = Blueprint('habitmultiplayer', __name__, url_prefix=
 
 @habitmultiplayer_blueprint.route('/register', methods=['GET', 'POST'])
 def registerapi():
-
     username = getpostget("username")
     password = getpostget("password")
     passwordrepeat = getpostget("passwordrepeat")
@@ -92,11 +89,9 @@ def registerapi():
 
 @habitmultiplayer_blueprint.route('/login', methods=['GET', 'POST'])
 def loginapi():
-
     username = getpostget("username")
     password = getpostget("password")
     keeptoken = getpostget("keeptoken")
-        
     
     if username == "" and password == "":
         return jsonify({"status":"ok", "result":"please enter login details"})
@@ -138,7 +133,6 @@ def createhabitapi():
         data['name'] = name
         data['created_at'] = datetime.now()
         data['deleted_at'] = ""
-        data['member'] = ""
         createdata = ccreate(data)
 
         return jsonify({
@@ -185,14 +179,36 @@ def readhabitapi():
             username = "guest"
         else:
             username = mydata['username']
-        print(username)
+
         data = {}
         data['csv'] = habitcsv
         data['targetname'] = "username"
         data['targetdata'] = username
-        data['targetname2'] = "member"
-        data['targetdata2'] = username
-        getdata = creadboth(data)
+        getdata = cread(data)
+
+        data = {}
+        data['csv'] = membercsv
+        data['targetname'] = "member"
+        data['targetdata'] = username
+        getdata2 = cread(data)
+        getdata3 = []
+
+        for g in getdata2:
+            data = {}
+            data['csv'] = habitcsv
+            data['targetname'] = "id"
+            data['targetdata'] = g["habitid"]
+            getdata3 = cread(data)
+        
+        getdata.extend(getdata3)
+
+        for g in getdata:
+            data = {}
+            data['csv'] = membercsv
+            data['targetname'] = "habitid"
+            data['targetdata'] = g["id"]
+            getdata4 = cread(data)
+            g["members"] = getdata4
 
         return jsonify({
             "status": "ok",
@@ -222,7 +238,6 @@ def updatehabitapi():
     if inputnotvalidated(newdata):
         return jsonifynotvalid("newdata")
     
-    
     mydata = modelchecktokendata(token, userscsv)
     if mydata or inputnotvalidated(token):
 
@@ -238,6 +253,13 @@ def updatehabitapi():
         getdata = cread(data)
         #the data was user's data
         cango = False
+        if getdata == []:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "The habit is not available"
+                }
+            )
         for g in getdata:
             if g['username'] == username:
                 cango = True
@@ -262,7 +284,7 @@ def updatehabitapi():
             return jsonify(
                 {
                     "status": "error",
-                    "message": "The id was not your habit"
+                    "message": "You are not the owner of this habit"
                 }
             )
     else:
@@ -293,6 +315,13 @@ def deletehabitapi():
         getdata = cread(data)
         #the data was user's data
         cango = False
+        if getdata == []:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "The habit is not available"
+                }
+            )
         for g in getdata:
             if g['username'] == username:
                 cango = True
@@ -315,7 +344,7 @@ def deletehabitapi():
             return jsonify(
                 {
                     "status": "error",
-                    "message": "The id was not your habit"
+                    "message": "You are not the owner of this habit"
                 }
             )
     else:
@@ -398,7 +427,6 @@ def updatenote():
 #habitid
 @habitmultiplayer_blueprint.route('/readnote', methods=['GET', 'POST'])
 def readnote():
-
     token = getpostget("token")
     habitid = getpostget("habitid")
 
@@ -411,16 +439,13 @@ def readnote():
             username = "guest"
         else:
             username = mydata['username']
-        # print(username)
+        
         data = {}
         data['csv'] = notescsv
         data['targetname'] = "habitid"
         data['targetdata'] = habitid
-        # data['targetname2'] = "username"
-        # data['targetdata2'] = username
 
         getdata = cread(data)
-        # getdata = cread2(data)
 
         return jsonify({
             "status": "ok",
@@ -442,15 +467,12 @@ def readnote():
 # -> habit -> member --> afwan;
 @habitmultiplayer_blueprint.route('/addmember', methods=['GET', 'POST'])
 def addmember():
-    newname = "member"
     member = getpostget("member")
     token = getpostget("token")
     habitid = getpostget("habitid")
     
     if inputnotvalidated(habitid):
         return jsonifynotvalid("habitid")
-    if inputnotvalidated(newname):
-        return jsonifynotvalid("newname")
     if inputnotvalidated(member):
         return jsonifynotvalid("member")
     
@@ -461,7 +483,6 @@ def addmember():
     #             "message": "You cannot add guest as member"
     #         }
     #     )
-    
     
     mydata = modelchecktokendata(token, userscsv)
     if mydata or inputnotvalidated(token):
@@ -491,31 +512,55 @@ def addmember():
         getdata = cread(data)
         #the data was user's data
         cango = False
+        if getdata == []:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "The habit is not available"
+                }
+            )
         for g in getdata:
             if g['username'] == username:
                 cango = True
+        
+        #check if the user already member
+        data = {}
+        data['csv'] = membercsv
+        data['targetname'] = "habitid"
+        data['targetdata'] = str(habitid)
+        data['targetname2'] = "member"
+        data['targetdata2'] = member
+        getdata = cread2(data)
+        if getdata == []:       
 
-        if cango:
-            data = {}
-            data['csv'] = habitcsv
-            data['targetname'] = "id"
-            data['targetdata'] = str(habitid)
-            data['newname'] = newname
-            data['newdata'] = member
+            if cango:
+                data = {}
+                data['csv'] = membercsv
+                data['habitid'] = habitid
+                data['member'] = member
+                data['created_at'] = datetime.now()
+                data['deleted_at'] = ""
+                createdata = ccreate(data)
 
-            cupdate(data)
-            data = cread(data)
-
-            return  jsonify({
-                "status": "ok",
-                "message": "added member",
-                "data": data
-            })
+                return jsonify(
+                    {
+                        "status": "ok",
+                        "message": "member added",
+                        "data": createdata
+                    }
+                )
+            else:
+                return jsonify(
+                    {
+                        "status": "error",
+                        "message": "You are not the owner of this habit"
+                    }
+                )
         else:
             return jsonify(
                 {
                     "status": "error",
-                    "message": "The id was not your habit"
+                    "message": "The member already exist"
                 }
             )
     else:
@@ -525,6 +570,81 @@ def addmember():
             "message": "Your token has expired"
         }
     )
+
+@habitmultiplayer_blueprint.route('/deletemember', methods=['GET', 'POST'])
+def deletemember():
+    member = getpostget("member")
+    token = getpostget("token")
+    habitid = getpostget("habitid")
+
+    if inputnotvalidated(habitid):
+        return jsonifynotvalid("habitid")
+    if inputnotvalidated(member):
+        return jsonifynotvalid("member")
+    
+    mydata = modelchecktokendata(token, userscsv)
+    if mydata or inputnotvalidated(token):
+
+        if inputnotvalidated(token):
+            username = "guest"
+        else:
+            username = mydata['username']
+        
+        data = {}
+        data['csv'] = habitcsv
+        data['targetname'] = "id"
+        data['targetdata'] = str(habitid)
+        getdata = cread(data)
+        #the data was user's data
+        cango = False
+        if getdata == []:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "The habit is not available"
+                }
+            )
+        for g in getdata:
+            if g['username'] == username:
+                cango = True
+
+        if cango:
+            data = {}
+            data['csv'] = membercsv
+            data['targetname'] = "habitid"
+            data['targetdata'] = str(habitid)
+            data['targetname2'] = "member"
+            data['targetdata2'] = str(member)
+            getdata = cdelete2(data)
+
+            if getdata == []:
+                return jsonify({
+                    "status": "ok",
+                    "message": f"member {member} already deleted",
+                })
+            else:
+
+                return jsonify({
+                    "status": "ok",
+                    "message": f"member {member} deleted",
+                    "deleted_at" : getdata['deleted_at'],
+                })
+        else:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": "You are not the owner of this habit"
+                }
+            )
+    else:
+        return jsonify(
+        {
+            "status": "error",
+            "message": "Your token has expired"
+        }
+    )
+
+
 
 @habitmultiplayer_blueprint.route('/readhistory', methods=['GET', 'POST'])
 def readhistory():
@@ -541,16 +661,13 @@ def readhistory():
             username = "guest"
         else:
             username = mydata['username']
-        # print(username)
+        
         data = {}
         data['csv'] = historycsv
         data['targetname'] = "habitid"
         data['targetdata'] = habitid
-        # data['targetname2'] = "username"
-        # data['targetdata2'] = username
 
         getdata = cread(data)
-        # getdata = cread2(data)
 
         return jsonify({
             "status": "ok",
@@ -609,7 +726,6 @@ def updatehistory():
                 }
             )
         else:
-            
             data = {}
             data['csv'] = historycsv
             data['username'] = username

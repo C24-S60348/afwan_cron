@@ -142,3 +142,32 @@ def af_replacecsvtwotarget(file_path="static/db/ayam.csv", targetcolumnname="pla
     except Exception as e:
         print(f"Error replacing CSV row: {e}")
         return False
+
+def af_replacecsvthreetarget(file_path="static/db/ayam.csv", targetcolumnname="player", targetcolumndata="afwan", targetcolumnname2="code", targetcolumndata2="ayam", targetcolumnname3="code", targetcolumndata3="ayam", new_data= {"token": "token"}):
+    try:
+        # Read all rows into a list
+        rows = af_getcsvdict(file_path)
+        
+        # Modify the row with the matching username
+        modified = False
+        for row in rows:
+            if row[targetcolumnname] == targetcolumndata:  # Assuming 'username' is a column
+                if row[targetcolumnname2] == targetcolumndata2:  
+                    if row[targetcolumnname3] == targetcolumndata3:  
+                        for key in new_data:
+                            row[key] = new_data[key]
+                        modified = True
+                        break
+        
+        # If a row was modified, write all rows back to the CSV
+        if modified:
+            with open(file_path, mode='w', newline='', encoding='utf-8-sig') as csvfile:
+                fieldnames = rows[0].keys()
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(rows)
+            return True
+        return False
+    except Exception as e:
+        print(f"Error replacing CSV row: {e}")
+        return False

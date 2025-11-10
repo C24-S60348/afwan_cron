@@ -104,13 +104,17 @@ def cupdate(data={}):
     newname = data['newname'] #"name"
     newdata = data['newdata'] #"afwan"
     if newname == None or newname == "":
-        return
+        return False
     if newdata == None or newdata == "":
-        return
+        return False
     
     new_data = {newname:newdata}
 
-    af_replacecsv2(linkcsv, targetname, targetdata, new_data)
+    result = af_replacecsv2(linkcsv, targetname, targetdata, new_data)
+    if result:
+        return True
+    else:
+        return False
 
 def cupdate2(data={}):
     linkcsv = data['csv']
@@ -174,5 +178,23 @@ def cdelete(data={}):
             new_data = {"deleted_at": deleted_at}
             af_replacecsv2(linkcsv, targetname, targetdata, new_data)
             return d
+    
+    return []
+
+def cdelete2(data={}):
+    linkcsv = data['csv']
+    targetname = data['targetname'] #"habitid"
+    targetdata = data['targetdata'] #"4"
+    targetname2 = data['targetname2'] #"member"
+    targetdata2 = data['targetdata2'] #"haziq"
+    datacsv = af_getcsvdict(linkcsv)
+    for d in datacsv:
+        if d[targetname] == targetdata:
+            if d[targetname2] == targetdata2:
+                deleted_at = datetime.now()
+                d['deleted_at'] = deleted_at
+                new_data = {"deleted_at": deleted_at}
+                af_replacecsvtwotarget(linkcsv, targetname, targetdata, targetname2, targetdata2, new_data)
+                return d
     
     return []
