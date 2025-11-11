@@ -1,0 +1,70 @@
+<!-- habit/deleteaccount -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Delete Account</title>
+  <style>
+    body { font-family: Arial; padding: 30px; max-width: 400px; margin: auto; }
+    h2 { color: #c00; }
+    input, button { width: 100%; padding: 8px; margin-top: 10px; }
+    #status { margin-top: 15px; color: #c00; }
+  </style>
+</head>
+<body>
+  <h2>Delete Account</h2>
+  <p>To permanently delete your account, please confirm below.</p>
+
+  <form id="deleteForm">
+    <label>Username</label>
+    <input id="username" placeholder="Enter username" required />
+
+    <label>Password</label>
+    <input id="password" type="password" placeholder="Enter password" required />
+
+    <label style="display:flex;justify-content: center;align-items: center;">
+      <input type="checkbox" id="confirmBox" style="width:10px;" /> I understand this is irreversible.
+    </label>
+
+    <input id="confirmText" placeholder='Type "DELETE" to confirm' />
+
+    <button type="button" id="deleteBtn">Delete my account</button>
+    <div id="status"></div>
+  </form>
+
+  <script>
+    document.getElementById('deleteBtn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const checked = document.getElementById('confirmBox').checked;
+      const text = document.getElementById('confirmText').value.trim();
+
+      if (!username || !password || !checked || text !== 'DELETE') {
+        alert('Please fill all fields and confirm deletion.');
+        return;
+      }
+
+      document.getElementById('status').textContent = 'Deleting...';
+
+      try {
+        const res = await fetch('/api/habit/deleteaccount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, confirm: true })
+        });
+
+        const json = await res.json();
+        console.log(json);
+        if (json.status == "ok") {
+          document.getElementById('status').textContent = 'Account submitted for deletion. Thankyou for using our app!';
+        //   setTimeout(() => location.href = '/', 1500);
+        } else {
+          document.getElementById('status').textContent = 'Error: ' + (json.message || res.statusText);
+        }
+      } catch (err) {
+        document.getElementById('status').textContent = 'Network error';
+      }
+    });
+  </script>
+</body>
+</html>

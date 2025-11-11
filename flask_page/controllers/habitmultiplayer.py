@@ -20,37 +20,24 @@ membercsv = "static/db/habit/member.csv"
 
 """
 Nota:
--Register
--Login
-
 Habit
--Create 
--Read one
--Read all
--Update 
--Delete
-
+-Create     -Read one-Read all  -Update     -Delete
 Note
--Read
--Update/Add
-
+-Read   -Update/Add
 Member
--Add
--Delete
-
+-Add    -Delete
 History
--Read
--Update/Add
+-Read   -Update/Add
 
-Additional:
--addmember - should not guest
+Todo
+-fix - orang baru tkleh add notes
+-added member ada satu je data
+
 
 ---All based on token, if no token, == "guest"
 
 """
 
-#http://127.0.0.1:5001/api/habit/register?username=afwanhaziq&password=12345&passwordadmin=afwan&passwordrepeat=12345
-#http://127.0.0.1:5001/api/habit/login?username=afwanhaziq&password=12345&keeptoken=yes
 
 #habit
 #http://127.0.0.1:5001/api/habit/createhabit?url=ayammm&name=ikan23
@@ -71,47 +58,10 @@ Additional:
 #http://127.0.0.1:5001/api/habit/readhistory?habitid=1
 #http://127.0.0.1:5001/api/habit/updatehistory?habitid=1&historydate=2025-10-11&historystatus=-1
 
-
+restrictmode = True
 habitmultiplayer_blueprint = Blueprint('habitmultiplayer', __name__, url_prefix="/api/habit")
 
-@habitmultiplayer_blueprint.route('/register', methods=['GET', 'POST'])
-def registerapi():
-    username = getpostget("username")
-    password = getpostget("password")
-    passwordrepeat = getpostget("passwordrepeat")
-    passwordadmin = getpostget("passwordadmin")
 
-    message = modelregister(username, password, passwordrepeat, passwordadmin, userscsv)
-    if message == "Successfully registered, now please login":
-        return jsonify({"status":"ok", "result":message})
-    else:
-        return jsonify({"status":"error", "result":message})
-
-@habitmultiplayer_blueprint.route('/login', methods=['GET', 'POST'])
-def loginapi():
-    username = getpostget("username")
-    password = getpostget("password")
-    keeptoken = getpostget("keeptoken")
-    
-    if username == "" and password == "":
-        return jsonify({"status":"ok", "result":"please enter login details"})
-    
-    if modelloginhash(username, password, userscsv):
-        result = {}
-        result['token'] = modelgettokenbasedonkeeptoken(username, keeptoken, userscsv)
-        result['username'] = username
-        return jsonify({"status":"ok", "result":result})
-    else:
-        return jsonify({"status":"error", "result":"Wrong username or password"})
-
-@habitmultiplayer_blueprint.route('/logout', methods=['GET', 'POST'])
-def logoutapi():
-    token = getpostget("token")
-    
-    if modellogout(token, userscsv) == "":
-        return jsonify({"status":"ok", "result":f"Logged out"})
-    else:
-        return jsonify({"status":"error", "result":f"No user with token {token}"})
     
 @habitmultiplayer_blueprint.route('/createhabit', methods=['GET', 'POST'])
 def createhabitapi():
@@ -125,6 +75,12 @@ def createhabitapi():
         return jsonifynotvalid("name")
     
     if token == "" or token == None:
+        if restrictmode:
+            return jsonify(
+            {
+                "status": "error",
+                "message": "Guest cannot perform this action. Please login."
+            })
         username = 'guest'
         data = {}
         data['csv'] = habitcsv
@@ -192,6 +148,7 @@ def readhabitapi():
         data['targetdata'] = username
         getdata2 = cread(data)
         getdata3 = []
+        getdata5 = []
 
         for g in getdata2:
             data = {}
@@ -199,8 +156,10 @@ def readhabitapi():
             data['targetname'] = "id"
             data['targetdata'] = g["habitid"]
             getdata3 = cread(data)
+            if getdata3 != []:
+                getdata5.append(getdata3[0])
         
-        getdata.extend(getdata3)
+        getdata.extend(getdata5)
 
         for g in getdata:
             data = {}
@@ -213,7 +172,7 @@ def readhabitapi():
         return jsonify({
             "status": "ok",
             "message": "get habit",
-            "data" : getdata
+            "data" : getdata,
         })
     else:
         return jsonify(
@@ -243,6 +202,12 @@ def updatehabitapi():
 
         if inputnotvalidated(token):
             username = "guest"
+            if restrictmode:
+                return jsonify(
+                {
+                    "status": "error",
+                    "message": "Guest cannot perform this action. Please login."
+                })
         else:
             username = mydata['username']
         
@@ -305,6 +270,12 @@ def deletehabitapi():
 
         if inputnotvalidated(token):
             username = "guest"
+            if restrictmode:
+                return jsonify(
+                {
+                    "status": "error",
+                    "message": "Guest cannot perform this action. Please login."
+                })
         else:
             username = mydata['username']
         
@@ -374,6 +345,12 @@ def updatenote():
     if mydata or inputnotvalidated(token):
         if inputnotvalidated(token):
             username = "guest"
+            if restrictmode:
+                return jsonify(
+                {
+                    "status": "error",
+                    "message": "Guest cannot perform this action. Please login."
+                })
         else:
             username = mydata['username']
         
@@ -444,13 +421,27 @@ def readnote():
         data['csv'] = notescsv
         data['targetname'] = "habitid"
         data['targetdata'] = habitid
-
         getdata = cread(data)
+
+        data = {}
+        data['csv'] = habitcsv
+        data['targetname'] = "id"
+        data['targetdata'] = habitid
+        getdata3 = cread(data)
+        owner = getdata3[0]['username']
+
+        data = {}
+        data['csv'] = membercsv
+        data['targetname'] = "habitid"
+        data['targetdata'] = habitid
+        getdata4 = cread(data)
 
         return jsonify({
             "status": "ok",
             "message": "get notes",
-            "data" : getdata
+            "data" : getdata,
+            "members": getdata4,
+            "owner": owner,
         })
     else:
         return jsonify(
@@ -462,187 +453,6 @@ def readnote():
  
 
 
-#add member / update / delete = ""
-#habitid,memberusername
-# -> habit -> member --> afwan;
-@habitmultiplayer_blueprint.route('/addmember', methods=['GET', 'POST'])
-def addmember():
-    member = getpostget("member")
-    token = getpostget("token")
-    habitid = getpostget("habitid")
-    
-    if inputnotvalidated(habitid):
-        return jsonifynotvalid("habitid")
-    if inputnotvalidated(member):
-        return jsonifynotvalid("member")
-    
-    # if member == "guest":
-    #     return jsonify(
-    #         {
-    #             "status": "error",
-    #             "message": "You cannot add guest as member"
-    #         }
-    #     )
-    
-    mydata = modelchecktokendata(token, userscsv)
-    if mydata or inputnotvalidated(token):
-
-        if inputnotvalidated(token):
-            username = "guest"
-            # return jsonify(
-            #     {
-            #         "status": "error",
-            #         "message": "Guest cannot add member"
-            #     }
-            # )
-        else:
-            username = mydata['username']
-            if username == member:
-                return jsonify(
-                    {
-                        "status": "error",
-                        "message": "You cannot add yourself as member!"
-                    }
-                )
-        
-        data = {}
-        data['csv'] = habitcsv
-        data['targetname'] = "id"
-        data['targetdata'] = str(habitid)
-        getdata = cread(data)
-        #the data was user's data
-        cango = False
-        if getdata == []:
-            return jsonify(
-                {
-                    "status": "error",
-                    "message": "The habit is not available"
-                }
-            )
-        for g in getdata:
-            if g['username'] == username:
-                cango = True
-        
-        #check if the user already member
-        data = {}
-        data['csv'] = membercsv
-        data['targetname'] = "habitid"
-        data['targetdata'] = str(habitid)
-        data['targetname2'] = "member"
-        data['targetdata2'] = member
-        getdata = cread2(data)
-        if getdata == []:       
-
-            if cango:
-                data = {}
-                data['csv'] = membercsv
-                data['habitid'] = habitid
-                data['member'] = member
-                data['created_at'] = datetime.now()
-                data['deleted_at'] = ""
-                createdata = ccreate(data)
-
-                return jsonify(
-                    {
-                        "status": "ok",
-                        "message": "member added",
-                        "data": createdata
-                    }
-                )
-            else:
-                return jsonify(
-                    {
-                        "status": "error",
-                        "message": "You are not the owner of this habit"
-                    }
-                )
-        else:
-            return jsonify(
-                {
-                    "status": "error",
-                    "message": "The member already exist"
-                }
-            )
-    else:
-        return jsonify(
-        {
-            "status": "error",
-            "message": "Your token has expired"
-        }
-    )
-
-@habitmultiplayer_blueprint.route('/deletemember', methods=['GET', 'POST'])
-def deletemember():
-    member = getpostget("member")
-    token = getpostget("token")
-    habitid = getpostget("habitid")
-
-    if inputnotvalidated(habitid):
-        return jsonifynotvalid("habitid")
-    if inputnotvalidated(member):
-        return jsonifynotvalid("member")
-    
-    mydata = modelchecktokendata(token, userscsv)
-    if mydata or inputnotvalidated(token):
-
-        if inputnotvalidated(token):
-            username = "guest"
-        else:
-            username = mydata['username']
-        
-        data = {}
-        data['csv'] = habitcsv
-        data['targetname'] = "id"
-        data['targetdata'] = str(habitid)
-        getdata = cread(data)
-        #the data was user's data
-        cango = False
-        if getdata == []:
-            return jsonify(
-                {
-                    "status": "error",
-                    "message": "The habit is not available"
-                }
-            )
-        for g in getdata:
-            if g['username'] == username:
-                cango = True
-
-        if cango:
-            data = {}
-            data['csv'] = membercsv
-            data['targetname'] = "habitid"
-            data['targetdata'] = str(habitid)
-            data['targetname2'] = "member"
-            data['targetdata2'] = str(member)
-            getdata = cdelete2(data)
-
-            if getdata == []:
-                return jsonify({
-                    "status": "ok",
-                    "message": f"member {member} already deleted",
-                })
-            else:
-
-                return jsonify({
-                    "status": "ok",
-                    "message": f"member {member} deleted",
-                    "deleted_at" : getdata['deleted_at'],
-                })
-        else:
-            return jsonify(
-                {
-                    "status": "error",
-                    "message": "You are not the owner of this habit"
-                }
-            )
-    else:
-        return jsonify(
-        {
-            "status": "error",
-            "message": "Your token has expired"
-        }
-    )
 
 
 
@@ -666,13 +476,27 @@ def readhistory():
         data['csv'] = historycsv
         data['targetname'] = "habitid"
         data['targetdata'] = habitid
-
         getdata = cread(data)
+
+        data = {}
+        data['csv'] = habitcsv
+        data['targetname'] = "id"
+        data['targetdata'] = habitid
+        getdata3 = cread(data)
+        owner = getdata3[0]['username']
+
+        data = {}
+        data['csv'] = membercsv
+        data['targetname'] = "habitid"
+        data['targetdata'] = habitid
+        getdata4 = cread(data)
 
         return jsonify({
             "status": "ok",
             "message": "get history",
-            "data" : getdata
+            "data" : getdata,
+            "members": getdata4,
+            "owner": owner,
         })
     else:
         return jsonify(
