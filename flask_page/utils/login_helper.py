@@ -56,11 +56,11 @@ def modelsendemail(email, newpassword):
     return True
 
 def modelsendemailbrevo(email, newpassword):
-    
     BREVO_API_KEY = variables.brevo_api_key_af1
     BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
     data = {
+        "sender": {"email": variables.brevo_email_af1},
         "to": [{"email": email}],
         "subject": "Password Reset",
         "htmlContent": f"Your new password is: {newpassword}"
