@@ -45,43 +45,35 @@ habitmultiplayer2_blueprint = Blueprint('habitmultiplayer2', __name__)
 
 @habitmultiplayer2_blueprint.route('/api/habit/readprofile', methods=['GET', 'POST'])
 def readprofile():
-    token = getpostget("token")
     usernames = getpostget("usernames")  # Comma-separated list of usernames
     
-    # if inputnotvalidated(token):
-    #     return jsonifynotvalid("token")
+    if inputnotvalidated(usernames):
+        return jsonifynotvalid("usernames")
     
-    mydata = modelchecktokendata(token, userscsv)
-    if mydata or inputnotvalidated(token):
-        # Get profile data for requested usernames
-        username_list = []
-        if usernames:
-            username_list = [u.strip() for u in usernames.split(',') if u.strip()]
-        
-        profiles = []
-        if username_list:
-            for username in username_list:
-                data = {}
-                data['csv'] = userscsv
-                data['targetname'] = "username"
-                data['targetdata'] = username
-                userdata = cread(data)
-                if userdata and len(userdata) > 0:
-                    profile = {
-                        "username": username,
-                        "name": userdata[0].get('name', '') if 'name' in userdata[0] else ''
-                    }
-                    profiles.append(profile)
-        
-        return jsonify({
-            "status": "ok",
-            "data": profiles
-        })
-    else:
-        return jsonify({
-            "status": "error",
-            "message": "Your token has expired"
-        })
+    # Get profile data for requested usernames
+    username_list = []
+    if usernames:
+        username_list = [u.strip() for u in usernames.split(',') if u.strip()]
+    
+    profiles = []
+    if username_list:
+        for username in username_list:
+            data = {}
+            data['csv'] = userscsv
+            data['targetname'] = "username"
+            data['targetdata'] = username
+            userdata = cread(data)
+            if userdata and len(userdata) > 0:
+                profile = {
+                    "username": username,
+                    "name": userdata[0].get('name', '') if 'name' in userdata[0] else ''
+                }
+                profiles.append(profile)
+    
+    return jsonify({
+        "status": "ok",
+        "data": profiles
+    })
 
 @habitmultiplayer2_blueprint.route('/api/habit/updateprofile', methods=['GET', 'POST'])
 def updateprofile():
