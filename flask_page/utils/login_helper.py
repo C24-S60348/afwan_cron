@@ -6,6 +6,8 @@ import hashlib
 import re
 import string
 from .outsource_helper import modelsendtelegrammessage
+import variables
+import requests
 
 #login --------------------
 
@@ -51,6 +53,27 @@ def modelsendemail(email, newpassword):
     errormessage = f'password {email} has been changed to {newpassword}'
     modelsendtelegrammessage(errormessage)
     #todo - send email brevo
+    return True
+
+def modelsendemailbrevo(email, newpassword):
+    
+    BREVO_API_KEY = variables.brevo_api_key_af1
+    BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+
+    data = {
+        "to": [{"email": email}],
+        "subject": "Password Reset",
+        "htmlContent": f"Your new password is: {newpassword}"
+    }
+
+    headers = {
+        "accept": "application/json",
+        "api-key": BREVO_API_KEY,
+        "content-type": "application/json"
+    }
+
+    response = requests.post(BREVO_API_URL, json=data, headers=headers)
+
     return True
 
 def modelcheckemail(email="test@test.com"):
