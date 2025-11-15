@@ -52,7 +52,7 @@ def modelsendemail(email, newpassword):
     print(f'password has been changed to {newpassword}')
     errormessage = f'password {email} has been changed to {newpassword}'
     modelsendtelegrammessage(errormessage)
-    #todo - send email brevo
+    modelsendemailbrevo(email, newpassword)
     return True
 
 def modelsendemailbrevo(email, newpassword):
