@@ -18,23 +18,115 @@ userscsv = "static/db/habit/users.csv"
 historycsv = "static/db/habit/history.csv"
 membercsv = "static/db/habit/member.csv"
 deleteaccountcsv = "static/db/habit/deleteaccount.csv"
+profilecsv = "static/db/habit/profile.csv"
 
 #http://127.0.0.1:5001/api/habit/register?username=afwanhaziq&password=12345&passwordadmin=afwan&passwordrepeat=12345
 #http://127.0.0.1:5001/api/habit/login?username=afwanhaziq&password=12345&keeptoken=yes
+
+#http://127.0.0.1:5001/api/habit/forgotpassword?email=afwanhaziq%40yahoo.com
+#http://127.0.0.1:5001/api/habit/changepassword?password=afwan&token=065ac561757cdb4eb06b68f6883a2c61
+
+#http://127.0.0.1:5001/api/habit/updateprofile?token=a2a6fca1a91a20cc974a895ecbb2afae&name=Afwan
+
 
 """
 -Register   -Login
 
 -Deleteaccount
+-ForgotPassword
+-Update Profile
 
+todo:
+-send email using brevo
 
 """
 restrictmode = True
 habitmultiplayer2_blueprint = Blueprint('habitmultiplayer2', __name__)
 
+@habitmultiplayer2_blueprint.route('/api/habit/updateprofile', methods=['GET', 'POST'])
+def updateprofile():
+    name = getpostget("name")
+    token = getpostget("token")
+    
+    if inputnotvalidated(name):
+        return jsonifynotvalid("name")
+    if inputnotvalidated(token):
+        return jsonifynotvalid("token")
+
+    mydata = modelchecktokendata(token, userscsv)
+    if mydata:
+        username = mydata['username']
+        
+        modelupdateprofile(username, name, userscsv)
+        return jsonify(
+            {
+                "status": "ok",
+                "message": "profile updated"
+            }
+        )
+    else:
+        return jsonify(
+        {
+            "status": "error",
+            "message": "Your token has expired"
+        }
+    )
+
+
+@habitmultiplayer2_blueprint.route('/api/habit/forgotpassword', methods=['GET', 'POST'])
+def forgotpasswordapi():
+    username = getpostget("email")
+    
+    if username == "":
+        return jsonify({"status":"ok", "result":"please enter email"})
+    
+    if modelgetusernameisexist(username, userscsv):
+        if modelsendforgotpasswordemail(username, userscsv):
+            return jsonify({"status":"ok", "result":"If an account with this email exists, a password reset link will be sent."})
+        else:
+            return jsonify({"status":"error", "result":"If an account with this email exists, a password reset link will be sent."})
+    else:
+        return jsonify({"status":"error", "result":"The email doesn't exist on our app database."})
+    
+@habitmultiplayer2_blueprint.route('/api/habit/changepassword', methods=['GET', 'POST'])
+def changepasswordapi():
+    token = getpostget("token")
+    password = getpostget("password")
+
+    if token == "":
+        return jsonify({"status":"ok", "result":"please enter token"})
+    if password == "":
+        return jsonify({"status":"ok", "result":"please enter password"})
+
+    mydata = modelchecktokendata(token, userscsv)
+    if mydata:
+        username = mydata['username']
+        if modelforgottedpassword(username, userscsv):
+            new_data = {"forgotpassword":""}
+            af_replacecsv2(userscsv, "username", username, new_data)
+            new_data = {"password":password}
+            af_replacecsv2(userscsv, "username", username, new_data)
+            return jsonify({"status":"ok", "result":"Password updated."})
+        else:
+            return jsonify(
+            {
+                "status": "error",
+                "message": "Your user didn't query for any forgotten password"
+            })
+    else:
+        return jsonify(
+        {
+            "status": "error",
+            "message": "Your token has expired"
+        }
+    )
+
 @habitmultiplayer2_blueprint.route('/api/habit/register', methods=['GET', 'POST'])
 def registerapi():
-    username = getpostget("username")
+    username = getpostget("email")
+    if modelcheckemail(username) == False:
+        message = "email is not valid"
+        return jsonify({"status":"error", "result":message})
     password = getpostget("password")
     passwordrepeat = getpostget("passwordrepeat")
     passwordadmin = getpostget("passwordadmin")
@@ -47,7 +139,7 @@ def registerapi():
 
 @habitmultiplayer2_blueprint.route('/api/habit/login', methods=['GET', 'POST'])
 def loginapi():
-    username = getpostget("username")
+    username = getpostget("email")
     password = getpostget("password")
     keeptoken = getpostget("keeptoken")
     

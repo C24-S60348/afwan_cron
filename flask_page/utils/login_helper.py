@@ -3,8 +3,52 @@
 import secrets
 from .csv_helper import *
 import hashlib
+import re
+import string
 
 #login --------------------
+
+def modelupdateprofile(username="", name="", file_path="static/db/users.csv"):
+    users = modeluser(file_path)
+    for u in users:
+        if username == u['username']:
+            new_data = { "name": name }
+            af_replacecsv(file_path, username, new_data)
+            return True
+    
+    return False
+
+def modelforgottedpassword(username="", file_path="static/db/users.csv"):
+    users = modeluser(file_path)
+    for u in users:
+        if username == u['username']:
+            if u['forgotpassword'] == "yes":
+                return True
+    
+    return False
+
+def generate_random_password(length=12):
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+def modelsendforgotpasswordemail(email, file_path="static/db/users.csv"):
+    newpassword = generate_random_password(12)
+    new_data = { "password": hash_password_sha256(newpassword) }
+    af_replacecsv(file_path, email, new_data)
+    new_data = { "forgotpassword": "yes" }
+
+    # Update the user's row with the new token
+    if af_replacecsv(file_path, email, new_data):
+        print(f'password has been changed to {newpassword}')
+        return True
+    else:
+        return False
+
+def modelcheckemail(email="test@test.com"):
+    # Regular expression pattern for a general valid email
+    pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    # pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return bool(re.match(pattern, email))
 
 def modelchecktokenwebsite(session, file_path="static/db/users.csv"):
     if modelchecktoken(session.get('token'), file_path):
@@ -102,8 +146,11 @@ def modelregister(username= "", password = "", passwordrepeat = "", passwordadmi
 def modelregisteruser(username="", password="", file_path="static/db/users.csv"):
     af_addcsv(modelgetuserspath(file_path), [
         username,
-        hash_password_sha256(password)
+        hash_password_sha256(password),
+        "",
+        ""
     ])
+
 
 def modelgetusernameisexist(username="", file_path="static/db/users.csv"):
 
