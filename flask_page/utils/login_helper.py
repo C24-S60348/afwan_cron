@@ -5,6 +5,7 @@ from .csv_helper import *
 import hashlib
 import re
 import string
+from .outsource_helper import modelsendtelegrammessage
 
 #login --------------------
 
@@ -47,7 +48,8 @@ def modelsendforgotpasswordemail(email, file_path="static/db/users.csv"):
 
 def modelsendemail(email, newpassword):
     print(f'password has been changed to {newpassword}')
-    send_telegram_message(f'password {email} has been changed to {newpassword}')
+    errormessage = f'password {email} has been changed to {newpassword}'
+    modelsendtelegrammessage(errormessage)
     #todo - send email brevo
     return True
 
