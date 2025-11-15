@@ -39,10 +39,16 @@ def modelsendforgotpasswordemail(email, file_path="static/db/users.csv"):
 
     # Update the user's row with the new token
     if af_replacecsv(file_path, email, new_data):
+        modelsendemail(email, newpassword)
         print(f'password has been changed to {newpassword}')
         return True
     else:
         return False
+
+def modelsendemail(email, newpassword):
+    print(f'password has been changed to {newpassword}')
+    #todo - send email brevo
+    return True
 
 def modelcheckemail(email="test@test.com"):
     # Regular expression pattern for a general valid email

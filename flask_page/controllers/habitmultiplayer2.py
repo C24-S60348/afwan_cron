@@ -112,13 +112,15 @@ def forgotpasswordapi():
     if username == "":
         return jsonify({"status":"ok", "result":"please enter email"})
     
-    if modelgetusernameisexist(username, userscsv):
-        if modelsendforgotpasswordemail(username, userscsv):
-            return jsonify({"status":"ok", "result":"If an account with this email exists, a password reset link will be sent."})
-        else:
-            return jsonify({"status":"error", "result":"If an account with this email exists, a password reset link will be sent."})
-    else:
-        return jsonify({"status":"error", "result":"The email doesn't exist on our app database."})
+    modelsendforgotpasswordemail(username, userscsv)
+    return jsonify({"status":"ok", "result":"If an account with this email exists, a password reset link will be sent."})
+    # if modelgetusernameisexist(username, userscsv):
+    #     if modelsendforgotpasswordemail(username, userscsv):
+    #         return jsonify({"status":"ok", "result":"If an account with this email exists, a password reset link will be sent."})
+    #     else:
+    #         return jsonify({"status":"error", "result":"If an account with this email exists, a password reset link will be sent."})
+    # else:
+    #     return jsonify({"status":"error", "result":"The email doesn't exist on our app database."})
     
 @habitmultiplayer2_blueprint.route('/api/habit/changepassword', methods=['GET', 'POST'])
 def changepasswordapi():
