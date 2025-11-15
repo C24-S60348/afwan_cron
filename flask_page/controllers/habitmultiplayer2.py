@@ -138,7 +138,7 @@ def changepasswordapi():
         if modelforgottedpassword(username, userscsv):
             new_data = {"forgotpassword":""}
             af_replacecsv2(userscsv, "username", username, new_data)
-            new_data = {"password":password}
+            new_data = {"password":hash_password_sha256(password)}
             af_replacecsv2(userscsv, "username", username, new_data)
             return jsonify({"status":"ok", "result":"Password updated."})
         else:
