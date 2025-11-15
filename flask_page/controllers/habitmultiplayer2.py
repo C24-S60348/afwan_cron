@@ -48,8 +48,8 @@ def readprofile():
     token = getpostget("token")
     usernames = getpostget("usernames")  # Comma-separated list of usernames
     
-    if inputnotvalidated(token):
-        return jsonifynotvalid("token")
+    # if inputnotvalidated(token):
+    #     return jsonifynotvalid("token")
     
     mydata = modelchecktokendata(token, userscsv)
     if mydata or inputnotvalidated(token):
