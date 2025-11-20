@@ -2,9 +2,7 @@
 
 from flask import abort, jsonify, request, Blueprint, render_template, render_template_string, session
 
-from apps.utils.db_helper import *
-
-
+from ..utils.db_helper import *
 from ..utils.crud_helper import *
 from ..utils.adminhandle_helper import *
 from ..utils.html_helper import *
