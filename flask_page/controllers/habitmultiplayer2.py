@@ -2,14 +2,20 @@
 
 from flask import abort, jsonify, request, Blueprint, render_template, render_template_string, session
 
+from apps.utils.db_helper import *
+
 
 from ..utils.crud_helper import *
 from ..utils.adminhandle_helper import *
 from ..utils.html_helper import *
 from ..utils.excel_helper import *
-from ..utils.login_helper import *
 from ..models.habitmultiplayer import *
 from ..utils.checker_helper import *
+from ..utils.outsource_helper import *
+import secrets
+import hashlib
+import re
+import string
 
 habitcsv = "static/db/habit/habit.csv"
 notescsv  = "static/db/habit/notes.csv"
@@ -19,14 +25,20 @@ historycsv = "static/db/habit/history.csv"
 membercsv = "static/db/habit/member.csv"
 deleteaccountcsv = "static/db/habit/deleteaccount.csv"
 profilecsv = "static/db/habit/profile.csv"
+dbloc = "static/db/habit/mydb.db"
 
-#http://127.0.0.1:5001/api/habit/register?username=afwanhaziq&password=12345&passwordadmin=afwan&passwordrepeat=12345
-#http://127.0.0.1:5001/api/habit/login?username=afwanhaziq&password=12345&keeptoken=yes
+#http://127.0.0.1:5001/api/habit/register?email=afwanhaziq%40yahoo.com&password=12345&passwordadmin=afwan&passwordrepeat=12345
+#http://127.0.0.1:5001/api/habit/login?email=afwanhaziq%40yahoo.com&password=12345&keeptoken=yes
+
+#member
+#http://127.0.0.1:5001/api/habit/addmember?habitid=4&member=afwanhaziq
+#http://127.0.0.1:5001/api/habit/deletemember?habitid=4&member=afwanhaziq
 
 #http://127.0.0.1:5001/api/habit/forgotpassword?email=afwanhaziq%40yahoo.com
-#http://127.0.0.1:5001/api/habit/changepassword?password=afwan&token=065ac561757cdb4eb06b68f6883a2c61
+#http://127.0.0.1:5001/api/habit/changepassword?password=12345&token=992f69b6e5b4f39d9da4ad100c3848d7
 
 #http://127.0.0.1:5001/api/habit/updateprofile?token=a2a6fca1a91a20cc974a895ecbb2afae&name=Afwan
+#http://127.0.0.1:5001/api/habit/readprofile?usernames=afwanhaziq%40yahoo.com,ikan
 
 
 """
@@ -36,12 +48,27 @@ profilecsv = "static/db/habit/profile.csv"
 -ForgotPassword
 -Update Profile
 
-todo:
--send email using brevo
-
 """
 restrictmode = True
 habitmultiplayer2_blueprint = Blueprint('habitmultiplayer2', __name__)
+
+def generate_random_password(length=12):
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+def modelcheckemail(email="test@test.com"):
+    # Regular expression pattern for a general valid email
+    pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    # pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return bool(re.match(pattern, email))
+
+def generate_token():
+    return secrets.token_hex(16)
+
+def hash_password_sha256(password):
+    # Create a SHA-256 hash of the password
+    sha_signature = hashlib.sha256(password.encode()).hexdigest()
+    return sha_signature
 
 @habitmultiplayer2_blueprint.route('/api/habit/readprofile', methods=['GET', 'POST'])
 def readprofile():
@@ -58,15 +85,14 @@ def readprofile():
     profiles = []
     if username_list:
         for username in username_list:
-            data = {}
-            data['csv'] = userscsv
-            data['targetname'] = "username"
-            data['targetdata'] = username
-            userdata = cread(data)
-            if userdata and len(userdata) > 0:
+            query = f"SELECT * FROM users WHERE username = ? AND deleted_at IS NULL"
+            params = (username,)
+            dbdata = af_getdb(dbloc, query, params)
+            
+            if dbdata and len(dbdata) > 0:
                 profile = {
                     "username": username,
-                    "name": userdata[0].get('name', '') if 'name' in userdata[0] else ''
+                    "name": dbdata[0].get('name', '') if 'name' in dbdata[0] else ''
                 }
                 profiles.append(profile)
     
@@ -74,7 +100,6 @@ def readprofile():
         "status": "ok",
         "data": profiles
     })
-
 @habitmultiplayer2_blueprint.route('/api/habit/updateprofile', methods=['GET', 'POST'])
 def updateprofile():
     name = getpostget("name")
@@ -84,12 +109,18 @@ def updateprofile():
         return jsonifynotvalid("name")
     if inputnotvalidated(token):
         return jsonifynotvalid("token")
+    
+    query = f"SELECT * FROM users WHERE token = ? AND deleted_at IS NULL"
+    params = (token,)
+    dbdata = af_getdb(dbloc, query, params)
 
-    mydata = modelchecktokendata(token, userscsv)
-    if mydata:
-        username = mydata['username']
+    if dbdata:
+        username = dbdata[0]['username']
         
-        modelupdateprofile(username, name, userscsv)
+        query = f"UPDATE users SET name = ? WHERE username = ? AND deleted_at IS NULL"
+        params = (name,username,)
+        dbdata = af_getdb(dbloc, query, params)
+
         return jsonify(
             {
                 "status": "ok",
@@ -112,15 +143,14 @@ def forgotpasswordapi():
     if username == "":
         return jsonify({"status":"ok", "result":"please enter email"})
     
-    modelsendforgotpasswordemail(username, userscsv)
+    newpassword = generate_random_password(12)
+    query = f"UPDATE users SET forgotpassword = ?, password = ? WHERE username = ? AND deleted_at IS NULL"
+    params = ("yes",hash_password_sha256(newpassword),username)
+    dbdata = af_getdb(dbloc, query, params)
+    print (newpassword)
+
+    modelsendemail(username, newpassword)
     return jsonify({"status":"ok", "result":"If an account with this email exists, a password reset link will be sent."})
-    # if modelgetusernameisexist(username, userscsv):
-    #     if modelsendforgotpasswordemail(username, userscsv):
-    #         return jsonify({"status":"ok", "result":"If an account with this email exists, a password reset link will be sent."})
-    #     else:
-    #         return jsonify({"status":"error", "result":"If an account with this email exists, a password reset link will be sent."})
-    # else:
-    #     return jsonify({"status":"error", "result":"The email doesn't exist on our app database."})
     
 @habitmultiplayer2_blueprint.route('/api/habit/changepassword', methods=['GET', 'POST'])
 def changepasswordapi():
@@ -131,15 +161,23 @@ def changepasswordapi():
         return jsonify({"status":"ok", "result":"please enter token"})
     if password == "":
         return jsonify({"status":"ok", "result":"please enter password"})
+    
+    query = f"SELECT * FROM users WHERE token = ? AND deleted_at IS NULL"
+    params = (token,)
+    dbdata = af_getdb(dbloc, query, params)
 
-    mydata = modelchecktokendata(token, userscsv)
-    if mydata:
-        username = mydata['username']
-        if modelforgottedpassword(username, userscsv):
-            new_data = {"forgotpassword":""}
-            af_replacecsv2(userscsv, "username", username, new_data)
-            new_data = {"password":hash_password_sha256(password)}
-            af_replacecsv2(userscsv, "username", username, new_data)
+    if dbdata:
+        username = dbdata[0]['username']
+
+        query = f"SELECT * FROM users WHERE username = ? AND forgotpassword = ? AND deleted_at IS NULL"
+        params = (username,"yes",)
+        dbdata = af_getdb(dbloc, query, params)
+
+        if dbdata:
+            query = f"UPDATE users SET forgotpassword = ?, password = ? WHERE username = ? AND deleted_at IS NULL"
+            params = ("",hash_password_sha256(password),username,)
+            dbdata = af_getdb(dbloc, query, params)
+
             return jsonify({"status":"ok", "result":"Password updated."})
         else:
             return jsonify(
@@ -158,18 +196,44 @@ def changepasswordapi():
 @habitmultiplayer2_blueprint.route('/api/habit/register', methods=['GET', 'POST'])
 def registerapi():
     username = getpostget("email")
+
     if modelcheckemail(username) == False:
         message = "email is not valid"
         return jsonify({"status":"error", "result":message})
+
+    query = f"SELECT * FROM users WHERE username = ? AND deleted_at IS NULL"
+    params = (username,)
+    dbdata = af_getdb(dbloc, query, params)
+
+    
+    
     password = getpostget("password")
     passwordrepeat = getpostget("passwordrepeat")
     passwordadmin = getpostget("passwordadmin")
 
-    message = modelregister(username, password, passwordrepeat, passwordadmin, userscsv)
-    if message == "Successfully registered, now please login":
-        return jsonify({"status":"ok", "result":message})
-    else:
+    if passwordadmin != "afwan":
+        message = "Wrong password admin!"
         return jsonify({"status":"error", "result":message})
+
+    if password != passwordrepeat:
+        message = "Password is not same with Repeat password!"
+        return jsonify({"status":"error", "result":message})
+    
+    query = f"SELECT * FROM users WHERE username = ? AND deleted_at IS NULL"
+    params = (username,)
+    dbdata = af_getdb(dbloc, query, params)
+
+    if dbdata:
+        message = "The username is already exist!"
+        return jsonify({"status":"error", "result":message})
+    else:
+        query = f"INSERT INTO users (username,password,created_at) VALUES (?,?,?)"
+        params = (username,hash_password_sha256(password),datetime.now(),)
+        dbdata = af_getdb(dbloc, query, params)
+
+        message = "Successfully registered, now please login"
+        return jsonify({"status":"ok", "result":message})
+    
 
 @habitmultiplayer2_blueprint.route('/api/habit/login', methods=['GET', 'POST'])
 def loginapi():
@@ -180,10 +244,22 @@ def loginapi():
     if username == "" and password == "":
         return jsonify({"status":"ok", "result":"please enter login details"})
     
-    if modelloginhash(username, password, userscsv):
+    query = f"SELECT * FROM users WHERE username = ? AND password = ? AND deleted_at IS NULL"
+    params = (username,hash_password_sha256(password),)
+    dbdata = af_getdb(dbloc, query, params)
+    
+    if dbdata:
+        token = generate_token()
         result = {}
-        result['token'] = modelgettokenbasedonkeeptoken(username, keeptoken, userscsv)
         result['username'] = username
+        if dbdata[0]["token"]:
+            result['token'] = dbdata[0]["token"]
+        else:
+            query = f"UPDATE users SET token = ? WHERE username = ? AND password = ? AND deleted_at IS NULL"
+            params = (token,username,hash_password_sha256(password),)
+            dbdata = af_getdb(dbloc, query, params)
+            result['token'] = token
+
         return jsonify({"status":"ok", "result":result})
     else:
         return jsonify({"status":"error", "result":"Wrong username or password"})
@@ -192,7 +268,11 @@ def loginapi():
 def logoutapi():
     token = getpostget("token")
     
-    if modellogout(token, userscsv) == "":
+    query = f"UPDATE users SET token = ? WHERE token = ? AND deleted_at IS NULL"
+    params = ("",token,)
+    dbdata = af_getdb(dbloc, query, params)
+    
+    if dbdata:
         return jsonify({"status":"ok", "result":f"Logged out"})
     else:
         return jsonify({"status":"error", "result":f"No user with token {token}"})
@@ -211,16 +291,11 @@ def addmember():
     if inputnotvalidated(member):
         return jsonifynotvalid("member")
     
-    # if member == "guest":
-    #     return jsonify(
-    #         {
-    #             "status": "error",
-    #             "message": "You cannot add guest as member"
-    #         }
-    #     )
-    
-    mydata = modelchecktokendata(token, userscsv)
-    if mydata or inputnotvalidated(token):
+    query = f"SELECT * FROM users WHERE token = ? AND deleted_at IS NULL"
+    params = (token,)
+    dbdata = af_getdb(dbloc, query, params)
+
+    if dbdata or inputnotvalidated(token):
 
         if inputnotvalidated(token):
             username = "guest"
@@ -231,7 +306,7 @@ def addmember():
                     "message": "Guest cannot perform this action. Please login."
                 })
         else:
-            username = mydata['username']
+            username = dbdata[0]['username']
             if username == member:
                 return jsonify(
                     {
@@ -240,48 +315,39 @@ def addmember():
                     }
                 )
         
-        data = {}
-        data['csv'] = habitcsv
-        data['targetname'] = "id"
-        data['targetdata'] = str(habitid)
-        getdata = cread(data)
+        query = f"SELECT * FROM habit WHERE id = ? AND deleted_at IS NULL"
+        params = (habitid,)
+        dbdata = af_getdb(dbloc, query, params)
+        
         #the data was user's data
         cango = False
-        if getdata == []:
+        if dbdata == []:
             return jsonify(
                 {
                     "status": "error",
                     "message": "The habit is not available"
                 }
             )
-        for g in getdata:
+        for g in dbdata:
             if g['username'] == username:
                 cango = True
         
         #check if the user already member
-        data = {}
-        data['csv'] = membercsv
-        data['targetname'] = "habitid"
-        data['targetdata'] = str(habitid)
-        data['targetname2'] = "member"
-        data['targetdata2'] = member
-        getdata = cread2(data)
-        if getdata == []:       
+        query = f"SELECT * FROM member WHERE habitid = ? AND member = ? AND deleted_at IS NULL"
+        params = (habitid,member,)
+        dbdata = af_getdb(dbloc, query, params)
+
+        if dbdata == []:       
 
             if cango:
-                data = {}
-                data['csv'] = membercsv
-                data['habitid'] = habitid
-                data['member'] = member
-                data['created_at'] = datetime.now()
-                data['deleted_at'] = ""
-                createdata = ccreate(data)
+                query = f"INSERT INTO member (habitid,member,created_at) VALUES (?,?,?)"
+                params = (habitid,member,datetime.now(),)
+                dbdata = af_getdb(dbloc, query, params)
 
                 return jsonify(
                     {
                         "status": "ok",
-                        "message": "member added",
-                        "data": createdata
+                        "message": f"member {member} added"
                     }
                 )
             else:
@@ -317,8 +383,11 @@ def deletemember():
     if inputnotvalidated(member):
         return jsonifynotvalid("member")
     
-    mydata = modelchecktokendata(token, userscsv)
-    if mydata or inputnotvalidated(token):
+    query = f"SELECT * FROM users WHERE token = ? AND deleted_at IS NULL"
+    params = (token,)
+    dbdata = af_getdb(dbloc, query, params)
+
+    if dbdata or inputnotvalidated(token):
 
         if inputnotvalidated(token):
             username = "guest"
@@ -329,47 +398,36 @@ def deletemember():
                     "message": "Guest cannot perform this action. Please login."
                 })
         else:
-            username = mydata['username']
+            username = dbdata[0]['username']
         
-        data = {}
-        data['csv'] = habitcsv
-        data['targetname'] = "id"
-        data['targetdata'] = str(habitid)
-        getdata = cread(data)
+        query = f"SELECT * FROM habit WHERE id = ? AND deleted_at IS NULL"
+        params = (habitid,)
+        dbdata = af_getdb(dbloc, query, params)
+
         #the data was user's data
         cango = False
-        if getdata == []:
+        if dbdata == []:
             return jsonify(
                 {
                     "status": "error",
                     "message": "The habit is not available"
                 }
             )
-        for g in getdata:
+        for g in dbdata:
             if g['username'] == username:
                 cango = True
 
         if cango:
-            data = {}
-            data['csv'] = membercsv
-            data['targetname'] = "habitid"
-            data['targetdata'] = str(habitid)
-            data['targetname2'] = "member"
-            data['targetdata2'] = str(member)
-            getdata = cdelete2(data)
 
-            if getdata == []:
-                return jsonify({
-                    "status": "ok",
-                    "message": f"member {member} already deleted",
-                })
-            else:
+            query = f"UPDATE member SET deleted_at = ? WHERE habitid = ? AND member = ? AND deleted_at IS NULL"
+            params = (datetime.now(),habitid,member,)
+            dbdata = af_getdb(dbloc, query, params)
 
-                return jsonify({
-                    "status": "ok",
-                    "message": f"member {member} deleted",
-                    "deleted_at" : getdata['deleted_at'],
-                })
+            return jsonify({
+                "status": "ok",
+                "message": f"member {member} deleted",
+            })
+        
         else:
             return jsonify(
                 {
@@ -395,17 +453,17 @@ def deleteaccount():
     if inputnotvalidated(password):
         return jsonifynotvalid("password")
     
-    if modelloginhash(username, password, userscsv):
-        data = {}
-        data['csv'] = deleteaccountcsv
-        data['username'] = username
-        data['password'] = password
-        data['created_at'] = datetime.now()
-        data['deleted_at'] = ""
-        createdata = ccreate(data)
+    query = f"SELECT * FROM users WHERE username = ? AND password = ? AND deleted_at IS NULL"
+    params = (username,hash_password_sha256(password),)
+    dbdata = af_getdb(dbloc, query, params)
+    
+    if dbdata:
+        query = f"INSERT INTO deleteaccount (username,password,created_at) VALUES (?,?,?)"
+        params = (username,password,datetime.now(),)
+        dbdata = af_getdb(dbloc, query, params)
 
         message = f"{username} is just submitted to delete their account for Habit Multiplayer"
-        #todo - send telegram message
+        modelsendtelegrammessage(message)
         return jsonify({
             "status": "ok",
             "message": f"Your account is submitted to be deleted. Thankyou for using our app",
