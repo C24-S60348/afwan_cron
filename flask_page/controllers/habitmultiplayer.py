@@ -393,8 +393,8 @@ def updatenote():
             username = dbdata[0]['username']
         
         
-        query = f"SELECT * FROM notes WHERE username = ? AND deleted_at IS NULL"
-        params = (username,)
+        query = f"SELECT * FROM notes WHERE username = ? AND habitid = ? AND deleted_at IS NULL"
+        params = (username,habitid,)
         dbdata = af_getdb(dbloc, query, params)
         
         if dbdata:
@@ -408,8 +408,8 @@ def updatenote():
             params = (username,habitid,notes,datetime.now(),)
             dbdata = af_getdb(dbloc, query, params)
         
-        query = f"SELECT * FROM notes WHERE username = ? AND deleted_at IS NULL"
-        params = (username,)
+        query = f"SELECT * FROM notes WHERE username = ? AND habitid = ? AND deleted_at IS NULL"
+        params = (username,habitid,)
         dbdata = af_getdb(dbloc, query, params)
 
         return jsonify(

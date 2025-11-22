@@ -16,14 +16,6 @@ import hashlib
 import re
 import string
 
-habitcsv = "static/db/habit/habit.csv"
-notescsv  = "static/db/habit/notes.csv"
-playerscsv = "static/db/habit/players.csv"
-userscsv = "static/db/habit/users.csv"
-historycsv = "static/db/habit/history.csv"
-membercsv = "static/db/habit/member.csv"
-deleteaccountcsv = "static/db/habit/deleteaccount.csv"
-profilecsv = "static/db/habit/profile.csv"
 dbloc = "static/db/habit/mydb.db"
 
 #http://127.0.0.1:5001/api/habit/register?email=afwanhaziq%40yahoo.com&password=12345&passwordadmin=afwan&passwordrepeat=12345
@@ -266,6 +258,8 @@ def loginapi():
 @habitmultiplayer2_blueprint.route('/api/habit/logout', methods=['GET', 'POST'])
 def logoutapi():
     token = getpostget("token")
+    
+    return jsonify({"status":"ok", "result":f"Logged out"})
     
     query = f"UPDATE users SET token = ? WHERE token = ? AND deleted_at IS NULL"
     params = ("",token,)
