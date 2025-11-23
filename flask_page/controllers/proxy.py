@@ -7,10 +7,9 @@ proxy_bp = Blueprint("proxy_bp", __name__)
 def proxy():
     target_url = request.args.get('url')
 
-    whitelist_domains = [
-        "https://www.celiktafsir.net",
-        "https://celiktafsir.net",
-    ]
+    # Check if the URL contains 'celiktafsir' to allow it
+    if not target_url or 'celiktafsir' not in target_url:
+        return Response("Domain not whitelisted", status=403)
 
     if target_url not in whitelist_domains:
         return Response("Domain not whitelisted", status=403)
