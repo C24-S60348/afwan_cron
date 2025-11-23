@@ -11,12 +11,6 @@ def proxy():
     if not target_url or 'celiktafsir' not in target_url:
         return Response("Domain not whitelisted", status=403)
 
-    if target_url not in whitelist_domains:
-        return Response("Domain not whitelisted", status=403)
-
-    if not target_url:
-        return Response("Missing 'url' parameter", status=400)
-
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
