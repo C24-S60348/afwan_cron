@@ -129,6 +129,7 @@ def home():
                 >
                     Project:
                     <select name="project" required>
+                        <option value="hadis40">hadis40</option>
                         <option value="celiktafsirv4">celiktafsirv4</option>
                         <option value="habitmultiplayer">habitmultiplayer</option>
                     </select>
