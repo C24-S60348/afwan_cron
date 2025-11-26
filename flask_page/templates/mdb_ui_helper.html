@@ -1,0 +1,109 @@
+{# mdb_ui_helper.html #}
+<html>
+    <body>
+        Andon system data query
+        <input id="secretkey" type="text" value="" placeholder="secretkey" />
+        <input id="dbloc" type="text" value="static/db/flangelist2003.mdb" />
+        <button onclick="confirmDbLocation()">Confirm</button>
+        {% if tables %}
+            <select id="tableSelect" onchange="onSelected(this.value)">
+                {% for t in tables %}
+                    <option>{{t}}</option>
+                {% endfor %}
+            
+            </select>
+        {% endif %}
+        <div id="tableget">
+
+        </div>
+        
+    </body>
+    <script>
+
+        function confirmDbLocation() {
+            fetchTables();
+        }
+
+        function fetchTables() {
+            dbloc = document.getElementById("dbloc").value;
+            secretkey = document.getElementById("secretkey").value;
+            const query = {
+                dbloc: dbloc,
+                secretkey: secretkey
+            };
+            // Assuming you have an endpoint "/getTables" to get tables for a specific database
+            fetch("/mdbviewer/gettable", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(query)
+            })
+            .then(response => response.json()) // Assuming the response is in JSON format
+            .then(tables => {
+                const selectElement = document.getElementById("tableSelect");
+                selectElement.innerHTML = ""; // Clear existing options
+                // console.log(tables);
+
+                tables.forEach(t => {
+                    const option = document.createElement("option");
+                    option.value = t;
+                    option.text = t;
+                    selectElement.add(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching tables:', error);
+            });
+        }
+
+        function onSelected(option) {
+            dbloc = document.getElementById("dbloc").value;
+            secretkey = document.getElementById("secretkey").value;
+            const query = {
+                query: "SELECT TOP 100 * FROM " + option,
+                params: "",
+                dbloc: dbloc,
+                secretkey: secretkey
+            };
+
+            fetch("/mdbviewer/query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(query)
+            })
+            .then(response => response.json()) // Assuming the response is in JSON format
+            .then(data => {
+                if (data.length > 0) {
+                    // Dynamically create table headers from the first object's keys
+                    let keys = Object.keys(data[0]);
+                    let html = "<table border='1'><tr>";
+                    
+                    keys.forEach(key => {
+                        html += `<th>${key}</th>`;
+                    });
+                    html += "</tr>";
+                    
+                    // Create rows for each item
+                    data.forEach(item => {
+                        html += "<tr>";
+                        keys.forEach(key => {
+                            html += `<td>${item[key] !== null ? item[key] : 'N/A'}</td>`;
+                        });
+                        html += "</tr>";
+                    });
+
+                    html += "</table>";
+                    document.getElementById("tableget").innerHTML = html;
+                } else {
+                    document.getElementById("tableget").innerHTML = "No data available.";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</html>

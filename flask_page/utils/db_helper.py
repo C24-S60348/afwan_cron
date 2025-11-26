@@ -1,4 +1,5 @@
 #utils/db_helper.py
+import os
 from flask import jsonify
 import sqlite3
 from flask import Flask, g
@@ -29,6 +30,9 @@ params = ()
 """
 
 def af_connectdb(dbloc=""):
+    if not os.path.isfile(dbloc):
+        raise FileNotFoundError(f"The database file at '{dbloc}' does not exist.")
+    
     conn = sqlite3.connect(dbloc)
     conn.row_factory = sqlite3.Row  # Optional: Returns results as dictionaries
     return conn
