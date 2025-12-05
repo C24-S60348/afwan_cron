@@ -45,7 +45,7 @@ History
 #http://127.0.0.1:5001/api/habit/readhistory?habitid=1
 #http://127.0.0.1:5001/api/habit/updatehistory?habitid=1&historydate=2025-10-11&historystatus=-1
 
-restrictmode = True
+restrictmode = False
 habitmultiplayer_blueprint = Blueprint('habitmultiplayer', __name__, url_prefix="/api/habit")
 
 
@@ -370,6 +370,7 @@ def updatenote():
     habitid = getpostget("habitid")
     notes = getpostget("notes")
     token = getpostget("token")
+    alluser = getpostget("alluser")
     
     if inputnotvalidated(habitid):
         return jsonifynotvalid("habitid")
@@ -392,9 +393,12 @@ def updatenote():
         else:
             username = dbdata[0]['username']
         
+        if alluser == "yes":
+            username = "alluser"
         
-        query = f"SELECT * FROM notes WHERE username = ? AND habitid = ? AND deleted_at IS NULL"
-        params = (username,habitid,)
+        
+        query = f"SELECT * FROM notes WHERE habitid = ? AND username = ? AND deleted_at IS NULL"
+        params = (habitid,username,)
         dbdata = af_getdb(dbloc, query, params)
         
         if dbdata:
@@ -408,8 +412,8 @@ def updatenote():
             params = (username,habitid,notes,datetime.now(),)
             dbdata = af_getdb(dbloc, query, params)
         
-        query = f"SELECT * FROM notes WHERE username = ? AND habitid = ? AND deleted_at IS NULL"
-        params = (username,habitid,)
+        query = f"SELECT * FROM notes WHERE habitid = ? AND username = ? AND deleted_at IS NULL"
+        params = (habitid,username,)
         dbdata = af_getdb(dbloc, query, params)
 
         return jsonify(

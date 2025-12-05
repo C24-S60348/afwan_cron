@@ -14,7 +14,7 @@ def db_ui_web():
     tables = af_getdb(dbloc, query, params)
     # print (tables)
 
-    return render_template("db_ui_helper.html", tables=tables)
+    return render_template("dbviewer.html", tables=tables)
 
 
 @dbviewer_bp.route('/query', methods=['GET', 'POST'])

@@ -1,0 +1,242 @@
+{# dbviewer.html #}
+<html>
+    <head>
+        <title>DB Viewer</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="{{ url_for('static', filename='lib/bootstrap.min.css') }}" rel="stylesheet"  crossorigin="anonymous">
+    </head>
+    <body>
+        <div class="container">
+            <h2>Data query</h2>
+            <div class="d-flex">
+                <div class="form-floating px-2">
+                    <input class="form-control" id="secretkey" type="text" value="" placeholder="secretkey" />
+                    <label for="secretkey">secretkey</label>
+                </div>
+                <div class="px-2 d-flex justify-content-center align-items-center gap-1" style="background-color: #f0fbff;">
+                    <div>DB</div>
+                    <input class="form-control" id="dbloc" type="text" value="static/db/habit/mydb.db" />
+                    <button class="btn btn-info" onclick="confirmDbLocation()">Confirm</button>
+                </div>
+                <div class="px-2 d-flex justify-content-center align-items-center gap-1">
+                    <div>Column</div>
+                    {% if tables %}
+                        <select class="form-select" style="width:200px;" id="tableSelect" onchange="onSelected(this.value)">
+                            {% for t in tables %}
+                                <option>{{t.name}}</option>
+                            {% endfor %}
+                        
+                        </select>
+                    {% endif %}
+                    <button class="btn btn-info" onclick="refreshQuery()">Refresh</button>
+                </div>
+            </div>
+            
+            <div id="tableget" class="my-2 px-2">
+            </div>
+            <hr/>
+
+            <div class="px-2" style="gap: 5px;display: flex;flex-direction: column;">
+                <div>Query runner</div>
+                <div class="d-flex">
+                    <!-- Custom command -->
+                    <select class="form-select" style="width:250px;" id="querySelect" onchange="onQuerySelected(this.value)">
+                        <option></option>
+                        <option>DATA CREATE</option>
+                        <option>DATA UPDATE</option>
+                        <option>DATA READ</option>
+                        <option>DATA DELETE</option>
+                        <option></option>
+                        <option>TABLE CREATE</option>
+                        <option>TABLE READ</option>
+                        <option>TABLE DELETE</option>
+                        <option>TABLE RENAME</option>
+                        <option>TABLE INFO</option>
+                        <option>TABLE RENAME COLUMN</option>
+                        <option>TABLE ADD COLUMN</option>
+                    </select>
+                </div>
+                <div>
+                    <textarea type="text" class="form-control" id="queryText"></textarea>
+                    <button class="btn btn-info my-2" onclick="confirmDbQuery()">Confirm</button>
+                </div>
+                <div>
+                    <pre id="outputQuery" style="background-color: lightcyan;">Output here</pre>
+                </div>
+            </div>
+
+        </div>
+        
+    </body>
+    <script>
+
+        function confirmDbLocation() {
+            fetchTables();
+        }
+
+        
+        function fetchTables() {
+            dbloc = document.getElementById("dbloc").value;
+            secretkey = document.getElementById("secretkey").value;
+            const query = {
+                query: "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';",                params: "",
+                dbloc: dbloc,
+                secretkey: secretkey
+            };
+            // Assuming you have an endpoint "/getTables" to get tables for a specific database
+            fetch("/dbviewer/query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(query)
+            })
+            .then(response => response.json()) // Assuming the response is in JSON format
+            .then(tables => {
+                const selectElement = document.getElementById("tableSelect");
+                selectElement.innerHTML = ""; // Clear existing options
+
+                tables.forEach(t => {
+                    const option = document.createElement("option");
+                    option.value = t.name;
+                    option.text = t.name;
+                    selectElement.add(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching tables:', error);
+            });
+        }
+        
+        function refreshQuery() {
+            selectedItem = document.getElementById("tableSelect").value;
+            // console.log(selectedItem);
+            onSelected(selectedItem);
+        }
+
+        function onQuerySelected(option) {
+            // console.log(option);
+            queryText = document.getElementById("queryText");
+
+            if (option == "DATA CREATE") {
+                queryText.value = "INSERT INTO mytable (name,value) VALUES ('ikan','ayam')";
+            }
+            else if (option == "DATA READ") {
+                queryText.value = "SELECT * FROM mytable WHERE name = 'myname'";
+            }
+            else if (option == "DATA UPDATE") {
+                queryText.value = "UPDATE mytable SET name = 'ayam' WHERE id = 7";
+            }
+            else if (option == "DATA DELETE") {
+                queryText.value = "DELETE FROM mytable WHERE id = 7";
+            }
+            else if (option == "TABLE CREATE") {
+                queryText.value = "CREATE TABLE {table_name} (id INTEGER PRIMARY KEY, name TEXT)";
+            }
+            else if (option == "TABLE READ") {
+                queryText.value = "SELECT * FROM mytable";
+            }
+            else if (option == "TABLE UPDATE") {
+                queryText.value = "ALTER TABLE {table_name} RENAME COLUMN {old_name} TO {new_name};";
+            }
+            else if (option == "TABLE RENAME") {
+                queryText.value = "ALTER TABLE {old_name} RENAME TO {new_name};";
+            }
+            else if (option == "TABLE INFO") {
+                queryText.value = "PRAGMA table_info(mytable);"
+            }
+            else if (option == "TABLE RENAME COLUMN") {
+                queryText.value = "ALTER TABLE {table_name} RENAME COLUMN {old_name} TO {new_name};"
+            }
+            else if (option == "TABLE ADD COLUMN") {
+                queryText.value = "ALTER TABLE {table_name} ADD COLUMN {new_col_name} {new_col_type};"
+            }
+            
+            else {
+                queryText.value = "";
+            }
+            
+        }
+
+        function onSelected(option) {
+            dbloc = document.getElementById("dbloc").value;
+            secretkey = document.getElementById("secretkey").value;
+            const query = {
+                query: "SELECT * FROM " + option,
+                params: "",
+                dbloc: dbloc,
+                secretkey: secretkey
+            };
+
+            fetch("/dbviewer/query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(query)
+            })
+            .then(response => response.json()) // Assuming the response is in JSON format
+            .then(data => {
+                if (data.length > 0) {
+                    // Dynamically create table headers from the first object's keys
+                    let keys = Object.keys(data[0]);
+                    let html = "<table class='table table-hover table-bordered' style='width: 500px;'><tr>";
+                    
+                    keys.forEach(key => {
+                        html += `<th>${key}</th>`;
+                    });
+                    html += "</tr>";
+                    
+                    // Create rows for each item
+                    data.forEach(item => {
+                        html += "<tr>";
+                        keys.forEach(key => {
+                            html += `<td>${item[key] !== null ? item[key] : 'N/A'}</td>`;
+                        });
+                        html += "</tr>";
+                    });
+
+                    html += "</table>";
+                    document.getElementById("tableget").innerHTML = html;
+                } else {
+                    document.getElementById("tableget").innerHTML = "No data available.";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function confirmDbQuery() {
+            queryText = document.getElementById("queryText").value;
+            dbloc = document.getElementById("dbloc").value;
+            secretkey = document.getElementById("secretkey").value;
+            const query = {
+                query: queryText,
+                params: "",
+                dbloc: dbloc,
+                secretkey: secretkey
+            };
+
+            fetch("/dbviewer/query", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(query)
+            })
+            .then(response => response.text()) // Assuming the response is in JSON format
+            .then(data => {
+                console.log(data);
+                document.getElementById("outputQuery").innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+            refreshQuery();
+        }
+
+    </script>
+</html>

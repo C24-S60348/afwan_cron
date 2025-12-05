@@ -43,15 +43,16 @@ def af_getdb(dbloc="static/db/habit/mydb.db", query="SELECT * FROM users;", para
     try:
         cursor.execute(query, params)
         conn.commit()
-        if query.strip().upper().startswith("SELECT"):
+        if query.strip().upper().startswith("SELECT") or query.strip().upper().startswith("PRAGMA"):
             dbdata = cursor.fetchall()
             results = [dict(row) for row in dbdata] if dbdata else []
             return results
         else:
             conn.commit()  # Commit only if it's not a SELECT query
-            return "Query executed successfully"
+            return f"Query executed successfully. Rows affected: {cursor.rowcount}"
     except sqlite3.Error as e:
-        print(f"An error occurred: {e.args[0]}")
+        #todo - telegram message here?
+        return f"An error occurred: {e.args[0]}"
     finally:
         conn.close()
 
