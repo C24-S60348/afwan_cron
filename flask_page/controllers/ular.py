@@ -425,9 +425,9 @@ def apiular_rolldice():
 
                 else:
                     if rdice["question"] == []:
-                        message = f"Roll dice: {rdice["dice"]}, Turn now: {rdice["turn"]}"
+                        message = f"Roll dice: {rdice['dice']}, Turn now: {rdice['turn']}"
                     else:
-                        message = f"Roll dice: {rdice["dice"]}, Turn now: {rdice["turn"]}, Please answer question"
+                        message = f"Roll dice: {rdice['dice']}, Turn now: {rdice['turn']}, Please answer question"
 
                 return jsonify({
                     "status": "ok",
