@@ -1,24 +1,36 @@
 #models/ular.py
 from flask import jsonify
-from ..utils.csv_helper import *
+# from ..utils.csv_helper import *
 from ..utils.html_helper import *
+from ..utils.db_helper import *
 import random
 import string
 
 confcsv = "static/db/ular/conf.csv"
 roomcsv = "static/db/ular/room.csv"
 playerscsv = "static/db/ular/players.csv"
+dbloc = "static/db/ular.db"
+maxbox = 28
 
 def modelgetcsvconf():
-    data = af_getcsvdict(confcsv)
+    query = "SELECT * FROM conf;"
+    params = ()
+    data = af_getdb(dbloc,query,params)
+    # data = af_getcsvdict(confcsv)
     return data
 
 def modelgetcsvroom():
-    data = af_getcsvdict(roomcsv)
+    query = "SELECT * FROM room;"
+    params = ()
+    data = af_getdb(dbloc,query,params)
+    # data = af_getcsvdict(roomcsv)
     return data
 
 def modelgetcsvplayers(code=""):
-    data = af_getcsvdict(playerscsv)
+    query = "SELECT * FROM players;"
+    params = ()
+    data = af_getdb(dbloc,query,params)
+    # data = af_getcsvdict(playerscsv)
     result = []
     for d in data:
         if d["code"] == code:
@@ -26,7 +38,10 @@ def modelgetcsvplayers(code=""):
     return result
 
 def playerdata(code="", player=""):
-    data = af_getcsvdict(playerscsv)
+    query = "SELECT * FROM players;"
+    params = ()
+    data = af_getdb(dbloc,query,params)
+    # data = af_getcsvdict(playerscsv)
     result = []
     for d in data:
         if d["code"] == code and d["player"] == player:
@@ -38,20 +53,29 @@ def modelgenerateroomcode(length=4):
     return ''.join(random.choice(chars) for _ in range(length))
 
 def startroom(code=""):
-    new_data = {"state":"playing"}
-    af_replacecsv2(roomcsv, "code", code, new_data)
+    # new_data = {"state":"playing"}
+    query = "UPDATE room SET state = ? WHERE code = ?;"
+    params = ("playing", code,)
+    data = af_getdb(dbloc,query,params)
+    # af_replacecsv2(roomcsv, "code", code, new_data)
 
 
 
-def adddataroom(code="", turn="", state="", maxbox=28, topic="biologi"):
-    af_addcsv(roomcsv, [
-        code, turn, state, "", maxbox, topic
-    ])
+def adddataroom(code="", turn="", state="", maxbox=maxbox, topic="biologi"):
+    query = "INSERT INTO room (code,turn,state,questionid,maxbox,topic) VALUES (?,?,?,?,?,?);"
+    params = (code, turn, state, "", maxbox, topic)
+    data = af_getdb(dbloc,query,params)
+    # af_addcsv(roomcsv, [
+    #     code, turn, state, "", maxbox, topic
+    # ])
 
 def adddataplayer(code="", player="", pos=0, color="white"):
-    af_addcsv(playerscsv, [
-        code, player, pos, color, "", ""
-    ])
+    query = "INSERT INTO players (code,player,pos,color,questionright,questionget) VALUES (?,?,?,?,?,?);"
+    params = (code, player, pos, color, "", "")
+    data = af_getdb(dbloc,query,params)
+    # af_addcsv(playerscsv, [
+    #     code, player, pos, color, "", ""
+    # ])
 
 
 def inputvalidated(input):
@@ -124,18 +148,24 @@ def modelnextturn(code="", currentplayer=""):
             else:
                 turn = players[pnum+1]['player'] 
         pnum += 1
-    new_data = {"turn":turn}
-    af_replacecsv2(roomcsv, "code", code, new_data)
+    query = "UPDATE room SET turn = ? WHERE code = ?;"
+    params = (turn, code,)
+    data = af_getdb(dbloc,query,params)
+    # new_data = {"turn":turn}
+    # af_replacecsv2(roomcsv, "code", code, new_data)
     return turn
 
 def playerchangepos(code="", player="", newpos=""):
-    new_data = {"pos":newpos}
-    af_replacecsvtwotarget(playerscsv, 
-                           "player", player, "code", code, 
-                           new_data)
+    query = "UPDATE players SET pos = ? WHERE code = ? AND player = ?;"
+    params = (newpos, code, player,)
+    data = af_getdb(dbloc,query,params)
+    # new_data = {"pos":newpos}
+    # af_replacecsvtwotarget(playerscsv, 
+    #                        "player", player, "code", code, 
+    #                        new_data)
 
 
-def checkgameended(pos="", code="", maxbox=28):
+def checkgameended(pos="", code="", maxbox=maxbox):
     ended = False
     if pos == str(maxbox) or pos == maxbox:
         endgame(code)
@@ -143,7 +173,7 @@ def checkgameended(pos="", code="", maxbox=28):
     
     return ended
 
-def rolldice(code="", player="", currentpos=0, maxbox=28):
+def rolldice(code="", player="", currentpos=0, maxbox=maxbox):
     dicenum = random.randint(1,6)
     turn = player
     newpos = currentpos + dicenum
@@ -177,7 +207,6 @@ def gquestion(newpos="", code=""):
     #endpos = getendbystartladdersnake(newpos)
     rdata = roomdata(code)
     topic = rdata["topic"]
-
     if getendbystartladdersnake(newpos) == 0:
         question = []
         questionid = ""
@@ -185,11 +214,15 @@ def gquestion(newpos="", code=""):
         question = getrandomquestiontopic(topic)
         questionid = question[0]["id"]
     
-    new_data = {
-        "questionid": questionid
-    }
-    #room's questionid => number
-    af_replacecsv2(roomcsv, "code", code, new_data)
+    query = "UPDATE room SET questionid = ? WHERE code = ?;"
+    params = (questionid, code,)
+    data = af_getdb(dbloc,query,params)
+
+    # new_data = {
+    #     "questionid": questionid
+    # }
+    # #room's questionid => number
+    # af_replacecsv2(roomcsv, "code", code, new_data)
 
     return {
         "question": question,
@@ -217,7 +250,7 @@ def getsteps(before=0, after=3):
 
     return results
 
-def getstepsdice(before=0, dice=3, maxbox=28):
+def getstepsdice(before=0, dice=3, maxbox=maxbox):
     results = []
 
     step = before
@@ -247,7 +280,10 @@ def playeralreadyavailable(player="", code=""):
     return False
 
 def modelgetcsvquestion():
-    data = af_getcsvdict("static/db/ular/questions.csv")
+    query = "SELECT * FROM questions;"
+    params = ()
+    data = af_getdb(dbloc,query,params)
+    # data = af_getcsvdict("static/db/ular/questions.csv")
     return data
 
 def getquestions():
@@ -339,5 +375,8 @@ def getladdersnakeinfo(start=0):
     }
 
 def endgame(code=""):
-    new_data = {"state":"ended"}
-    af_replacecsv2(roomcsv, "code", code, new_data)
+    query = "UPDATE room SET state = ? WHERE code = ?;"
+    params = ("ended", code,)
+    data = af_getdb(dbloc,query,params)
+    # new_data = {"state":"ended"}
+    # af_replacecsv2(roomcsv, "code", code, new_data)

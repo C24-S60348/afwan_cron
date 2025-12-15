@@ -56,6 +56,26 @@ def af_getdb(dbloc="static/db/habit/mydb.db", query="SELECT * FROM users;", para
     finally:
         conn.close()
 
+def af_getdb2(dblog, query, params):
+    # Connect to the SQLite database and execute the query
+    conn = sqlite3.connect(dblog)
+    cursor = conn.cursor()
+    cursor.execute(query, params)
+    data = cursor.fetchall()
+
+    # Fetch the column names to use as keys in your JSON
+    columns = [description[0] for description in cursor.description]
+    conn.close()
+    
+    return columns, data
+
+def af_processdb(data, defaultvalue=""):
+    processed_data = []
+    for row in data:
+        processed_row = {k: (v if v is not None else defaultvalue) for k, v in row.items()}
+        processed_data.append(processed_row)
+    return processed_data
+
 def convert_to_json(dbdata):
     if dbdata:
         # Create a list of dictionaries from the rows

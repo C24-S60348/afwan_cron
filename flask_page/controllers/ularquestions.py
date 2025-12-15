@@ -1,7 +1,7 @@
 #controllers/ularquestions.py
 from flask import jsonify, request, Blueprint, render_template, render_template_string
 from ..utils.html_helper import *
-from ..utils.csv_helper import *
+# from ..utils.csv_helper import *
 from ..models.ular import *
 
 ularq_blueprint = Blueprint('ularq', __name__)
@@ -115,8 +115,11 @@ def apiular_submitanswer():
 
         if player == rturn:
             submitanswerd = submitanswer(rquestionid, answer)
-            new_data = {"questionid": ""}
-            af_replacecsv2(roomcsv, "code", code, new_data)
+            query = "UPDATE room SET questionid = ? WHERE code = ?;"
+            params = ("", code,)
+            data = af_getdb(dbloc,query,params)
+            # new_data = {"questionid": ""}
+            # af_replacecsv2(roomcsv, "code", code, new_data)
             
             #kalau tangga, naik, kalau ular, turun
             #get player data and ladder or snake info

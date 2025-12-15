@@ -1,7 +1,7 @@
 #controllers/ular.py
 from flask import jsonify, request, Blueprint, render_template, render_template_string
 from ..utils.html_helper import *
-from ..utils.csv_helper import *
+# from ..utils.csv_helper import *
 from ..models.ular import *
 
 ular_blueprint = Blueprint('ular', __name__)
@@ -40,63 +40,121 @@ def cellsget():
     return {
         "cells":
         [
-            { "x": -10,"y": 110 
+            { #0
+                "x": -10,
+                "y": 110 
             },
-            { "x": 0*size,"y": 3*size
+            { #1
+                "x": 0*size,
+                "y": 3*size
             },
-            {"x": 1*size,"y": 3*size
+            {
+                "x": 1*size,
+                "y": 3*size
             },
-            {"x": 2*size,"y": 3*size
+            {
+                "x": 2*size,
+                "y": 3*size
             },
-            {"x": 3*size,"y": 3*size
+            {
+                "x": 3*size,
+                "y": 3*size
             },
-            {"x": 4*size,"y": 3*size
+            {
+                "x": 4*size,
+                "y": 3*size
             },
-            {"x": 5*size,"y": 3*size
+            {
+                "x": 5*size,
+                "y": 3*size
             },
-            {"x": 6*size,"y": 3*size
+            {
+                "x": 6*size,
+                "y": 3*size
             },
-            { "x": 6*size,"y": 2*size
+            { #8
+                "x": 6*size,
+                "y": 2*size
             },
-            { "x": 5*size,"y": 2*size
+            { 
+                "x": 5*size,
+                "y": 2*size
             },
-            { "x": 4*size,"y": 2*size
+            { 
+                "x": 4*size,
+                "y": 2*size
             },
-            { "x": 3*size,"y": 2*size
+            { 
+                "x": 3*size,
+                "y": 2*size
             },
-            { "x": 2*size,"y": 2*size
+            { 
+                "x": 2*size,
+                "y": 2*size
             },
-            { "x": 1*size,"y": 2*size
+            { 
+                "x": 1*size,
+                "y": 2*size
             },
-            { "x": 0*size,"y": 2*size
+            { 
+                "x": 0*size,
+                "y": 2*size
             },
-            { "x": 0*size,"y": 1*size
+            { #15
+                "x": 0*size,
+                "y": 1*size
             },
-            { "x": 1*size,"y": 1*size
+            { 
+                "x": 1*size,
+                "y": 1*size
             },
-            { "x": 2*size,"y": 1*size
+            { 
+                "x": 2*size,
+                "y": 1*size
             },
-            { "x": 3*size,"y": 1*size
+            { 
+                "x": 3*size,
+                "y": 1*size
             },
-            { "x": 4*size,"y": 1*size
+            { 
+                "x": 4*size,
+                "y": 1*size
             },
-            { "x": 5*size,"y": 1*size
+            { 
+                "x": 5*size,
+                "y": 1*size
             },
-            { "x": 6*size,"y": 1*size
+            { 
+                "x": 6*size,
+                "y": 1*size
             },
-            { "x": 6*size,"y": 0*size
+            { #22
+                "x": 6*size,
+                "y": 0*size
             },
-            { "x": 5*size,"y": 0*size
+            { 
+                "x": 5*size,
+                "y": 0*size
             },
-            { "x": 4*size,"y": 0*size
+            { 
+                "x": 4*size,
+                "y": 0*size
             },
-            { "x": 3*size,"y": 0*size
+            { 
+                "x": 3*size,
+                "y": 0*size
             },
-            { "x": 2*size,"y": 0*size
+            { 
+                "x": 2*size,
+                "y": 0*size
             },
-            { "x": 1*size,"y": 0*size
+            { 
+                "x": 1*size,
+                "y": 0*size
             },
-            { "x": 0*size,"y": 0*size
+            { 
+                "x": 0*size,
+                "y": 0*size
             },
         ],
         "gaps": gaps
