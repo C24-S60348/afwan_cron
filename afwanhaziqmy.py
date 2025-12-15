@@ -126,6 +126,7 @@ from flask_page.controllers.dbviewer import dbviewer_bp
 from flask_page.controllers.cachegeturl import cachegeturl_bp
 from flask_page.controllers.celiktafsir import celiktafsir_blueprint
 from flask_page.controllers.ulardashboard import ulardashboard_bp
+from flask_page.controllers.pointercalculator import pointercalculator_bp
 
 # from flask_page.controllers.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -159,6 +160,7 @@ app.register_blueprint(dbviewer_bp)
 app.register_blueprint(cachegeturl_bp)
 app.register_blueprint(celiktafsir_blueprint)
 app.register_blueprint(ulardashboard_bp)
+app.register_blueprint(pointercalculator_bp)
 
 with app.app_context():
     ularular_init_db()  # ✅ Auto-create tables if not found
