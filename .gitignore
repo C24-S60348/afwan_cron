@@ -15,3 +15,5 @@ venv
 variables.py.example
 .DS_Store
 __pycache__
+pointercalculator.db
+static/db/habit/mydb.db
