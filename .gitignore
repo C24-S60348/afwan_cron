@@ -17,3 +17,4 @@ variables.py.example
 __pycache__
 pointercalculator.db
 static/db/habit/mydb.db
+static/db/error/error.csv
