@@ -1,5 +1,8 @@
 #sudo nano /etc/systemd/system/afwanapp.service
 
+#Get nginx log:
+#sudo tail -n 50 /var/log/nginx/error.log
+
 """
 source venv/bin/activate
 
