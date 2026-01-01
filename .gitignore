@@ -13,7 +13,6 @@ output python/
 variables.py
 variables.py
 venv
-variables.py.example
 .DS_Store
 __pycache__
 pointercalculator.db
