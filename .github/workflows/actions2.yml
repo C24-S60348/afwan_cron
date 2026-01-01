@@ -1,8 +1,8 @@
 name: run automation_Afwan.py 2
 
-on:
-  schedule:
-    - cron: '*/10 * * * *'  # Runs every 5 minutes
+#on:
+  #schedule:
+    #- cron: '*/10 * * * *'  # Runs every 5 minutes
 
 jobs:
   build:
