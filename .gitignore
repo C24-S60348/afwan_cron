@@ -19,3 +19,5 @@ __pycache__
 pointercalculator.db
 static/db/habit/mydb.db
 static/db/error/error.csv
+pelajar_data.xlsx
+pelajar_data_2.xlsx
