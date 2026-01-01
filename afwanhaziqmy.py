@@ -10,6 +10,8 @@ sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 sudo systemctl enable afwanapp
 sudo systemctl start afwanapp
+
+sudo systemctl restart afwanapp
 """
 
 from flask import Flask, request, jsonify
