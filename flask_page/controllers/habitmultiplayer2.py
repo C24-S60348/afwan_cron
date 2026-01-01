@@ -16,7 +16,7 @@ import hashlib
 import re
 import string
 
-dbloc = "static/db/habit/mydb.db"
+dbloc = "static/db/habit.db"
 
 #http://127.0.0.1:5001/api/habit/register?email=afwanhaziq%40yahoo.com&password=12345&passwordadmin=afwan&passwordrepeat=12345
 #http://127.0.0.1:5001/api/habit/login?email=afwanhaziq%40yahoo.com&password=12345&keeptoken=yes

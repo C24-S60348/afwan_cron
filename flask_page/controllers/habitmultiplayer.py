@@ -11,8 +11,10 @@ from ..utils.login_helper import *
 from ..models.habitmultiplayer import *
 from ..utils.checker_helper import *
 from ..utils.db_helper import *
+import os
+import sqlite3
 
-dbloc = "static/db/habit/mydb.db"
+dbloc = "static/db/habit.db"
 
 """
 Nota:
@@ -48,7 +50,129 @@ History
 restrictmode = False
 habitmultiplayer_blueprint = Blueprint('habitmultiplayer', __name__, url_prefix="/api/habit")
 
+@habitmultiplayer_blueprint.route('/initdb', methods=['GET', 'POST'])
+def initdb():
+    """
+    Initialize Habit Multiplayer SQLite database (create db file + required tables).
+    This endpoint is idempotent (safe to call multiple times).
+    """
+    # Ensure folder exists (and DB file will be created on first connect)
+    db_dir = os.path.dirname(dbloc)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
 
+    conn = sqlite3.connect(dbloc)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON;")
+
+        # users: used by habitmultiplayer.py + habitmultiplayer2.py
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                password TEXT,
+                token TEXT,
+                name TEXT,
+                forgotpassword TEXT,
+                created_at DATETIME,
+                deleted_at DATETIME
+            );
+            """
+        )
+
+        # habit: used by habitmultiplayer.py
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS habit (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                url TEXT,
+                name TEXT,
+                created_at DATETIME,
+                deleted_at DATETIME
+            );
+            """
+        )
+
+        # member: used by habitmultiplayer.py + habitmultiplayer2.py
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS member (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                habitid INTEGER NOT NULL,
+                member TEXT NOT NULL,
+                created_at DATETIME,
+                deleted_at DATETIME
+            );
+            """
+        )
+
+        # notes: used by habitmultiplayer.py
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS notes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                habitid INTEGER NOT NULL,
+                notes TEXT,
+                created_at DATETIME,
+                deleted_at DATETIME
+            );
+            """
+        )
+
+        # history: used by habitmultiplayer.py
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                habitid INTEGER NOT NULL,
+                historydate TEXT,
+                historystatus TEXT,
+                created_at DATETIME,
+                deleted_at DATETIME
+            );
+            """
+        )
+
+        # deleteaccount: used by habitmultiplayer2.py
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS deleteaccount (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT,
+                password TEXT,
+                created_at DATETIME,
+                deleted_at DATETIME
+            );
+            """
+        )
+
+        # Helpful indexes for common lookups
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_token ON users(token);")
+
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_habit_username ON habit(username);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_member_habitid ON member(habitid);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_member_member ON member(member);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_notes_habitid ON notes(habitid);")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_history_habitid ON history(habitid);")
+
+        conn.commit()
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;")
+        tables = [r[0] for r in cursor.fetchall()]
+        return jsonify({
+            "status": "ok",
+            "message": "initdb done",
+            "db": dbloc,
+            "tables": tables,
+        })
+    finally:
+        conn.close()
     
 @habitmultiplayer_blueprint.route('/test', methods=['GET', 'POST'])
 def test():

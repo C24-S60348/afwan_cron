@@ -86,7 +86,7 @@ def handle_exception(e):
         #log here
         errormessage = f"🚨 ERROR ALERT 🚨\n\n{errormessage}"
         modelsendtelegrammessage(errormessage)
-        af_addcsv("static/db/error/error.csv", new_data)
+        # af_addcsv("static/db/error/error.csv", new_data)
     
     return jsonify({
         "status" : "error",
