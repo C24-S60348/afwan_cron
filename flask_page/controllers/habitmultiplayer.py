@@ -50,6 +50,13 @@ History
 restrictmode = False
 habitmultiplayer_blueprint = Blueprint('habitmultiplayer', __name__, url_prefix="/api/habit")
 
+@habitmultiplayer_blueprint.route('/healthcheck', methods=['GET', 'POST'])
+def healthcheck():
+    return jsonify({
+        "status": "ok",
+        "message": "healthcheck"
+    })
+
 @habitmultiplayer_blueprint.route('/initdb', methods=['GET', 'POST'])
 def initdb():
     """
