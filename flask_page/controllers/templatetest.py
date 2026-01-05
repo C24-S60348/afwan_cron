@@ -1,8 +1,8 @@
 #controllers/templatetest.py
 import random
 from flask import abort, jsonify, request, Blueprint, render_template, render_template_string, send_from_directory, session
-from apps.utils.html_helper import *
-from apps.utils.db_helper import *
+from ..utils.html_helper import *
+from ..utils.db_helper import *
 from datetime import datetime
 import sqlite3
 import random
