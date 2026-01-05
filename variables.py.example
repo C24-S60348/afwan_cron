@@ -2,7 +2,9 @@ import os
 
 tb_token = os.getenv("TB_TOKEN", "")
 tb_token_fy = os.getenv("TB_TOKEN_FY", "")
-csftp_link = os.getenv("CSFTP_LINK" , "")
+tb_token_server = os.getenv("TB_TOKEN_SERVER", "")
+
+csftp_link = os.getenv("CSFTP_LINK", "")
 fydevlink = os.getenv("FYDEV_LINK", "")
 fy_code = os.getenv("FY_APP_CODE", "")
 fy_app_staging = os.getenv("FY_APP_STAGING", "")
@@ -16,4 +18,23 @@ afwanemail = os.getenv("AFWAN_EMAIL", "")
 
 ct_link = os.getenv("CT_LINK", "")
 website_pass = os.getenv("WEBSITE_PASS", "")
-program = os.getenv("PROGRAM", "CRO") #only for the program
+program = os.getenv("PROGRAM", "")
+
+db_user = os.getenv("DB_USER", "")
+db_pass = os.getenv("DB_PASS", "")
+db_name = os.getenv("DB_NAME", "")
+db_host = os.getenv("DB_HOST", "")
+db_port = os.getenv("DB_PORT", "")
+
+brevo_api_key = os.getenv("BREVO_API_KEY", "")
+brevo_sms_api_key = os.getenv("BREVO_SMS_API_KEY", "")
+twilio_account_sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+twilio_auth_token = os.getenv("TWILIO_AUTH_TOKEN", "")
+twilio_phone_number = os.getenv("TWILIO_PHONE_NUMBER", "")
+purgo_server = os.getenv("PURGO_SERVER", "")
+purgo_email = os.getenv("PURGO_EMAIL", "")
+purgo_password = os.getenv("PURGO_PASSWORD", "")
+
+
+brevo_api_key_af1 = os.getenv("BREVO_API_KEY_AF1", "")
+brevo_email_af1 = os.getenv("BREVO_EMAIL_AF1", "")
