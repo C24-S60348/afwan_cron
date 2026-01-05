@@ -21,9 +21,9 @@ def db_ui_query():
     # dbloc = getpostget("dbloc")
     query = getpostget("query")
     params = getpostget("parameter")
-    # secretkey = "afwan"
-    # if secretkey != "afwan":
-    #     return jsonify({"error": "invalid secretkey"})
+    secret = getpostget("secret")
+    if secret != "afwan":
+        return jsonify({"error": "invalid secret"})
     
     dbdata = af_getdb(dbloc, query, params)
     return jsonify(dbdata)

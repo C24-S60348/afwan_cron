@@ -1,0 +1,74 @@
+{# templatetest.html #}
+<head>
+    <title>Template</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='lib/bootstrap.min.css') }}" rel="stylesheet" crossorigin="anonymous">
+    <script src="{{ url_for('static', filename='lib/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
+    
+    <style>
+        .inputwin {
+            background-color:aquamarine;
+        }
+        .inputlose {
+            background-color:lightcoral;
+        }
+    </style>
+</head>
+
+<body style="background-color: aliceblue;">
+    <div>
+        <h3>History</h3> 
+        <table class="table table-sm">
+            <tbody>
+                <tr>
+                    <td>Date</td>
+                    <td>Time</td>
+                    <td>Score</td>
+                    <td>Remark</td>
+                    <td>Left</td>
+                    <td>Right</td>
+                </tr>
+                <tr>
+                    <td>26 Dec 2025</td>
+                    <td>4:21PM</td>
+                    <td>21-14</td>
+                    <td><input type="text"/><button>/</button></td>
+                    <td><input type="text" value="Afwan" class="inputwin"/><button>/</button></td>
+                    <td><input type="text" value="Ikan" class="inputlose"/><button>/</button></td>
+                </tr>
+                <tr>
+                    <td>26 Dec 2025</td>
+                    <td>4:21PM</td>
+                    <td>21-14</td>
+                    <td><input type="text"/><button>/</button></td>
+                    <td><input type="text" value="Afwan" class="inputwin"/><button>/</button></td>
+                    <td><input type="text" value="Ikan" class="inputlose"/><button>/</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <h4>Summary</h4>
+        <div>Afwan - Wins 1 Loses 2</div>
+        <div>Ikan - Wins 2 Loses 1</div>
+    </div>
+    <div>
+        <h3>UI</h3> 
+        <div>0🔥 1</div>
+        <div>[-] [-]</div>
+
+        <div>Match:</div>
+        <div>1 0</div>
+        <div>Kiri Kanan</div>
+
+        <div>(🔥 = streak) (🔥🔥🔥, then 🔥x4, if 0 4, then accidentally 1 4 then minus, then 0 4 have the streak back)</div>
+
+        <br/>
+        <div>Speech Score</div>
+        <div>Total points</div>
+        <div>Share image</div>
+        <br/>
+        
+        <div>Suggestions</div>
+        <div>Review</div>
+    </div>
+</body>

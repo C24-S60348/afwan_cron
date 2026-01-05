@@ -1,203 +1,265 @@
 {# dbviewer2.html #}
 <html>
-    <head>
-        <title>DB Viewer</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="{{ url_for('static', filename='lib/bootstrap.min.css') }}" rel="stylesheet"  crossorigin="anonymous">
-    </head>
-    <body>
-        <div class="d-flex">
-            <div style="width: 230px;font-size:12px;">
-                <h3>Data query</h3>
-                <div class="px-2 d-flex justify-content-center align-items-center gap-1">
-                    <div>Column</div>
-                    <select class="" style="width:200px;" id="tableSelect" onchange="onSelected(this.value)">
-                        <option></option>
-                    
-                    </select>
-                    <button class="" onclick="refreshQuery()">Refresh</button>
-                </div>
-            </div>
-            <div>
-                
-                <div id="tableget" class="my-2 px-2">
-                </div>
-                <hr/>
 
-                <div class="px-2" style="gap: 5px;display: flex;flex-direction: column;">
-                    <div>Query runner</div>
-                    <div class="d-flex">
-                        <!-- Custom command -->
-                        <select class="form-select" style="width:250px;" id="querySelect" onchange="onQuerySelected(this.value)">
-                            <option></option>
-                            <option>DATA CREATE</option>
-                            <option>DATA UPDATE</option>
-                            <option>DATA READ</option>
-                            <option>DATA DELETE</option>
-                            <option></option>
-                            <option>TABLE CREATE</option>
-                            <option>TABLE READ</option>
-                            <option>TABLE DELETE</option>
-                            <option>TABLE RENAME</option>
-                            <option>TABLE INFO</option>
-                            <option>TABLE RENAME COLUMN</option>
-                            <option>TABLE ADD COLUMN</option>
-                        </select>
-                    </div>
+<head>
+    <title>DB Viewer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='lib/bootstrap.min.css') }}" rel="stylesheet" crossorigin="anonymous">
+    <script src="{{ url_for('static', filename='lib/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
+        
+</head>
+
+<body style="background-color: aliceblue;">
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+        Debug
+    </button> -->
+    <div style="height:10px;"></div>
+
+    <!-- The Modal -->
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalText">Modal Heading</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
                     <div>
                         <textarea type="text" class="form-control" id="queryText"></textarea>
-                        <button class="btn btn-info my-2" onclick="confirmDbQuery()">Confirm</button>
-                    </div>
-                    <div>
-                        <pre id="outputQuery" style="background-color: lightcyan;">Output here</pre>
+                        <div style="display:flex;margin-left:auto;">
+                            <button style="margin-left:auto;" class="btn btn-info my-2" onclick="confirmDbQuery()" data-bs-dismiss="modal">Confirm</button>
+                        </div>
                     </div>
                 </div>
+                <!-- Modal Footer -->
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                </div> -->
             </div>
+        </div>
+    </div>
+    <div class="">
+        <div style="width: 300px;font-size:12px;margin-left: auto;margin-right: auto;text-align: center;padding: 10px 0;background-color: white;box-shadow: 2px 2px grey;">
+            <h3>Data Query</h3>
+            <div class="form-floating px-2 d-flex justify-content-center align-items-center gap-1">
+                <input class="form-control" id="dbloc" type="text" value="{{dbloc}}" />
+                <label for="dbloc">DB</label>
+            </div>
+            <div class="form-floating px-2 d-flex justify-content-center align-items-center gap-1">
+                <!-- <div>DB</div> -->
+                <input class="form-control" id="secretText" type="password" value="" placeholder="secretText" />
+                <label for="secretText">Key</label>
+                <!-- <input class="" id="dbloc" type="text" value="{{dbloc}}" /> -->
+                <button class="btn btn-light" onclick="confirmDbLocation()">OK</button>
+            </div>
+            <div class="form-floating px-2 d-flex justify-content-center align-items-center gap-1">
+                <!-- <div>Column</div> -->
+                <select class="form-select" style="" id="tableSelect" onchange="onSelected(this.value)">
+                    <option></option>
+
+                </select>
+                <label for="tableSelect">Column</label>
+                <button class="btn btn-light" onclick="refreshQuery()">🔃</button>
+            </div>
+        </div>
+        <div class="d-flex" style="margin: 10px auto;border-radius: 12px;flex-direction: column;width: 120px;text-align: center;position: absolute;right: 10px;top: 10px;align-items: center;">
+            <div>Table: </div>
+            <div class="btn btn-primary" onclick="btncreatetablequery()" data-bs-toggle="modal" data-bs-target="#myModal">Create 🗄️</div>
+            <div class="btn btn-danger" onclick="btndeletetablequery()" data-bs-toggle="modal" data-bs-target="#myModal">Delete 🗑️</div>
+            <div class="btn btn-warning" onclick="btninfotablequery()" data-bs-toggle="modal" data-bs-target="#myModal">Info ℹ️</div>
+            <div class="btn btn-secondary" onclick="btnrenametablequery()" data-bs-toggle="modal" data-bs-target="#myModal">Rename 📝</div>
 
         </div>
-        
-    </body>
-    <script>
+        <div>
 
-        function confirmDbLocation() {
-            fetchTables();
-        }
+            <div id="tableget" class="my-2 px-2">
+            </div>
+            <hr />
 
-        confirmDbLocation();
+            <div class="px-2" style="gap: 5px;display: flex;flex-direction: column;">
+                <!-- <div>Query runner</div> -->
+                <!-- <div class="d-flex">
+                    <select class="form-select" style="width:250px;" id="querySelect"
+                        onchange="onQuerySelected(this.value)">
+                        <option></option>
+                        <option>DATA CREATE</option>
+                        <option>DATA UPDATE</option>
+                        <option>DATA READ</option>
+                        <option>DATA DELETE</option>
+                        <option></option>
+                        <option>TABLE CREATE</option>
+                        <option>TABLE READ</option>
+                        <option>TABLE DELETE</option>
+                        <option>TABLE RENAME</option>
+                        <option>TABLE INFO</option>
+                        <option>TABLE RENAME COLUMN</option>
+                        <option>TABLE ADD COLUMN</option>
+                    </select>
+                </div> -->
+                <div>
+                    <pre id="outputQuery" style="background-color: lightcyan;">Output here</pre>
+                </div>
+            </div>
+        </div>
 
-        
-        function fetchTables() {
-            // dbloc = document.getElementById("dbloc").value;
-            // secretkey = document.getElementById("secretkey").value;
-            const query = {
-                query: "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';", params: "",
-            };
-            // Assuming you have an endpoint "/getTables" to get tables for a specific database
-            fetch("/{{endpoint}}/query", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(query)
-            })
+    </div>
+
+</body>
+<script>
+
+    function confirmDbLocation() {
+        fetchTables();
+    }
+
+    confirmDbLocation();
+
+
+    function fetchTables() {
+        // dbloc = document.getElementById("dbloc").value;
+        secretText = document.getElementById("secretText").value;
+        const query = {
+            query: "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';", params: "",
+            secret: secretText,
+        };
+        // Assuming you have an endpoint "/getTables" to get tables for a specific database
+        fetch("/{{endpoint}}/query", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(query)
+        })
             .then(response => response.json()) // Assuming the response is in JSON format
             .then(tables => {
                 const selectElement = document.getElementById("tableSelect");
                 selectElement.innerHTML = ""; // Clear existing options
 
-                tables.forEach(t => {
-                    const option = document.createElement("option");
-                    option.value = t.name;
-                    option.text = t.name;
-                    selectElement.add(option);
-                });
+                if (Array.isArray(tables)) {
+                    tables.forEach(t => {
+                        const option = document.createElement("option");
+                        option.value = t.name;
+                        option.text = t.name;
+                        selectElement.add(option);
+                    });
+                }
             })
             .catch(error => {
                 console.error('Error fetching tables:', error);
             });
-        }
-        
-        function refreshQuery() {
-            selectedItem = document.getElementById("tableSelect").value;
-            // console.log(selectedItem);
-            onSelected(selectedItem);
-        }
 
-        function onQuerySelected(option) {
-            // console.log(option);
-            queryText = document.getElementById("queryText");
-            tableSelect = document.getElementById("tableSelect").value;
+        setTimeout(refreshQuery, 500);
+    }
 
-            if (option == "DATA CREATE") {
-                queryText.value = `INSERT INTO ${tableSelect} (name,value) VALUES ('ikan','ayam')`;
-            }
-            else if (option == "DATA READ") {
-                queryText.value = `SELECT * FROM ${tableSelect} WHERE name = 'myname'`;
-            }
-            else if (option == "DATA UPDATE") {
-                queryText.value = `UPDATE ${tableSelect} SET name = 'ayam' WHERE id = 7`;
-            }
-            else if (option == "DATA DELETE") {
-                queryText.value = `DELETE FROM ${tableSelect} WHERE id = 7`;
-            }
-            else if (option == "TABLE CREATE") {
-                queryText.value = `CREATE TABLE {table_name} (id INTEGER PRIMARY KEY, name TEXT)`;
-            }
-            else if (option == "TABLE READ") {
-                queryText.value = `SELECT * FROM ${tableSelect}`;
-            }
-            else if (option == "TABLE UPDATE") {
-                queryText.value = `ALTER TABLE ${tableSelect} RENAME COLUMN {old_name} TO {new_name};`;
-            }
-            else if (option == "TABLE RENAME") {
-                queryText.value = `ALTER TABLE ${tableSelect} RENAME TO {new_name};`;
-            }
-            else if (option == "TABLE INFO") {
-                queryText.value = `PRAGMA table_info(${tableSelect});`
-            }
-            else if (option == "TABLE RENAME COLUMN") {
-                queryText.value = `ALTER TABLE ${tableSelect} RENAME COLUMN {old_name} TO {new_name};`
-            }
-            else if (option == "TABLE ADD COLUMN") {
-                queryText.value = `ALTER TABLE ${tableSelect} ADD COLUMN {new_col_name} TEXT;`
-            }
-            
-            else {
-                queryText.value = "";
-            }
-            
+    function refreshQuery() {
+        selectedItem = document.getElementById("tableSelect").value;
+        // console.log(selectedItem);
+        onSelected(selectedItem);
+    }
+
+    function onQuerySelected(option) {
+        // console.log(option);
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+
+        if (option == "DATA CREATE") {
+            queryText.value = `INSERT INTO ${tableSelect} (name,value) VALUES ('ikan','ayam')`;
+        }
+        else if (option == "DATA READ") {
+            queryText.value = `SELECT * FROM ${tableSelect} WHERE name = 'myname'`;
+        }
+        else if (option == "DATA UPDATE") {
+            queryText.value = `UPDATE ${tableSelect} SET name = 'ayam' WHERE id = 7`;
+        }
+        else if (option == "DATA DELETE") {
+            queryText.value = `DELETE FROM ${tableSelect} WHERE id = 7`;
+        }
+        else if (option == "TABLE CREATE") {
+            queryText.value = `CREATE TABLE {table_name} (id INTEGER PRIMARY KEY, name TEXT)`;
+        }
+        else if (option == "TABLE READ") {
+            queryText.value = `SELECT * FROM ${tableSelect}`;
+        }
+        else if (option == "TABLE UPDATE") {
+            queryText.value = `ALTER TABLE ${tableSelect} RENAME COLUMN {old_name} TO {new_name};`;
+        }
+        else if (option == "TABLE RENAME") {
+            queryText.value = `ALTER TABLE ${tableSelect} RENAME TO {new_name};`;
+        }
+        else if (option == "TABLE INFO") {
+            queryText.value = `PRAGMA table_info(${tableSelect});`
+        }
+        else if (option == "TABLE RENAME COLUMN") {
+            queryText.value = `ALTER TABLE ${tableSelect} RENAME COLUMN {old_name} TO {new_name};`
+        }
+        else if (option == "TABLE ADD COLUMN") {
+            queryText.value = `ALTER TABLE ${tableSelect} ADD COLUMN {new_col_name} TEXT;`
         }
 
-        function onSelected(option) {
-            const query = {
-                query: "SELECT * FROM " + option + " LIMIT 1000",
-                params: "",
-            };
+        else {
+            queryText.value = "";
+        }
 
-            fetch("/{{endpoint}}/query", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(query)
-            })
+    }
+
+    function onSelected(option) {
+        secretText = document.getElementById("secretText").value;
+
+        const query = {
+            query: "SELECT * FROM " + option + " LIMIT 1000",
+            params: "",
+            secret: secretText,
+        };
+
+        fetch("/{{endpoint}}/query", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(query)
+        })
             .then(response => response.json()) // Assuming the response is in JSON format
             .then(data => {
                 if (data.length > 0) {
                     // Dynamically create table headers from the first object's keys
                     let keys = Object.keys(data[0]);
-                    let html = "<table class='table table-hover table-bordered' style='width: 500px;'><tr>";
-                    
+                    let html = "<table class='table table-sm table-hover table-bordered' style='width: 500px;'><thead class='thead-dark'><tr class='table-primary'>";
+
                     keys.forEach(key => {
-                        html += `<th>${key}</th>`;
+                        html += `<th>${key}<span style="cursor:pointer;background-color: white;border-radius:4px;margin-left:4px;" data-name="${key}" data-bs-toggle="modal" data-bs-target="#myModal" onclick='btnrenamecolumntablequery(this)'>📝</span></th>`;
                     });
-                    html += "<th><i style='font-size:12px;font-weight:normal;'>Edit/Delete</i></th>"
-                    html += "</tr>";
-                    
+                    html += `<th><div style='font-size:12px;font-weight:normal;'>Edit/Delete <span style="cursor:pointer;background-color:white;border-radius:4px;padding: 2px;" data-bs-toggle="modal" data-bs-target="#myModal" onclick='btnaddcolumntablequery()'>➕Col</span></div></th>`;
+                    html += "</tr></thead>";
+
+                    html += "<tbody>";
+
                     // Create rows for each item
                     data.forEach(item => {
                         html += "<tr>";
                         let itemid = "0";
                         keys.forEach(key => {
-                            if (key == "id") {itemid = item[key];}
+                            if (key == "id") { itemid = item[key]; }
                             html += `<td data-item="${key}"><input type="text" value="${item[key] !== null ? item[key] : ''}"/></td>`;
                         });
-                        html += `<td> <button data-id='${itemid}' onclick='btneditquery(this)' type='submit' value='E'>E</button> <button data-id='${itemid}' onclick='btndeletequery(this)' type='submit' value='D'>D</button> </td>`
+                        html += `<td style="display:flex;gap:4px;justify-content:center;"> <button data-id='${itemid}' data-bs-toggle="modal" data-bs-target="#myModal" onclick='btneditquery(this)' type='submit' value='E'>E</button> <button data-id='${itemid}' data-bs-toggle="modal" data-bs-target="#myModal" onclick='btndeletequery(this)' type='submit' value='D'>D</button> </td>`
                         html += "</tr>";
                     });
 
                     html += "<tr>";
                     let itemid = "0";
                     keys.forEach(key => {
-                        if (key == "id") {itemid = data[0][key];}
+                        if (key == "id") { itemid = data[0][key]; }
                         html += `<td data-item="${key}"><input type="text" /></td>`;
                     });
-                    html += `<td> <button data-id='${itemid}' onclick='btninsertquery(this)' type='submit' value='I'>I</button> </td>`
+                    html += `<td style="display:flex;gap:4px;justify-content:center;"> <button data-id='${itemid}' data-bs-toggle="modal" data-bs-target="#myModal" onclick='btninsertquery(this)' type='submit' value='I'>I</button> </td>`
                     html += "</tr>";
 
+                    html += "</tbody>";
+
                     html += "</table>";
-                    html += "<p><i>Showing "+data.length+" results <span style='font-size:10px'>(max:1000, pls use query for more)</span></i></p>";
+                    html += "<p><i>Showing " + data.length + " results <span style='font-size:10px'>(max:1000)</span></i></p>";
                     document.getElementById("tableget").innerHTML = html;
                 } else {
                     document.getElementById("tableget").innerHTML = "No data available.";
@@ -206,125 +268,182 @@
             .catch(error => {
                 console.error('Error:', error);
             });
+    }
+    
+    function btncreatetablequery() {
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Create table";
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+        queryText.value = "CREATE TABLE table_name (id INTEGER PRIMARY KEY, name TEXT); INSERT INTO table_name (name) VALUES ('sample');";
+    }
+    function btndeletetablequery() {
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Empty table";
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+        queryText.value = "DELETE FROM "+tableSelect+"; VACUUM; --- or --- DROP TABLE COMPANY;";
+    }
+    function btninfotablequery() {
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Info table";
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+        queryText.value = "PRAGMA table_info("+tableSelect+");";
+    }
+    function btnrenametablequery() {
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Rename table";
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+        queryText.value = "ALTER TABLE "+tableSelect+" RENAME TO new_name;";
+    }
+    function btnrenamecolumntablequery(e) {
+        name = e.dataset.name;
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Rename column";
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+        queryText.value = "ALTER TABLE "+tableSelect+" RENAME COLUMN "+name+" TO new_name;";
+    }
+    function btnaddcolumntablequery() {
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Add column";
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+        queryText.value = "ALTER TABLE "+tableSelect+" ADD COLUMN new_col_name TEXT;";
+    }
+    
+
+    //-------------------
+
+    function btndeletequery(e) {
+        id = e.dataset.id;
+        queryText = document.getElementById("queryText");
+        tableSelect = document.getElementById("tableSelect").value;
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Delete data";
+        queryText.value = "DELETE FROM " + tableSelect + " WHERE ID = " + id;
+        // console.log("btndeletequery");
+    }
+    function btneditquery(e) {
+        id = e.dataset.id;
+        queryText = document.getElementById("queryText");
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Edit data";
+        tableSelect = document.getElementById("tableSelect").value;
+        //i want to get parent element's tr and get each <td>, that <td>'s data-item (e.dataset.item) with td's value, maybe innerText
+        let parentRow = e.parentElement;
+        while (parentRow && parentRow.tagName !== 'TR') {
+            parentRow = parentRow.parentElement;
         }
+        let setClause = [];
+        const tds = parentRow.getElementsByTagName('td');
+        for (let i = 0; i < tds.length; i++) {
+            const td = tds[i];
+            const dataItem = td.dataset.item;
+            const inputElement = td.querySelector('input[type="text"]');
+            // const value = td.innerText.trim();
+            let value = "";
+            if (inputElement) {
+                value = inputElement.value.trim();
+            }
 
-        function btndeletequery(e) {
-            id = e.dataset.id;
-            queryText = document.getElementById("queryText");
-            tableSelect = document.getElementById("tableSelect").value;
-            queryText.value = "DELETE FROM " + tableSelect + " WHERE ID = " + id;
-            // console.log("btndeletequery");
+            // If data-item exists, build the SET clause assignment
+            if (dataItem) {
+                if (value == "" || value == undefined || value == null) {
+                    setClause.push(`${dataItem} = null`);
+                }
+                else {
+                    setClause.push(`${dataItem} = '${value}'`);
+                }
+            }
         }
-        function btneditquery(e) {
-            id = e.dataset.id;
-            queryText = document.getElementById("queryText");
-            tableSelect = document.getElementById("tableSelect").value;
-            //i want to get parent element's tr and get each <td>, that <td>'s data-item (e.dataset.item) with td's value, maybe innerText
-            let parentRow = e.parentElement;
-            while (parentRow && parentRow.tagName !== 'TR') {
-                parentRow = parentRow.parentElement;
-            }
-            let setClause = [];
-            const tds = parentRow.getElementsByTagName('td');
-            for (let i = 0; i < tds.length; i++) {
-                const td = tds[i];
-                const dataItem = td.dataset.item;
-                const inputElement = td.querySelector('input[type="text"]');
-                // const value = td.innerText.trim();
-                let value = "";
-                if (inputElement) {
-                    value = inputElement.value.trim();
-                }
-
-                // If data-item exists, build the SET clause assignment
-                if (dataItem) {
-                    if (value == "" || value == undefined || value == null) {
-                        setClause.push(`${dataItem} = null`);
-                    }
-                    else {
-                        setClause.push(`${dataItem} = '${value}'`);
-                    }
-                }
-            }
-            const setClauseStr = setClause.length ? setClause.join(', ') : '';
-            queryText.value = `UPDATE ${tableSelect} SET ${setClauseStr} WHERE ID = ${id}`
+        const setClauseStr = setClause.length ? setClause.join(', ') : '';
+        queryText.value = `UPDATE ${tableSelect} SET ${setClauseStr} WHERE ID = ${id}`
 
 
-            // queryText.value = "UPDATE FROM " + tableSelect + " SET ? = ? WHERE ID = " + id;
-            // console.log("btneditquery");
+        // queryText.value = "UPDATE FROM " + tableSelect + " SET ? = ? WHERE ID = " + id;
+        // console.log("btneditquery");
+    }
+    function btninsertquery(e) {
+        id = e.dataset.id;
+        queryText = document.getElementById("queryText");
+        modalText = document.getElementById("modalText");
+        modalText.innerText = "Insert data";
+        tableSelect = document.getElementById("tableSelect").value;
+        //i want to get parent element's tr and get each <td>, that <td>'s data-item (e.dataset.item) with td's value, maybe innerText
+        let parentRow = e.parentElement;
+        while (parentRow && parentRow.tagName !== 'TR') {
+            parentRow = parentRow.parentElement;
         }
-        function btninsertquery(e) {
-            id = e.dataset.id;
-            queryText = document.getElementById("queryText");
-            tableSelect = document.getElementById("tableSelect").value;
-            //i want to get parent element's tr and get each <td>, that <td>'s data-item (e.dataset.item) with td's value, maybe innerText
-            let parentRow = e.parentElement;
-            while (parentRow && parentRow.tagName !== 'TR') {
-                parentRow = parentRow.parentElement;
+        let setClause = [];
+        let namesColumn = [];
+        let dataColumn = [];
+        const tds = parentRow.getElementsByTagName('td');
+        for (let i = 0; i < tds.length; i++) {
+            const td = tds[i];
+            const dataItem = td.dataset.item;
+            // const value = td.innerText.trim();
+            // const value = td[0].value;
+            const inputElement = td.querySelector('input[type="text"]');
+            let value = "";
+            if (inputElement) {
+                value = inputElement.value.trim();
             }
-            let setClause = [];
-            let namesColumn = [];
-            let dataColumn = [];
-            const tds = parentRow.getElementsByTagName('td');
-            for (let i = 0; i < tds.length; i++) {
-                const td = tds[i];
-                const dataItem = td.dataset.item;
-                // const value = td.innerText.trim();
-                // const value = td[0].value;
-                const inputElement = td.querySelector('input[type="text"]');
-                let value = "";
-                if (inputElement) {
-                    value = inputElement.value.trim();
-                }
 
-                // If data-item exists, build the SET clause assignment
-                if (dataItem) {
-                    namesColumn.push(`${dataItem}`);
-                    if (value == "" || value == undefined || value == null) {
-                        setClause.push(`${dataItem} = null`);
-                        dataColumn.push(`null`);
-                    }
-                    else {
-                        setClause.push(`${dataItem} = '${value}'`);
-                        dataColumn.push(`"${value}"`);
-                    }
+            // If data-item exists, build the SET clause assignment
+            if (dataItem) {
+                namesColumn.push(`${dataItem}`);
+                if (value == "" || value == undefined || value == null) {
+                    setClause.push(`${dataItem} = null`);
+                    dataColumn.push(`null`);
+                }
+                else {
+                    setClause.push(`${dataItem} = '${value}'`);
+                    dataColumn.push(`"${value}"`);
                 }
             }
-            const setClauseStr = setClause.length ? setClause.join(', ') : '';
-            const namesColumnStr = namesColumn.length ? namesColumn.join(', ') : '';
-            const dataColumnStr = dataColumn.length ? dataColumn.join(', ') : '';
-            queryText.value = `INSERT INTO ${tableSelect} (${namesColumnStr}) VALUES (${dataColumnStr})`
-
-
-            // queryText.value = "UPDATE FROM " + tableSelect + " SET ? = ? WHERE ID = " + id;
-            // console.log("btneditquery");
         }
+        const setClauseStr = setClause.length ? setClause.join(', ') : '';
+        const namesColumnStr = namesColumn.length ? namesColumn.join(', ') : '';
+        const dataColumnStr = dataColumn.length ? dataColumn.join(', ') : '';
+        queryText.value = `INSERT INTO ${tableSelect} (${namesColumnStr}) VALUES (${dataColumnStr})`
 
-        function confirmDbQuery() {
-            queryText = document.getElementById("queryText").value;
-            const query = {
-                query: queryText,
-                params: "",
-            };
 
-            fetch("/{{endpoint}}/query", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(query)
-            })
+        // queryText.value = "UPDATE FROM " + tableSelect + " SET ? = ? WHERE ID = " + id;
+        // console.log("btneditquery");
+    }
+
+    function confirmDbQuery() {
+        queryText = document.getElementById("queryText").value;
+        secretText = document.getElementById("secretText").value;
+        const query = {
+            query: queryText,
+            params: "",
+            secret: secretText,
+        };
+
+        fetch("/{{endpoint}}/query", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(query)
+        })
             .then(response => response.text()) // Assuming the response is in JSON format
             .then(data => {
                 console.log(data);
                 document.getElementById("outputQuery").innerHTML = data;
+                setTimeout(refreshQuery, 500);
             })
             .catch(error => {
                 console.error('Error:', error);
             });
 
-            setTimeout(refreshQuery, 500);
-        }
         setTimeout(refreshQuery, 500);
-    </script>
+    }
+    setTimeout(refreshQuery, 500);
+</script>
+
 </html>
