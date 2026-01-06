@@ -253,3 +253,11 @@ def insertsuggestions():
     
     dbdata = af_getdb(DB_FILE, query, params)
     return jsonify(dbdata)
+
+@badminton_bp.route('/badminton/api/getsuggestions', methods=['GET', 'POST'])
+def getsuggestions():
+    query = "SELECT * FROM suggestions"
+    params = ()
+    
+    dbdata = af_getdb(DB_FILE, query, params)
+    return jsonify(dbdata)
