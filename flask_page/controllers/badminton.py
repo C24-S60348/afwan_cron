@@ -1,8 +1,8 @@
 #controllers/badminton.py
 import random
 from flask import abort, jsonify, request, Blueprint, render_template, render_template_string, send_from_directory, session
-from ..utils.html_helper import *
-from ..utils.db_helper import *
+from apps.utils.html_helper import *
+from apps.utils.db_helper import *
 from datetime import datetime
 import sqlite3
 import random
@@ -173,8 +173,8 @@ def inserthistory():
 def updatehistory():
 
     query = "UPDATE history"
-    query += " SET userid = ?,date = ?,playerleft = ?,playerright = ?,remark = ?,score = ?,time = ?,created_at = ?)"
-    query += " WHERE ID = ?"
+    query += " SET userid = ?, date = ?, playerleft = ?, playerright = ?, remark = ?, score = ?, time = ?, created_at = ?"
+    query += " WHERE id = ?"
     
     userid = getpostget("userid")
     date = getpostget("date")
@@ -186,11 +186,12 @@ def updatehistory():
     created_at = datetime.now()
     id = getpostget("id")
 
-    params = (userid,date,playerleft,playerright,remark,score,time,created_at,id,)
+    params = (userid, date, playerleft, playerright, remark, score, time, created_at, id)
     
     dbdata = af_getdb(DB_FILE, query, params)
     return jsonify(dbdata)
 
+@badminton_bp.route('/badminton/api/getsummary', methods=['GET', 'POST'])
 def getsummary():
     userid = getpostget("userid")
     query = "SELECT * FROM history WHERE userid = ?"
@@ -198,25 +199,47 @@ def getsummary():
     
     dbdata = af_getdb(DB_FILE, query, params)
 
-    name = ""
-    count = 0
-    result = "Summary: "
-
-    #count the player how many wins
-    for db in dbdata:
-        name = db['playerleft']
-        count = 0
-        for db2 in dbdata:
-            if db2['playerleft'] == name:
-                if db2['score'] == "left": #left side of "-" is winner - means the name is winner
-                    count += 1
-            if db2['playerright'] == name:
-                if db2['score'] == "right": #right side of "-" is winner - means the name is winner
-                    count += 1
-        result += f"{name} : {count}, "
+    # Dictionary to track player wins
+    player_wins = {}
+    
+    # Count wins for each player
+    for game in dbdata:
+        score = game.get('score', '0-0')
+        playerleft = game.get('playerleft', 'Left')
+        playerright = game.get('playerright', 'Right')
+        
+        # Initialize players if not exists
+        if playerleft not in player_wins:
+            player_wins[playerleft] = 0
+        if playerright not in player_wins:
+            player_wins[playerright] = 0
+        
+        # Parse score (format: "21-19")
+        try:
+            scores = score.split('-')
+            if len(scores) == 2:
+                left_score = int(scores[0])
+                right_score = int(scores[1])
+                
+                # Determine winner
+                if left_score > right_score:
+                    player_wins[playerleft] += 1
+                elif right_score > left_score:
+                    player_wins[playerright] += 1
+        except (ValueError, AttributeError):
+            # Skip invalid scores
+            continue
+    
+    # Format result
+    result = {
+        "summary": "Player Win Summary",
+        "players": player_wins,
+        "total_games": len(dbdata)
+    }
             
     return jsonify(result)
 
+@badminton_bp.route('/badminton/api/insertsuggestions', methods=['GET', 'POST'])
 def insertsuggestions():
 
     query = "INSERT INTO suggestions (name,comment,created_at)"
