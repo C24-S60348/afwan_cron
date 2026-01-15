@@ -8,7 +8,9 @@ def proxy():
     target_url = request.args.get('url')
 
     # Check if the URL contains 'celiktafsir' to allow it
-    if not target_url or 'celiktafsir' not in target_url:
+    if 'celiktafsir' in target_url or 'tafseerliterate.wordpress.com' in target_url:
+        pass
+    else:
         return Response("Domain not whitelisted", status=403)
 
     try:
