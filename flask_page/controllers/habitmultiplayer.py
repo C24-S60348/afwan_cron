@@ -666,6 +666,164 @@ def readhistory():
             "message": "Your token has expired"
         }
     )
+
+@habitmultiplayer_blueprint.route('/top3habits', methods=['GET', 'POST'])
+def top3habits():
+    """
+    Get top 3 habits tracked in the last 5 days for the current user
+    Returns habits sorted by number of check-ins (historystatus = 1) in last 5 days
+    """
+    token = getpostget("token")
+    
+    query = "SELECT * FROM users WHERE token = ? AND deleted_at IS NULL"
+    params = (token,)
+    dbdata = af_getdb(dbloc, query, params)
+    
+    if dbdata or inputnotvalidated(token):
+        if inputnotvalidated(token):
+            username = "guest"
+        else:
+            username = dbdata[0]['username']
+        
+        # Get date 5 days ago
+        from datetime import datetime, timedelta
+        five_days_ago = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
+        
+        # Get all user's habits
+        query = "SELECT * FROM habit WHERE username = ? AND deleted_at IS NULL"
+        params = (username,)
+        user_habits = af_getdb(dbloc, query, params)
+        
+        # Also get habits where user is a member
+        query = """SELECT habit.* FROM habit 
+                   INNER JOIN member ON habit.id = member.habitid 
+                   WHERE member.member = ? AND member.deleted_at IS NULL"""
+        params = (username,)
+        member_habits = af_getdb(dbloc, query, params)
+        
+        # Combine both lists
+        all_habits = user_habits + member_habits
+        
+        # For each habit, count check-ins in last 5 days
+        habit_counts = []
+        for habit in all_habits:
+            habitid = habit['id']
+            
+            # Count positive check-ins (historystatus = 1) in last 5 days for this user
+            query = """SELECT COUNT(*) as count FROM history 
+                       WHERE habitid = ? AND username = ? 
+                       AND historydate >= ? 
+                       AND historystatus = '1'
+                       AND deleted_at IS NULL"""
+            params = (habitid, username, five_days_ago)
+            count_result = af_getdb(dbloc, query, params)
+            
+            count = count_result[0]['count'] if count_result else 0
+            
+            habit_counts.append({
+                'id': habit['id'],
+                'name': habit['name'],
+                'url': habit['url'],
+                'count': count
+            })
+        
+        # Sort by count descending and get top 3
+        habit_counts.sort(key=lambda x: x['count'], reverse=True)
+        top3 = habit_counts[:3]
+        
+        return jsonify({
+            "status": "ok",
+            "message": "top 3 habits",
+            "data": top3
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Your token has expired"
+        })
+
+@habitmultiplayer_blueprint.route('/profilewithtop3', methods=['GET', 'POST'])
+def profilewithtop3():
+    """
+    Combined API that returns profile info and top 3 habits in one call
+    """
+    token = getpostget("token")
+    
+    query = "SELECT * FROM users WHERE token = ? AND deleted_at IS NULL"
+    params = (token,)
+    dbdata = af_getdb(dbloc, query, params)
+    
+    if dbdata or inputnotvalidated(token):
+        if inputnotvalidated(token):
+            username = "guest"
+            profile = {
+                "username": username,
+                "name": ""
+            }
+        else:
+            username = dbdata[0]['username']
+            profile = {
+                "username": username,
+                "name": dbdata[0].get('name', '')
+            }
+        
+        # Get top 3 habits (same logic as top3habits endpoint)
+        from datetime import datetime, timedelta
+        five_days_ago = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
+        
+        # Get all user's habits
+        query = "SELECT * FROM habit WHERE username = ? AND deleted_at IS NULL"
+        params = (username,)
+        user_habits = af_getdb(dbloc, query, params)
+        
+        # Also get habits where user is a member
+        query = """SELECT habit.* FROM habit 
+                   INNER JOIN member ON habit.id = member.habitid 
+                   WHERE member.member = ? AND member.deleted_at IS NULL"""
+        params = (username,)
+        member_habits = af_getdb(dbloc, query, params)
+        
+        # Combine both lists
+        all_habits = user_habits + member_habits
+        
+        # For each habit, count check-ins in last 5 days
+        habit_counts = []
+        for habit in all_habits:
+            habitid = habit['id']
+            
+            # Count positive check-ins (historystatus = 1) in last 5 days for this user
+            query = """SELECT COUNT(*) as count FROM history 
+                       WHERE habitid = ? AND username = ? 
+                       AND historydate >= ? 
+                       AND historystatus = '1'
+                       AND deleted_at IS NULL"""
+            params = (habitid, username, five_days_ago)
+            count_result = af_getdb(dbloc, query, params)
+            
+            count = count_result[0]['count'] if count_result else 0
+            
+            habit_counts.append({
+                'id': habit['id'],
+                'name': habit['name'],
+                'url': habit['url'],
+                'count': count
+            })
+        
+        # Sort by count descending and get top 3
+        habit_counts.sort(key=lambda x: x['count'], reverse=True)
+        top3 = habit_counts[:3]
+        
+        return jsonify({
+            "status": "ok",
+            "message": "profile with top 3 habits",
+            "profile": profile,
+            "top3habits": top3
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Your token has expired"
+        })
  
 
 @habitmultiplayer_blueprint.route('/updatehistory', methods=['GET', 'POST'])

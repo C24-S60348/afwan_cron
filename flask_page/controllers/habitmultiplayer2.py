@@ -40,7 +40,7 @@ dbloc = "static/db/habit.db"
 -Update Profile
 
 """
-restrictmode = True
+restrictmode = False
 habitmultiplayer2_blueprint = Blueprint('habitmultiplayer2', __name__)
 
 def generate_random_password(length=12):
@@ -409,6 +409,10 @@ def deletemember():
         for g in dbdata:
             if g['username'] == username:
                 cango = True
+        
+        # Allow users to remove themselves from groups (even if not the owner)
+        if member == username:
+            cango = True
 
         if cango:
 
