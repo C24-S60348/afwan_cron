@@ -107,7 +107,8 @@ from flask_page.controllers.croncheck import croncheck_bp
 from flask_page.controllers.executejsonv2 import executejsonv2_bp
 from flask_page.controllers.pelajar_data import pelajar_data_bp
 from flask_page.controllers.admin import admin_bp
-from flask_page.controllers.ularular import ularular_bp, ularular_init_db
+from flask_page.controllers.ularular import ularular_bp
+from flask_page.utils.db_init_helper import init_all_ular_databases
 from flask_page.controllers.ularulargame import ularulargame_bp
 from flask_page.controllers.ularulargame2 import ularulargame2_bp
 from flask_page.controllers.postman import postman_bp
@@ -172,7 +173,7 @@ app.register_blueprint(templatetest_bp)
 app.register_blueprint(badminton_bp)
 
 with app.app_context():
-    ularular_init_db()  # ✅ Auto-create tables if not found
+    init_all_ular_databases()  # ✅ Auto-initialize all Ular game databases
 
 # Start the app using Uvicorn
 if __name__ == '__main__':

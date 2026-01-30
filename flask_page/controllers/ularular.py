@@ -27,31 +27,47 @@ def close_db(exception=None):
         db.close()
 
 def ularular_init_db():
+    """Initialize ularular database tables if they don't exist"""
     db = ularular_get_db()
-    db.executescript("""
-    CREATE TABLE IF NOT EXISTS rooms (
-        code TEXT PRIMARY KEY,
-        turn TEXT,
-        state TEXT
-    );
+    
+    try:
+        # Check if tables exist and have correct structure
+        cursor = db.cursor()
+        
+        # Get existing tables
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        existing_tables = [row[0] for row in cursor.fetchall()]
+        
+        # Create tables if they don't exist
+        db.executescript("""
+        CREATE TABLE IF NOT EXISTS rooms (
+            code TEXT PRIMARY KEY,
+            turn TEXT,
+            state TEXT
+        );
 
-    CREATE TABLE IF NOT EXISTS players (
-        room_code TEXT,
-        player TEXT,
-        pos INTEGER,
-        PRIMARY KEY (room_code, player)
-    );
+        CREATE TABLE IF NOT EXISTS players (
+            room_code TEXT,
+            player TEXT,
+            pos INTEGER,
+            PRIMARY KEY (room_code, player)
+        );
 
-    CREATE TABLE IF NOT EXISTS moves (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        room_code TEXT,
-        player TEXT,
-        dice INTEGER,
-        pos INTEGER,
-        time TEXT
-    );
-    """)
-    db.commit()
+        CREATE TABLE IF NOT EXISTS moves (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            room_code TEXT,
+            player TEXT,
+            dice INTEGER,
+            pos INTEGER,
+            time TEXT
+        );
+        """)
+        db.commit()
+        print("✅ Ularular database tables initialized successfully")
+        
+    except Exception as e:
+        print(f"❌ Error initializing ularular database: {e}")
+        db.rollback()
 
 # ----------------------
 # Game Logic

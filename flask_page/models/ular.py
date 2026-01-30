@@ -12,6 +12,91 @@ playerscsv = "static/db/ular/players.csv"
 dbloc = "static/db/ular.db"
 maxbox = 28
 
+def init_ular_db():
+    """Initialize the ular database tables if they don't exist"""
+    try:
+        # Create conf table
+        query = """CREATE TABLE IF NOT EXISTS conf (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            start TEXT,
+            end TEXT,
+            type TEXT
+        );"""
+        af_getdb(dbloc, query, ())
+        
+        # Create room table
+        query = """CREATE TABLE IF NOT EXISTS room (
+            code TEXT PRIMARY KEY,
+            turn TEXT,
+            state TEXT,
+            questionid TEXT,
+            maxbox INTEGER,
+            topic TEXT
+        );"""
+        af_getdb(dbloc, query, ())
+        
+        # Create players table
+        query = """CREATE TABLE IF NOT EXISTS players (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            code TEXT,
+            player TEXT,
+            pos INTEGER,
+            color TEXT,
+            questionright TEXT,
+            questionget TEXT
+        );"""
+        af_getdb(dbloc, query, ())
+        
+        # Create questions table
+        query = """CREATE TABLE IF NOT EXISTS questions (
+            id TEXT PRIMARY KEY,
+            question TEXT,
+            a1 TEXT,
+            a2 TEXT,
+            a3 TEXT,
+            a4 TEXT,
+            answer TEXT,
+            topic TEXT
+        );"""
+        af_getdb(dbloc, query, ())
+        
+        # Check if conf table is empty and add sample data
+        query = "SELECT COUNT(*) as count FROM conf;"
+        result = af_getdb(dbloc, query, ())
+        if isinstance(result, list) and len(result) > 0 and result[0].get('count', 0) == 0:
+            # Add sample ladder and snake configurations
+            query = """INSERT INTO conf (start, end, type) VALUES 
+                ('3', '10', 'ladder'),
+                ('6', '15', 'ladder'),
+                ('12', '20', 'ladder'),
+                ('18', '8', 'snake'),
+                ('22', '12', 'snake'),
+                ('25', '5', 'snake');"""
+            af_getdb(dbloc, query, ())
+            print("✅ Added sample ladder/snake configurations")
+        
+        # Check if questions table is empty and add sample data
+        query = "SELECT COUNT(*) as count FROM questions;"
+        result = af_getdb(dbloc, query, ())
+        if isinstance(result, list) and len(result) > 0 and result[0].get('count', 0) == 0:
+            # Add sample questions
+            query = """INSERT INTO questions (id, question, a1, a2, a3, a4, answer, topic) VALUES 
+                ('1', 'What is the formula for force?', 'F=ma', 'F=mv', 'F=mgh', 'F=1/2mv^2', 'a1', 'fizik'),
+                ('2', 'What is the speed of light in vacuum?', '3x10^6 m/s', '3x10^7 m/s', '3x10^8 m/s', '3x10^9 m/s', 'a3', 'fizik'),
+                ('3', 'What is Newton''s first law about?', 'Force', 'Inertia', 'Acceleration', 'Momentum', 'a2', 'fizik'),
+                ('4', 'What is the unit of energy?', 'Newton', 'Watt', 'Joule', 'Pascal', 'a3', 'fizik'),
+                ('5', 'What is the powerhouse of the cell?', 'Nucleus', 'Ribosome', 'Mitochondria', 'Chloroplast', 'a3', 'biologi'),
+                ('6', 'What is the process by which plants make food?', 'Respiration', 'Photosynthesis', 'Digestion', 'Fermentation', 'a2', 'biologi'),
+                ('7', 'What is DNA?', 'A protein', 'A genetic material', 'A carbohydrate', 'A lipid', 'a2', 'biologi'),
+                ('8', 'What is the largest organ in the human body?', 'Heart', 'Liver', 'Brain', 'Skin', 'a4', 'biologi');"""
+            af_getdb(dbloc, query, ())
+            print("✅ Added sample questions")
+        
+        print("✅ Ular database tables initialized successfully")
+        
+    except Exception as e:
+        print(f"❌ Error initializing ular database: {e}")
+
 def modelgetcsvconf():
     query = "SELECT * FROM conf;"
     params = ()
@@ -77,6 +162,9 @@ def adddataroom(code="", turn="", state="", maxbox=maxbox, topic="biologi"):
     query = "INSERT INTO room (code,turn,state,questionid,maxbox,topic) VALUES (?,?,?,?,?,?);"
     params = (code, turn, state, "", maxbox, topic)
     data = af_getdb(dbloc,query,params)
+    # Check if there was an error
+    if isinstance(data, str) and ("error" in data.lower() or "Query executed" not in data):
+        print(f"Error adding room: {data}")
     # af_addcsv(roomcsv, [
     #     code, turn, state, "", maxbox, topic
     # ])
@@ -85,6 +173,9 @@ def adddataplayer(code="", player="", pos=0, color="white"):
     query = "INSERT INTO players (code,player,pos,color,questionright,questionget) VALUES (?,?,?,?,?,?);"
     params = (code, player, pos, color, "", "")
     data = af_getdb(dbloc,query,params)
+    # Check if there was an error
+    if isinstance(data, str) and ("error" in data.lower() or "Query executed" not in data):
+        print(f"Error adding player: {data}")
     # af_addcsv(playerscsv, [
     #     code, player, pos, color, "", ""
     # ])
