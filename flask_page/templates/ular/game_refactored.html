@@ -1,0 +1,125 @@
+{% extends "ular/base.html" %}
+{% block css %}
+<link rel="stylesheet" href="/static/lib/bootstrap.min.css">
+{% endblock %}
+
+{% block game %}
+<div style="background-color: rgb(82, 158, 229); width: 80%; max-width: 900px; margin: 20px auto; padding: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <button class="btn btn-primary" onclick="opentab('setup', 'yes')">Setup</button>
+        <button class="btn btn-primary" onclick="opentab('board', 'no')">Board</button>
+        <button class="btn btn-primary" onclick="opentab('detail', 'no')">Detail</button>
+        <button class="btn btn-danger" onclick="endgame()">End Game</button>
+    </div>
+
+    <!-- SETUP TAB -->
+    <div id="divsetup">
+        <h2>Game Setup</h2>
+        
+        <!-- Create Room -->
+        <div id="divcreateroom" style="margin-bottom: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+            <h3>Create Room</h3>
+            <form>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <input type="text" id="playercreateroom" placeholder="Player name" class="form-control" />
+                    
+                    <label for="colorcreateroom">Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="colorcreateroom" class="form-control" style="flex: 1;"></select>
+                        <div id="colorpreview_create" style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ccc;"></div>
+                    </div>
+                    
+                    <label for="topiccreateroom">Topic</label>
+                    <select id="topiccreateroom" class="form-control">
+                        <option value="biologi">Biologi</option>
+                        <option value="fizik">Fizik</option>
+                        <option value="kimia">Kimia</option>
+                        <option value="sains">Sains</option>
+                        <option value="matematik">Matematik</option>
+                    </select>
+                    
+                    <button type="button" class="btn btn-success" onclick="createroom()">Create</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Join Room -->
+        <div id="divjoinroom" style="padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+            <h3>Join Room</h3>
+            <form>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <input type="text" id="codejoinroom" placeholder="Room code" oninput="this.value = this.value.toUpperCase();" class="form-control"/>
+                    <input type="text" id="playerjoinroom" placeholder="Player name" class="form-control"/>
+                    
+                    <label for="colorjoinroom">Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="colorjoinroom" class="form-control" style="flex: 1;"></select>
+                        <div id="colorpreview_join" style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ccc;"></div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-success" onclick="joinroom()">Join</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BOARD TAB -->
+    <div id="divboard" style="display:none;">
+        <canvas id="canvas" width="240" height="150"></canvas>
+        <div id="boardinfo" style="display:none;">
+            <p>player : <span id="playercode"></span></p>
+            <p>room code : <span id="statecode"></span></p>
+            <p>color : <span id="playercolor"></span></p>
+            <p>pos : <span id="playerpos"></span></p>
+            <button type="button" class="btn btn-warning" onclick="startgame()">Start Game</button>
+            <button type="button" class="btn btn-primary" onclick="rolldice()">Roll Dice</button>
+            <p>dice : <span id="diceget"></span></p>
+        </div>
+        
+        <div id="boardinfo2" style="display:none;">
+            <p><strong>Player:</strong> <span id="playercode2"></span></p>
+            <p><strong>Room Code:</strong> <span id="statecode2"></span></p>
+            <button type="button" class="btn btn-warning" onclick="startgame()">Start Game</button>
+            <button type="button" class="btn btn-primary" onclick="rolldice()">Roll Dice</button>
+            <p><strong>Dice:</strong> <span id="diceget2"></span></p>
+        </div>
+
+        <div id="divquestion" style="padding: 20px; background: rgba(255,255,255,0.9); border-radius: 8px; margin-top: 20px;">
+            <div id="questionplayertext" style="margin-bottom:15px;font-weight: bold;">Answerer: </div>
+            <div id="questiontext" style="margin-bottom:15px;font-size:18px;">Question: </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button id="a1text" onclick="jawab('a1')" class="btn btn-info">1</button>
+                <button id="a2text" onclick="jawab('a2')" class="btn btn-info">2</button>
+                <button id="a3text" onclick="jawab('a3')" class="btn btn-info">3</button>
+                <button id="a4text" onclick="jawab('a4')" class="btn btn-info">4</button>
+            </div>
+        </div>
+
+        <pre id="outputall"></pre>
+    </div>
+
+    <!-- DETAIL TAB -->
+    <div id="divdetail" style="display:none;">
+        <h2>Game Details</h2>
+        <pre id="outputdetail"></pre>
+    </div>
+</div>
+
+<input type="hidden" id="maxboxcreateroom"/>
+
+<script src="/static/js/ular/ColorPicker.js"></script>
+<script src="/static/js/ular/game.js"></script>
+<script>
+    // Initialize color pickers when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create room color picker
+        const createRoomPicker = new ColorPicker('colorcreateroom', 'colorpreview_create');
+        createRoomPicker.setValue('antiquewhite'); // Set default
+        
+        // Join room color picker
+        const joinRoomPicker = new ColorPicker('colorjoinroom', 'colorpreview_join');
+        joinRoomPicker.setValue('lightblue'); // Set default
+    });
+</script>
+
+{% endblock %}
