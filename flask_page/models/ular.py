@@ -17,6 +17,9 @@ def modelgetcsvconf():
     params = ()
     data = af_getdb(dbloc,query,params)
     # data = af_getcsvdict(confcsv)
+    # Handle case where af_getdb returns a string (error message)
+    if isinstance(data, str):
+        return []
     return data
 
 def modelgetcsvroom():
@@ -24,6 +27,9 @@ def modelgetcsvroom():
     params = ()
     data = af_getdb(dbloc,query,params)
     # data = af_getcsvdict(roomcsv)
+    # Handle case where af_getdb returns a string (error message)
+    if isinstance(data, str):
+        return []
     return data
 
 def modelgetcsvplayers(code=""):
@@ -31,6 +37,9 @@ def modelgetcsvplayers(code=""):
     params = ()
     data = af_getdb(dbloc,query,params)
     # data = af_getcsvdict(playerscsv)
+    # Handle case where af_getdb returns a string (error message)
+    if isinstance(data, str):
+        return []
     result = []
     for d in data:
         if d["code"] == code:
@@ -42,6 +51,9 @@ def playerdata(code="", player=""):
     params = ()
     data = af_getdb(dbloc,query,params)
     # data = af_getcsvdict(playerscsv)
+    # Handle case where af_getdb returns a string (error message)
+    if isinstance(data, str):
+        return []
     result = []
     for d in data:
         if d["code"] == code and d["player"] == player:
@@ -284,6 +296,9 @@ def modelgetcsvquestion():
     params = ()
     data = af_getdb(dbloc,query,params)
     # data = af_getcsvdict("static/db/ular/questions.csv")
+    # Handle case where af_getdb returns a string (error message)
+    if isinstance(data, str):
+        return []
     return data
 
 def getquestions():
