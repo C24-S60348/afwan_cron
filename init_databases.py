@@ -83,12 +83,14 @@ def init_ular_db():
             cursor.executemany(
                 "INSERT INTO conf (start, end, type) VALUES (?, ?, ?)",
                 [
-                    ('3', '10', 'ladder'),
-                    ('6', '15', 'ladder'),
-                    ('12', '20', 'ladder'),
-                    ('18', '8', 'snake'),
-                    ('22', '12', 'snake'),
-                    ('25', '5', 'snake'),
+                    ('3', '12', 'ladder'),
+                    ('8', '21', 'ladder'),
+                    ('18', '25', 'ladder'),
+                    ('16', '28', 'ladder'),
+                    ('15', '2', 'snake'),
+                    ('17', '11', 'snake'),
+                    ('23', '10', 'snake'),
+                    ('9', '4', 'snake'),
                 ]
             )
             print("  ✅ Added sample ladder/snake configurations")
