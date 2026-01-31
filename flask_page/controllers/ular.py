@@ -341,6 +341,7 @@ def apiular_state():
     rturn = rdata["turn"]
     rquestionid = rdata["questionid"]
     rmaxbox = int(rdata["maxbox"])
+    rdice = int(rdata.get("dice", 0))  # Get last dice rolled
     question = []
     if rquestionid != "":
         question = getquestion(rquestionid)
@@ -366,7 +367,8 @@ def apiular_state():
             "turn": rturn,
             "question": question,
             "questionid": rquestionid,
-            "state": rstate
+            "state": rstate,
+            "dice": rdice
         })
     else:
         return jsonify({

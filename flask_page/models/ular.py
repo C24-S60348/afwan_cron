@@ -159,8 +159,8 @@ def startroom(code=""):
 
 
 def adddataroom(code="", turn="", state="", maxbox=maxbox, topic="biologi"):
-    query = "INSERT INTO room (code,turn,state,questionid,maxbox,topic) VALUES (?,?,?,?,?,?);"
-    params = (code, turn, state, "", maxbox, topic)
+    query = "INSERT INTO room (code,turn,state,questionid,maxbox,topic,dice) VALUES (?,?,?,?,?,?,?);"
+    params = (code, turn, state, "", maxbox, topic, 0)
     data = af_getdb(dbloc,query,params)
     # Check if there was an error
     if isinstance(data, str) and ("error" in data.lower() or "Query executed" not in data):
@@ -268,6 +268,15 @@ def playerchangepos(code="", player="", newpos=""):
     #                        new_data)
 
 
+def update_room_dice(code="", dice=0):
+    """Update the dice value in the room table"""
+    query = "UPDATE room SET dice = ? WHERE code = ?;"
+    params = (dice, code,)
+    data = af_getdb(dbloc, query, params)
+    if isinstance(data, str) and ("error" in data.lower() or "Query executed" not in data):
+        print(f"Error updating room dice: {data}")
+
+
 def checkgameended(pos="", code="", maxbox=maxbox):
     ended = False
     if pos == str(maxbox) or pos == maxbox:
@@ -286,6 +295,9 @@ def rolldice(code="", player="", currentpos=0, maxbox=maxbox):
 
     #changepos
     playerchangepos(code, player, newpos)
+    
+    # Update dice value in room
+    update_room_dice(code, dicenum)
     
     #if has question, get question
     qqid = gquestion(newpos, code)
