@@ -46,7 +46,8 @@ def init_ular_db():
                 state TEXT,
                 questionid TEXT,
                 maxbox INTEGER,
-                topic TEXT
+                topic TEXT,
+                dice INTEGER DEFAULT 0
             );
         """)
         
