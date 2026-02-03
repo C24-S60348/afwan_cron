@@ -6,6 +6,39 @@ from ..models.ular import *
 
 ularq_blueprint = Blueprint('ularq', __name__)
 
+# Track selected answer before submission
+@ularq_blueprint.route("/api/ular/selectanswer")
+def apiular_selectanswer():
+    code = af_requestget("code")
+    player = af_requestget("player")
+    answer = af_requestget("answer")
+    
+    if inputnotvalidated(code):
+        return jsonifynotvalid("code")
+    if inputnotvalidated(player):
+        return jsonifynotvalid("player")
+    if inputnotvalidated(answer):
+        return jsonifynotvalid("answer")
+    
+    rdata = roomdata(code)
+    rturn = rdata["turn"]
+    
+    # Only the current turn player can select
+    if player == rturn:
+        query = "UPDATE room SET selectedanswer = ? WHERE code = ?;"
+        params = (answer, code)
+        af_getdb(dbloc, query, params)
+        
+        return jsonify({
+            "status": "ok",
+            "message": "Answer selected"
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Not your turn"
+        })
+
 #questions
 @ularq_blueprint.route("/api/ular/getquestions")
 def apiular_getquestions():
@@ -115,6 +148,14 @@ def apiular_submitanswer():
 
         if player == rturn:
             submitanswerd = submitanswer(rquestionid, answer)
+            
+            # Store answer correctness for 2 seconds so other players can see
+            answercorrect = "true" if submitanswerd["answer"] == True else "false"
+            query = "UPDATE room SET answercorrect = ?, selectedanswer = ? WHERE code = ?;"
+            params = (answercorrect, answer, code)
+            af_getdb(dbloc, query, params)
+            
+            # Clear question after storing result
             query = "UPDATE room SET questionid = ? WHERE code = ?;"
             params = ("", code,)
             data = af_getdb(dbloc,query,params)

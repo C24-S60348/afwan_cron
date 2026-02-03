@@ -342,6 +342,8 @@ def apiular_state():
     rquestionid = rdata["questionid"]
     rmaxbox = int(rdata["maxbox"])
     rdice = int(rdata.get("dice", 0))  # Get last dice rolled
+    rselectedanswer = rdata.get("selectedanswer", "")
+    ranswercorrect = rdata.get("answercorrect", "")
     question = []
     if rquestionid != "":
         question = getquestion(rquestionid)
@@ -368,7 +370,9 @@ def apiular_state():
             "question": question,
             "questionid": rquestionid,
             "state": rstate,
-            "dice": rdice
+            "dice": rdice,
+            "selectedanswer": rselectedanswer,
+            "answercorrect": ranswercorrect
         })
     else:
         return jsonify({
@@ -413,6 +417,11 @@ def apiular_rolldice():
         if rstate == "playing":
 
             if rturn == player:
+                # Clear previous question state
+                query = "UPDATE room SET selectedanswer = ?, answercorrect = ? WHERE code = ?;"
+                params = ("", "", code)
+                af_getdb(dbloc, query, params)
+                
                 rdice = rolldice(code, player, ppos, rmaxbox)
                 rdata = roomdata(code)
                 rstate = rdata["state"]

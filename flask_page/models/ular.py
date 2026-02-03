@@ -31,7 +31,9 @@ def init_ular_db():
             state TEXT,
             questionid TEXT,
             maxbox INTEGER,
-            topic TEXT
+            topic TEXT,
+            selectedanswer TEXT,
+            answercorrect TEXT
         );"""
         af_getdb(dbloc, query, ())
         
@@ -66,14 +68,12 @@ def init_ular_db():
         if isinstance(result, list) and len(result) > 0 and result[0].get('count', 0) == 0:
             # Add sample ladder and snake configurations
             query = """INSERT INTO conf (start, end, type) VALUES 
-                ('3', '12', 'ladder'),
-                ('8', '21', 'ladder'),
-                ('18', '25', 'ladder'),
-                ('16', '28', 'ladder'),
-                ('15', '2', 'snake'),
-                ('17', '11', 'snake'),
-                ('23', '10', 'snake'),
-                ('9', '4', 'snake');"""
+                ('3', '10', 'ladder'),
+                ('6', '15', 'ladder'),
+                ('12', '20', 'ladder'),
+                ('18', '8', 'snake'),
+                ('22', '12', 'snake'),
+                ('25', '5', 'snake');"""
             af_getdb(dbloc, query, ())
             print("✅ Added sample ladder/snake configurations")
         
@@ -446,7 +446,11 @@ def submitanswer(id="", answer=""):
     
     for d in data:
         if d["id"] == id:
-            if d["answer"] == answer:
+            # Case-insensitive comparison and strip whitespace
+            correct_answer = str(d["answer"]).strip().lower()
+            submitted_answer = str(answer).strip().lower()
+            
+            if correct_answer == submitted_answer:
                 return {
                     "status": "ok",
                     "answer": True
