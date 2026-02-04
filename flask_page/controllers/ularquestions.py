@@ -331,7 +331,7 @@ def admin_createquestion():
     
     # Insert new question
     query = """INSERT INTO questions (id, question, a1, a2, a3, a4, answer, topic)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
     params = (questionid, question, a1, a2, a3, a4, answer, topic)
     result = af_getdb(dbloc, query, params)
     
