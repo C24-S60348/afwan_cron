@@ -335,10 +335,22 @@ def admin_createquestion():
     params = (questionid, question, a1, a2, a3, a4, answer, topic, "medium")
     af_getdb(dbloc, query, params)
     
-    return jsonify({
-        "status": "ok",
-        "message": "Question created successfully"
-    })
+    # Verify the question was inserted
+    verify_query = "SELECT id FROM questions WHERE id = ?;"
+    verify_params = (questionid,)
+    verify_result = af_getdb(dbloc, verify_query, verify_params)
+    
+    if verify_result:
+        return jsonify({
+            "status": "ok",
+            "message": "Question created successfully",
+            "id": questionid
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Question creation failed - not found after insert"
+        })
 
 @ularq_blueprint.route('/api/admin/updatequestion', methods=['GET'])
 def admin_updatequestion():
