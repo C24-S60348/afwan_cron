@@ -330,9 +330,9 @@ def admin_createquestion():
         })
     
     # Insert new question
-    query = """INSERT INTO questions (id, question, a1, a2, a3, a4, answer, topic, difficulty)
+    query = """INSERT INTO questions (id, question, a1, a2, a3, a4, answer, topic)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-    params = (questionid, question, a1, a2, a3, a4, answer, topic, "medium")
+    params = (questionid, question, a1, a2, a3, a4, answer, topic)
     result = af_getdb(dbloc, query, params)
     
     # Check if insert was successful (af_getdb returns success message or error)
