@@ -333,14 +333,10 @@ def admin_createquestion():
     query = """INSERT INTO questions (id, question, a1, a2, a3, a4, answer, topic, difficulty)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
     params = (questionid, question, a1, a2, a3, a4, answer, topic, "medium")
-    af_getdb(dbloc, query, params)
+    result = af_getdb(dbloc, query, params)
     
-    # Verify the question was inserted
-    verify_query = "SELECT id FROM questions WHERE id = ?;"
-    verify_params = (questionid,)
-    verify_result = af_getdb(dbloc, verify_query, verify_params)
-    
-    if verify_result:
+    # Check if insert was successful (af_getdb returns success message or error)
+    if "successfully" in str(result).lower() or "rows affected" in str(result).lower():
         return jsonify({
             "status": "ok",
             "message": "Question created successfully",
@@ -349,7 +345,7 @@ def admin_createquestion():
     else:
         return jsonify({
             "status": "error",
-            "message": "Question creation failed - not found after insert"
+            "message": f"Question creation failed: {result}"
         })
 
 @ularq_blueprint.route('/api/admin/updatequestion', methods=['GET'])
