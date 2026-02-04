@@ -231,3 +231,181 @@ def apiular_submitanswer():
                 "message": f"No question available!"
             }
         )
+
+# Question Management API
+@ularq_blueprint.route('/api/admin/login', methods=['GET'])
+def admin_login():
+    password = af_requestget("password")
+    
+    # Simple password check (you can change this password)
+    correct_password = "ularadmin123"
+    
+    if password == correct_password:
+        return jsonify({
+            "status": "ok",
+            "message": "Login successful"
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Invalid password"
+        })
+
+@ularq_blueprint.route('/api/admin/getquestionlist', methods=['GET'])
+def admin_getquestionlist():
+    topic = af_requestget("topic")
+    
+    if topic and topic != "":
+        query = "SELECT * FROM questions WHERE topic = ? ORDER BY id;"
+        params = (topic,)
+    else:
+        query = "SELECT * FROM questions ORDER BY id;"
+        params = ()
+    
+    dbdata = af_getdb(dbloc, query, params)
+    return jsonify({
+        "status": "ok",
+        "questions": dbdata
+    })
+
+@ularq_blueprint.route('/api/admin/getquestion', methods=['GET'])
+def admin_getquestion():
+    questionid = af_requestget("id")
+    
+    if inputnotvalidated(questionid):
+        return jsonifynotvalid("id")
+    
+    query = "SELECT * FROM questions WHERE id = ?;"
+    params = (questionid,)
+    dbdata = af_getdb(dbloc, query, params)
+    
+    if dbdata:
+        return jsonify({
+            "status": "ok",
+            "question": dbdata[0]
+        })
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "Question not found"
+        })
+
+@ularq_blueprint.route('/api/admin/createquestion', methods=['GET'])
+def admin_createquestion():
+    questionid = af_requestget("id")
+    question = af_requestget("question")
+    a1 = af_requestget("a1")
+    a2 = af_requestget("a2")
+    a3 = af_requestget("a3")
+    a4 = af_requestget("a4")
+    answer = af_requestget("answer")
+    topic = af_requestget("topic")
+    
+    if inputnotvalidated(questionid):
+        return jsonifynotvalid("id")
+    if inputnotvalidated(question):
+        return jsonifynotvalid("question")
+    if inputnotvalidated(a1):
+        return jsonifynotvalid("a1")
+    if inputnotvalidated(a2):
+        return jsonifynotvalid("a2")
+    if inputnotvalidated(a3):
+        return jsonifynotvalid("a3")
+    if inputnotvalidated(a4):
+        return jsonifynotvalid("a4")
+    if inputnotvalidated(answer):
+        return jsonifynotvalid("answer")
+    if inputnotvalidated(topic):
+        return jsonifynotvalid("topic")
+    
+    # Check if question ID already exists
+    query = "SELECT id FROM questions WHERE id = ?;"
+    params = (questionid,)
+    existing = af_getdb(dbloc, query, params)
+    
+    if existing:
+        return jsonify({
+            "status": "error",
+            "message": "Question ID already exists"
+        })
+    
+    # Insert new question
+    query = """INSERT INTO questions (id, question, a1, a2, a3, a4, answer, topic, difficulty)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+    params = (questionid, question, a1, a2, a3, a4, answer, topic, "medium")
+    af_getdb(dbloc, query, params)
+    
+    return jsonify({
+        "status": "ok",
+        "message": "Question created successfully"
+    })
+
+@ularq_blueprint.route('/api/admin/updatequestion', methods=['GET'])
+def admin_updatequestion():
+    questionid = af_requestget("id")
+    question = af_requestget("question")
+    a1 = af_requestget("a1")
+    a2 = af_requestget("a2")
+    a3 = af_requestget("a3")
+    a4 = af_requestget("a4")
+    answer = af_requestget("answer")
+    topic = af_requestget("topic")
+    
+    if inputnotvalidated(questionid):
+        return jsonifynotvalid("id")
+    if inputnotvalidated(question):
+        return jsonifynotvalid("question")
+    if inputnotvalidated(a1):
+        return jsonifynotvalid("a1")
+    if inputnotvalidated(a2):
+        return jsonifynotvalid("a2")
+    if inputnotvalidated(a3):
+        return jsonifynotvalid("a3")
+    if inputnotvalidated(a4):
+        return jsonifynotvalid("a4")
+    if inputnotvalidated(answer):
+        return jsonifynotvalid("answer")
+    if inputnotvalidated(topic):
+        return jsonifynotvalid("topic")
+    
+    # Update question
+    query = """UPDATE questions 
+               SET question = ?, a1 = ?, a2 = ?, a3 = ?, a4 = ?, answer = ?, topic = ?
+               WHERE id = ?;"""
+    params = (question, a1, a2, a3, a4, answer, topic, questionid)
+    af_getdb(dbloc, query, params)
+    
+    return jsonify({
+        "status": "ok",
+        "message": "Question updated successfully"
+    })
+
+@ularq_blueprint.route('/api/admin/deletequestion', methods=['GET'])
+def admin_deletequestion():
+    questionid = af_requestget("id")
+    
+    if inputnotvalidated(questionid):
+        return jsonifynotvalid("id")
+    
+    # Delete question
+    query = "DELETE FROM questions WHERE id = ?;"
+    params = (questionid,)
+    af_getdb(dbloc, query, params)
+    
+    return jsonify({
+        "status": "ok",
+        "message": "Question deleted successfully"
+    })
+
+@ularq_blueprint.route('/api/admin/gettopics', methods=['GET'])
+def admin_gettopics():
+    query = "SELECT DISTINCT topic FROM questions ORDER BY topic;"
+    params = ()
+    dbdata = af_getdb(dbloc, query, params)
+    
+    topics = [row['topic'] for row in dbdata]
+    
+    return jsonify({
+        "status": "ok",
+        "topics": topics
+    })
