@@ -14,23 +14,8 @@ sudo systemctl start afwanapp
 sudo systemctl restart afwanapp
 """
 
-"""
-location /socket.io/ {
-    proxy_pass http://127.0.0.1:5002;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host $host;
-}
-
-pip install flask-socketio
-sudo systemctl restart afwanapp
-
-"""
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_socketio import SocketIO                                          # ← ADD
 from flask_page.utils.csv_helper import *
 from datetime import datetime
 import os
@@ -150,7 +135,6 @@ from flask_page.controllers.ulardashboard import ulardashboard_bp
 from flask_page.controllers.pointercalculator import pointercalculator_bp
 from flask_page.controllers.templatetest import templatetest_bp
 from flask_page.controllers.badminton import badminton_bp
-from flask_page.controllers.block_puzzle import block_puzzle_bp, init_block_puzzle_db, socketio as bp_socketio  # ← ADD
 
 # from flask_page.controllers.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -187,15 +171,10 @@ app.register_blueprint(ulardashboard_bp)
 app.register_blueprint(pointercalculator_bp)
 app.register_blueprint(templatetest_bp)
 app.register_blueprint(badminton_bp)
-app.register_blueprint(block_puzzle_bp)                                     # ← ADD
-
-# Init SocketIO — must be after all blueprints are registered
-bp_socketio.init_app(app, cors_allowed_origins='*', async_mode='threading') # ← ADD
 
 with app.app_context():
     init_all_ular_databases()  # ✅ Auto-initialize all Ular game databases
-    init_block_puzzle_db(app)  # ← ADD
 
 # Start the app using Uvicorn
 if __name__ == '__main__':
-    bp_socketio.run(app, host="0.0.0.0", port=5002, debug=True)             # ← CHANGED from app.run
+    app.run(host="0.0.0.0", port=5002, debug=True)
