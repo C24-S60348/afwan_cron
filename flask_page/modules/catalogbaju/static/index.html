@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catalog Slider</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark" id="brandShort">CB</span>
+        <span class="brand-text" id="brandName">Catalog Baju</span>
+      </div>
+      <button
+        class="header-info-btn"
+        type="button"
+        id="infoBtn"
+        aria-label="About & collection"
+      >
+        <span class="header-info-btn__title">Info</span>
+      </button>
+      <nav class="site-nav">
+        <button
+          class="cart-button"
+          type="button"
+          id="cartButton"
+          aria-label="View cart"
+        >
+          Cart <span class="cart-button__count" id="cartCount">0</span>
+        </button>
+      </nav>
+    </header>
+
+    <main class="page page--fullscreen">
+      <section id="catalog" class="catalog-section catalog-section--fullscreen">
+        <div class="catalog-tabs">
+          <button
+            class="catalog-tab catalog-tab--active"
+            type="button"
+            data-category="all"
+          >
+            All
+          </button>
+          <button class="catalog-tab" type="button" data-category="men">
+            Men
+          </button>
+          <button class="catalog-tab" type="button" data-category="women">
+            Women
+          </button>
+          <button class="catalog-tab" type="button" data-category="kids">
+            Kids
+          </button>
+          <button class="catalog-tab" type="button" data-category="unisex">
+            Unisex
+          </button>
+        </div>
+
+        <div class="slider">
+          <button class="slider-arrow slider-arrow--prev" aria-label="Previous item">
+            &#10094;
+          </button>
+
+          <div class="slider-window">
+            <div class="slider-track" id="sliderTrack">
+              <!-- Pages (2x3 grid each) filled by script -->
+            </div>
+            <div class="slider-dots" aria-label="Slider pagination"></div>
+          </div>
+
+          <button class="slider-arrow slider-arrow--next" aria-label="Next item">
+            &#10095;
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <div class="info-modal" id="infoModal" aria-hidden="true">
+      <div class="info-modal__backdrop"></div>
+      <div class="info-modal__dialog" role="dialog" aria-modal="true">
+        <header class="info-modal__header">
+          <h2 id="infoModalTitle">Info</h2>
+          <button type="button" class="info-modal__close" aria-label="Close">&times;</button>
+        </header>
+        <div class="info-modal__body">
+          <section class="info-modal__section">
+            <h3 id="infoModalSeasonTitle">New Season Collection</h3>
+            <p id="infoModalSeasonText">Quick view of all baju in the shop.</p>
+          </section>
+          <section class="info-modal__section">
+            <h3>About this catalog</h3>
+            <p id="infoModalAboutText">This catalog view is designed for admins and staff to quickly see all available baju in the shop.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-modal" id="itemModal" aria-hidden="true">
+      <div class="item-modal__backdrop"></div>
+      <div
+        class="item-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="itemModalTitle"
+      >
+        <header class="item-modal__header">
+          <div class="item-modal__title-block">
+            <span class="item-modal__price" id="itemModalPrice">RM 0</span>
+            <span class="item-modal__tag" id="itemModalTag">Category</span>
+          </div>
+          <button
+            class="item-modal__close"
+            type="button"
+            aria-label="Close item details"
+          >
+            &times;
+          </button>
+        </header>
+        <div class="item-modal__image-wrap">
+          <button type="button" class="item-modal__img-nav item-modal__img-nav--prev" id="itemModalImgPrev" aria-label="Previous image">&#10094;</button>
+          <img class="item-modal__image" id="itemModalImage" src="" alt="" />
+          <button type="button" class="item-modal__img-nav item-modal__img-nav--next" id="itemModalImgNext" aria-label="Next image">&#10095;</button>
+          <span class="item-modal__img-counter" id="itemModalImgCounter"></span>
+        </div>
+        <div class="item-modal__body">
+          <h2 class="item-modal__title" id="itemModalTitle">Item name</h2>
+          <p class="item-modal__description" id="itemModalDescription">
+            Description of the selected baju will appear here.
+          </p>
+          <div class="item-modal__sizes" id="itemModalSizes">
+            <span class="item-modal__sizes-label">Size</span>
+            <div class="item-modal__size-btns" id="itemModalSizeBtns"></div>
+          </div>
+          <div class="item-modal__actions">
+            <button type="button" class="btn btn--primary" id="itemModalAddToCart">Add to cart</button>
+            <button type="button" class="btn btn--secondary" id="itemModalAskOwner">Ask owner</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-modal" id="cartModal" aria-hidden="true">
+      <div class="cart-modal__backdrop"></div>
+      <div class="cart-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="cartModalTitle">
+        <header class="cart-modal__header">
+          <h2 id="cartModalTitle">Cart</h2>
+          <button type="button" class="cart-modal__close" aria-label="Close cart">&times;</button>
+        </header>
+        <div class="cart-modal__body">
+          <ul class="cart-modal__list" id="cartList"></ul>
+          <p class="cart-modal__empty" id="cartEmpty">Your cart is empty.</p>
+        </div>
+        <footer class="cart-modal__footer">
+          <button type="button" class="cart-modal__send-to-owner" id="cartSendToOwner">Send to owner</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="guest-cart-modal" id="guestCartModal" aria-hidden="true">
+      <div class="guest-cart-modal__backdrop"></div>
+      <div class="guest-cart-modal__dialog" role="dialog">
+        <header class="guest-cart-modal__header">
+          <h2 id="guestCartModalTitle">Guest cart</h2>
+          <button type="button" class="guest-cart-modal__close" aria-label="Close">&times;</button>
+        </header>
+        <div class="guest-cart-modal__body">
+          <ul class="guest-cart-modal__list" id="guestCartModalList"></ul>
+          <p class="guest-cart-modal__empty" id="guestCartModalEmpty">Cart is empty.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="owner-toggle-wrap">
+      <button type="button" class="owner-toggle" id="ownerToggle" aria-label="Toggle owner view">Owner</button>
+    </div>
+    <section class="owner-panel" id="ownerPanel" aria-hidden="true">
+      <div class="owner-panel__header">
+        <h2>Owner</h2>
+        <button type="button" class="owner-panel__back" id="ownerPanelBack">← Catalog</button>
+      </div>
+      <div class="owner-panel__tabs">
+        <button type="button" class="owner-tab owner-tab--active" data-panel="guests">Guest carts</button>
+        <button type="button" class="owner-tab" data-panel="requests">Ask owner</button>
+        <button type="button" class="owner-tab" data-panel="catalog">Catalog list</button>
+        <button type="button" class="owner-tab" data-panel="templates">Templates</button>
+      </div>
+      <div class="owner-panel__content" id="ownerPanelGuests">
+        <p class="owner-panel__section-label">Guests who have a cart</p>
+        <div class="owner-guests-grid" id="ownerGuestsGrid"></div>
+        <p class="owner-panel__empty" id="ownerGuestsEmpty">No guest carts yet.</p>
+      </div>
+      <div class="owner-panel__content owner-panel__content--hidden" id="ownerPanelRequests">
+        <div class="owner-panel__header-actions">
+          <button type="button" class="owner-panel__btn" id="ownerPanelAdd">Add</button>
+          <label class="owner-panel__btn owner-panel__btn--secondary"><input type="file" id="ownerPanelImport" accept=".csv" hidden /> Import CSV</label>
+          <button type="button" class="owner-panel__btn owner-panel__btn--secondary" id="ownerPanelExport">Export CSV</button>
+        </div>
+        <ul class="owner-panel__list" id="ownerPanelList"></ul>
+        <p class="owner-panel__empty" id="ownerPanelEmpty">No requests yet.</p>
+      </div>
+      <div class="owner-panel__content owner-panel__content--hidden" id="ownerPanelCatalog">
+        <div class="owner-panel__header-actions">
+          <button type="button" class="owner-panel__btn" id="catalogAddItem">Add item</button>
+          <label class="owner-panel__btn owner-panel__btn--secondary"><input type="file" id="catalogImportCsv" accept=".csv" hidden /> Import CSV</label>
+          <button type="button" class="owner-panel__btn owner-panel__btn--secondary" id="catalogExportCsv">Export CSV</button>
+          <button type="button" class="owner-panel__btn owner-panel__btn--secondary" id="catalogResetDefaults">Reset to default</button>
+        </div>
+        <ul class="owner-catalog-list" id="ownerCatalogList"></ul>
+      </div>
+      <div class="owner-panel__content owner-panel__content--hidden" id="ownerPanelTemplates">
+        <h3>Catalog templates</h3>
+        <p class="owner-panel__hint">Click template type, then click catalog items to add (title and sizes will appear).</p>
+        <div class="owner-templates__actions">
+          <button type="button" class="owner-panel__btn" id="templateBookPage">Book page (3 items)</button>
+          <button type="button" class="owner-panel__btn" id="templateCover">Cover / poster (1–3 items)</button>
+        </div>
+        <div class="template-picker-wrap" id="templatePickerWrap" style="display:none;">
+          <p class="template-picker-label" id="templatePickerLabel">Select up to 3 items (click catalog images):</p>
+          <div class="template-picker-grid" id="templatePickerGrid"></div>
+          <div class="template-selected" id="templateSelected"></div>
+          <button type="button" class="owner-panel__btn" id="templateBuildPreview">Build preview</button>
+        </div>
+        <div class="template-preview-wrap" id="templatePreviewWrap" style="display:none;">
+          <div class="template-preview" id="templatePreview"></div>
+          <div class="template-preview-actions">
+            <button type="button" class="owner-panel__btn" id="templateExportPng">Export PNG</button>
+            <button type="button" class="owner-panel__btn" id="templateExportPdf">Export PDF</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <span>&copy; <span id="year"></span> <span id="footerBrandName">Catalog Baju</span></span>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+  </html>
