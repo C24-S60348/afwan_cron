@@ -147,3 +147,22 @@ def ensure_tables(app_name: str, ddl_statements: list) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+def af_getdb(dbloc: str, query: str, params: tuple):
+    # Legacy helper used by Ular game db_init_helper.
+    # Opens a direct connection to dbloc path, executes one SQL statement,
+    # returns list of dicts for SELECT queries, empty list otherwise.
+    db_dir = os.path.dirname(dbloc)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+    conn = sqlite3.connect(dbloc)
+    conn.row_factory = sqlite3.Row
+    try:
+        cursor = conn.execute(query, params)
+        if cursor.description:
+            return [dict(r) for r in cursor.fetchall()]
+        conn.commit()
+        return []
+    finally:
+        conn.close()
