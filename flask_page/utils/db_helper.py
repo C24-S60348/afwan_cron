@@ -1,85 +1,67 @@
-#utils/db_helper.py
+"""
+Shared SQLite utility for all afwan_cron modules.
+
+Each module gets its own .db file in afwan_cron/db/.
+Table naming convention: projectname_tablename_db
+
+Usage in any module:
+
+    from flask_page.utils.db_helper import get_connection, ensure_tables
+
+    APP_NAME = 'myapp'
+
+    def init_myapp_db():
+        ensure_tables(APP_NAME, [
+            '''CREATE TABLE IF NOT EXISTS myapp_things_db (
+                id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )'''
+        ])
+
+    # In a route:
+    with get_connection(APP_NAME) as conn:
+        rows = conn.execute('SELECT * FROM myapp_things_db').fetchall()
+"""
 import os
-from flask import jsonify
 import sqlite3
-from flask import Flask, g
 
-"""
-Example:
-
-dbloc = "static/db/habit/mydb.db"
-
-query - "SELECT * FROM habit where deleted_at IS NULL;"
-params - ()
-
-query - "INSERT INTO habit (name, value, created_at) VALUES (?, ?, ?)"
-params - ("ayam","ikan", datetime.now())
-
-query = "UPDATE habit SET username = ? WHERE id = ?"
-params = ("ayam", 4)
-
-query = "UPDATE habit SET deleted_at = ? WHERE id = ?"
-params = (datetime.now(),)
+# Resolves to afwan_cron/db/ regardless of where the app is run from
+_PROJECT_ROOT = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+_DB_DIR = os.path.join(_PROJECT_ROOT, 'db')
 
 
-query = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"
-params = ()
+def get_db_path(app_name: str) -> str:
+    """Return absolute path to <app_name>.db inside afwan_cron/db/."""
+    return os.path.join(_DB_DIR, f'{app_name}.db')
 
 
-
-"""
-
-def af_connectdb(dbloc=""):
-    if not os.path.isfile(dbloc):
-        raise FileNotFoundError(f"The database file at '{dbloc}' does not exist.")
-    
-    conn = sqlite3.connect(dbloc)
-    conn.row_factory = sqlite3.Row  # Optional: Returns results as dictionaries
+def get_connection(app_name: str) -> sqlite3.Connection:
+    """
+    Open a SQLite connection for the given app.
+    Creates db/ directory and the .db file if they don't exist.
+    WAL mode is enabled for better concurrent-read performance.
+    """
+    os.makedirs(_DB_DIR, exist_ok=True)
+    conn = sqlite3.connect(get_db_path(app_name))
+    conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA foreign_keys=ON')
     return conn
 
-def af_getdb(dbloc="static/db/habit/mydb.db", query="SELECT * FROM users;", params=("ikan",)):
-    conn = af_connectdb(dbloc)
-    cursor = conn.cursor()
+
+def ensure_tables(app_name: str, ddl_statements: list) -> None:
+    """
+    Run each DDL statement once at startup.
+    Idempotent — safe to call every time the server starts.
+    Each statement should be a CREATE TABLE IF NOT EXISTS ...
+    """
+    os.makedirs(_DB_DIR, exist_ok=True)
+    conn = get_connection(app_name)
     try:
-        cursor.execute(query, params)
+        for stmt in ddl_statements:
+            conn.execute(stmt)
         conn.commit()
-        if query.strip().upper().startswith("SELECT") or query.strip().upper().startswith("PRAGMA"):
-            dbdata = cursor.fetchall()
-            results = [dict(row) for row in dbdata] if dbdata else []
-            return results
-        else:
-            conn.commit()  # Commit only if it's not a SELECT query
-            return f"Query executed successfully. Rows affected: {cursor.rowcount}"
-    except sqlite3.Error as e:
-        #todo - telegram message here?
-        return f"An error occurred: {e.args[0]}"
     finally:
         conn.close()
-
-def af_getdb2(dblog, query, params):
-    # Connect to the SQLite database and execute the query
-    conn = sqlite3.connect(dblog)
-    cursor = conn.cursor()
-    cursor.execute(query, params)
-    data = cursor.fetchall()
-
-    # Fetch the column names to use as keys in your JSON
-    columns = [description[0] for description in cursor.description]
-    conn.close()
-    
-    return columns, data
-
-def af_processdb(data, defaultvalue=""):
-    processed_data = []
-    for row in data:
-        processed_row = {k: (v if v is not None else defaultvalue) for k, v in row.items()}
-        processed_data.append(processed_row)
-    return processed_data
-
-def convert_to_json(dbdata):
-    if dbdata:
-        # Create a list of dictionaries from the rows
-        results = [dict(row) for row in dbdata]
-        return jsonify(results)  # Directly use jsonify for proper JSON response in Flask
-    else:
-        return jsonify([])  # Return an empty list as JSON

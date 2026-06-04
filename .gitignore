@@ -22,3 +22,6 @@ pelajar_data.xlsx
 pelajar_data_2.xlsx
 static/soalanDBresult.csv
 static/soalanDBresult.csv
+
+# SQLite databases created at runtime
+db/
