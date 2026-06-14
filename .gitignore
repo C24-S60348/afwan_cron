@@ -27,3 +27,4 @@ static/soalanDBresult.csv
 db/
 flask_page/modules/catalogbaju/data/catalog_items.json
 flask_page/modules/catalogbaju/data/guest_carts.json
+flask_page/modules/ar3d/instance/ar3d.sqlite3
