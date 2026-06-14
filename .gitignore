@@ -25,3 +25,5 @@ static/soalanDBresult.csv
 
 # SQLite databases created at runtime
 db/
+flask_page/modules/catalogbaju/data/catalog_items.json
+flask_page/modules/catalogbaju/data/guest_carts.json
