@@ -138,6 +138,7 @@ from flask_page.controllers.badminton import badminton_bp
 from flask_page.modules.block_puzzle import block_puzzle_bp, init_block_puzzle_db
 from flask_page.modules.kadkahwin import kadkahwin_bp as kadkahwin_bp_module
 from flask_page.modules.catalogbaju import catalogbaju_bp, init_catalogbaju_db
+from flask_page.modules.ar3d import ar3d_bp, init_ar3d
 
 # from flask_page.controllers.publicvar import last_run_timesitest_bp)
 app.register_blueprint(apitest_bp)
@@ -177,11 +178,13 @@ app.register_blueprint(badminton_bp)
 app.register_blueprint(block_puzzle_bp)
 app.register_blueprint(kadkahwin_bp_module)
 app.register_blueprint(catalogbaju_bp)
+app.register_blueprint(ar3d_bp)
 
 with app.app_context():
     init_all_ular_databases()   # ✅ Ular game databases
     init_block_puzzle_db(app)   # ✅ Block Puzzle database
     init_catalogbaju_db()       # ✅ Catalog Baju database (catalogbaju.db)
+    init_ar3d(app)              # ✅ AR3D database and uploads
 
 # Start the app using Uvicorn
 if __name__ == '__main__':

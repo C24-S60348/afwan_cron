@@ -51,11 +51,29 @@ CREATE INDEX IF NOT EXISTS idx_attempts_question ON answer_attempts (question_id
 CREATE INDEX IF NOT EXISTS idx_attempts_answered_at ON answer_attempts (answered_at);
 CREATE INDEX IF NOT EXISTS idx_notes_order ON notes (sort_order, id);
 
-INSERT OR IGNORE INTO topics (name, description) VALUES
-    ('Maths for Primary Students', 'Primary-level learning questions'),
-    ('Maths for Secondary Students', 'Secondary-level learning questions'),
-    ('Maths for Higher Education', 'Higher education learning questions'),
-    ('Tourism Melaka', 'Questions about Melaka tourism and heritage');
+INSERT INTO topics (name, description)
+SELECT 'Maths for Primary Students', 'Primary-level learning questions'
+WHERE NOT EXISTS (
+    SELECT 1 FROM topics WHERE name = 'Maths for Primary Students'
+);
+
+INSERT INTO topics (name, description)
+SELECT 'Maths for Secondary Students', 'Secondary-level learning questions'
+WHERE NOT EXISTS (
+    SELECT 1 FROM topics WHERE name = 'Maths for Secondary Students'
+);
+
+INSERT INTO topics (name, description)
+SELECT 'Maths for Higher Education', 'Higher education learning questions'
+WHERE NOT EXISTS (
+    SELECT 1 FROM topics WHERE name = 'Maths for Higher Education'
+);
+
+INSERT INTO topics (name, description)
+SELECT 'Tourism Melaka', 'Questions about Melaka tourism and heritage'
+WHERE NOT EXISTS (
+    SELECT 1 FROM topics WHERE name = 'Tourism Melaka'
+);
 
 INSERT INTO notes (emoji, title, points_json, external_url, sort_order)
 SELECT

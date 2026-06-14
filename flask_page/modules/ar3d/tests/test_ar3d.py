@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from app import create_app
+from ar3d.db import get_db, init_db
 
 
 class Ar3dApiTestCase(unittest.TestCase):
@@ -14,10 +15,10 @@ class Ar3dApiTestCase(unittest.TestCase):
             {
                 "TESTING": True,
                 "SECRET_KEY": "test-secret",
-                "DATABASE": str(root / "test.sqlite3"),
-                "UPLOAD_FOLDER": str(root / "uploads"),
-                "ADMIN_PASSWORD": "lecturer-password",
-                "ADMIN_API_KEY": "test-api-key",
+                "AR3D_DATABASE": str(root / "test.sqlite3"),
+                "AR3D_UPLOAD_FOLDER": str(root / "uploads"),
+                "AR3D_ADMIN_PASSWORD": "lecturer-password",
+                "AR3D_ADMIN_API_KEY": "test-api-key",
             }
         )
         self.client = self.app.test_client()
@@ -50,6 +51,17 @@ class Ar3dApiTestCase(unittest.TestCase):
         asset_response = self.client.get("/ar3d-static/admin.css")
         self.assertEqual(asset_response.status_code, 200)
         asset_response.close()
+
+    def test_database_initialization_is_idempotent(self):
+        with self.app.app_context():
+            before = get_db().execute(
+                "SELECT seq FROM sqlite_sequence WHERE name = 'topics'"
+            ).fetchone()["seq"]
+            init_db()
+            after = get_db().execute(
+                "SELECT seq FROM sqlite_sequence WHERE name = 'topics'"
+            ).fetchone()["seq"]
+        self.assertEqual(after, before)
 
     def test_admin_write_requires_authentication(self):
         response = self.client.post("/api/ar3d/admin/questions", json={})

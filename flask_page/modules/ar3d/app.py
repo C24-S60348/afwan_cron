@@ -13,14 +13,14 @@ def create_app(test_config=None):
 
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("FLASK_SECRET_KEY", "development-only-secret"),
-        DATABASE=os.environ.get(
+        AR3D_DATABASE=os.environ.get(
             "AR3D_DATABASE", str(Path(app.instance_path) / "ar3d.sqlite3")
         ),
-        UPLOAD_FOLDER=os.environ.get(
+        AR3D_UPLOAD_FOLDER=os.environ.get(
             "AR3D_UPLOAD_FOLDER", str(server_dir / "uploads")
         ),
-        ADMIN_PASSWORD=os.environ.get("AR3D_ADMIN_PASSWORD", "change-me"),
-        ADMIN_API_KEY=os.environ.get("AR3D_ADMIN_API_KEY", "change-me"),
+        AR3D_ADMIN_PASSWORD=os.environ.get("AR3D_ADMIN_PASSWORD", "change-me"),
+        AR3D_ADMIN_API_KEY=os.environ.get("AR3D_ADMIN_API_KEY", "change-me"),
         MAX_CONTENT_LENGTH=5 * 1024 * 1024,
     )
 
@@ -28,7 +28,7 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
-    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
+    Path(app.config["AR3D_UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
 
     init_database(app)
     app.register_blueprint(ar3d)

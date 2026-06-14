@@ -7,18 +7,18 @@ from flask import current_app, g
 
 
 def get_db():
-    if "db" not in g:
-        g.db = sqlite3.connect(
-            current_app.config["DATABASE"],
+    if "ar3d_db" not in g:
+        g.ar3d_db = sqlite3.connect(
+            current_app.config["AR3D_DATABASE"],
             detect_types=sqlite3.PARSE_DECLTYPES,
         )
-        g.db.row_factory = sqlite3.Row
-        g.db.execute("PRAGMA foreign_keys = ON")
-    return g.db
+        g.ar3d_db.row_factory = sqlite3.Row
+        g.ar3d_db.execute("PRAGMA foreign_keys = ON")
+    return g.ar3d_db
 
 
 def close_db(_error=None):
-    db = g.pop("db", None)
+    db = g.pop("ar3d_db", None)
     if db is not None:
         db.close()
 

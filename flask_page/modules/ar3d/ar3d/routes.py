@@ -29,8 +29,8 @@ ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 def _admin_authorized():
     supplied_key = request.headers.get("X-Admin-Key", "")
     supplied_password = request.headers.get("X-Admin-Password", "")
-    expected_key = current_app.config["ADMIN_API_KEY"]
-    expected_password = current_app.config["ADMIN_PASSWORD"]
+    expected_key = current_app.config["AR3D_ADMIN_API_KEY"]
+    expected_password = current_app.config["AR3D_ADMIN_PASSWORD"]
     return session.get("ar3d_admin") is True or (
         bool(supplied_key)
         and bool(expected_key)
@@ -62,14 +62,14 @@ def _save_image(file):
     if extension not in ALLOWED_IMAGE_EXTENSIONS:
         raise ValueError("Image must be PNG, JPG, JPEG, GIF, or WEBP")
     filename = f"{uuid.uuid4().hex}.{extension}"
-    file.save(Path(current_app.config["UPLOAD_FOLDER"]) / filename)
+    file.save(Path(current_app.config["AR3D_UPLOAD_FOLDER"]) / filename)
     return filename
 
 
 def _delete_image(filename):
     if not filename:
         return
-    path = Path(current_app.config["UPLOAD_FOLDER"]) / filename
+    path = Path(current_app.config["AR3D_UPLOAD_FOLDER"]) / filename
     if path.is_file():
         path.unlink()
 
@@ -249,7 +249,7 @@ def list_notes():
 def api_admin_login():
     data = request.get_json(silent=True) or {}
     supplied = str(data.get("password", ""))
-    expected = current_app.config["ADMIN_PASSWORD"]
+    expected = current_app.config["AR3D_ADMIN_PASSWORD"]
     if supplied and secrets.compare_digest(supplied, expected):
         return jsonify({"authenticated": True})
     return jsonify({"error": "Incorrect lecturer password"}), 401
@@ -524,14 +524,14 @@ def api_delete_question(question_id):
 
 @ar3d.get("/uploads/ar3d/<path:filename>")
 def uploaded_image(filename):
-    return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
+    return send_from_directory(current_app.config["AR3D_UPLOAD_FOLDER"], filename)
 
 
 @ar3d.route("/admin/ar3d/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
         supplied = request.form.get("password", "")
-        expected = current_app.config["ADMIN_PASSWORD"]
+        expected = current_app.config["AR3D_ADMIN_PASSWORD"]
         if supplied and secrets.compare_digest(supplied, expected):
             session["ar3d_admin"] = True
             return redirect(url_for("ar3d.admin_dashboard"))
@@ -541,7 +541,7 @@ def admin_login():
 
 @ar3d.post("/admin/ar3d/logout")
 def admin_logout():
-    session.clear()
+    session.pop("ar3d_admin", None)
     return redirect(url_for("ar3d.admin_login"))
 
 
