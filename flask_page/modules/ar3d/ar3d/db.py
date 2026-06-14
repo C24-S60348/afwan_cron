@@ -1,0 +1,76 @@
+import json
+import sqlite3
+from pathlib import Path
+
+import click
+from flask import current_app, g
+
+
+def get_db():
+    if "db" not in g:
+        g.db = sqlite3.connect(
+            current_app.config["DATABASE"],
+            detect_types=sqlite3.PARSE_DECLTYPES,
+        )
+        g.db.row_factory = sqlite3.Row
+        g.db.execute("PRAGMA foreign_keys = ON")
+    return g.db
+
+
+def close_db(_error=None):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+
+def init_db():
+    schema_path = Path(__file__).with_name("schema.sql")
+    db = get_db()
+    db.executescript(schema_path.read_text(encoding="utf-8"))
+    _migrate_questions_to_typed_answers(db)
+    db.commit()
+
+
+def _migrate_questions_to_typed_answers(db):
+    columns = {
+        row["name"] for row in db.execute("PRAGMA table_info(questions)").fetchall()
+    }
+    if "correct_answer" not in columns:
+        db.execute("ALTER TABLE questions ADD COLUMN correct_answer TEXT")
+    if "accepted_answers_json" not in columns:
+        db.execute("ALTER TABLE questions ADD COLUMN accepted_answers_json TEXT")
+    if "options_json" not in columns or "correct_index" not in columns:
+        return
+
+    legacy_rows = db.execute(
+        """
+        SELECT id, options_json, correct_index
+        FROM questions
+        WHERE correct_answer IS NULL OR accepted_answers_json IS NULL
+        """
+    ).fetchall()
+    for row in legacy_rows:
+        options = json.loads(row["options_json"]) if row["options_json"] else []
+        index = row["correct_index"] or 0
+        answer = str(options[index]).strip() if 0 <= index < len(options) else ""
+        db.execute(
+            """
+            UPDATE questions
+            SET correct_answer = ?, accepted_answers_json = ?
+            WHERE id = ?
+            """,
+            (answer, json.dumps([answer] if answer else []), row["id"]),
+        )
+
+
+@click.command("init-db")
+def init_db_command():
+    init_db()
+    click.echo("Initialized the AR3D database.")
+
+
+def init_app(app):
+    app.teardown_appcontext(close_db)
+    app.cli.add_command(init_db_command)
+    with app.app_context():
+        init_db()

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AR3D Admin{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('ar3d.static', filename='admin.css') }}">
+</head>
+<body>
+  <header>
+    <a class="brand" href="{{ url_for('ar3d.admin_dashboard') }}">i.-GB AR3D</a>
+    {% if session.get('ar3d_admin') %}
+      <nav>
+        <a href="{{ url_for('ar3d.admin_dashboard') }}">Questions</a>
+        <a href="{{ url_for('ar3d.admin_responses') }}">Responses</a>
+        <form method="post" action="{{ url_for('ar3d.admin_logout') }}">
+          <button class="link-button" type="submit">Log out</button>
+        </form>
+      </nav>
+    {% endif %}
+  </header>
+  <main>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

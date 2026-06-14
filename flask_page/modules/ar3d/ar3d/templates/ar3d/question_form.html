@@ -1,0 +1,41 @@
+{% extends "ar3d/base.html" %}
+{% block title %}{{ 'Edit' if question else 'New' }} Question{% endblock %}
+{% block content %}
+<section class="form-card">
+  <h1>{{ 'Edit' if question else 'Create' }} Question</h1>
+  <form method="post" enctype="multipart/form-data">
+    <label>Topic
+      <select name="topic_id" required>
+        {% for topic in topics %}
+          <option value="{{ topic.id }}" {% if question and question.topic_id == topic.id %}selected{% endif %}>{{ topic.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Question
+      <textarea name="prompt" rows="4" required>{{ question.prompt if question else '' }}</textarea>
+    </label>
+    <label>Accepted answers, one per line
+      <textarea name="accepted_answers" rows="6" required>{{ question.accepted_answers|join('\n') if question else '' }}</textarea>
+      <small>
+        The first line is displayed as the correct answer. Matching ignores
+        letter case and extra spaces. Equivalent numbers such as 0.5, 0.50,
+        and 1/2 are accepted automatically.
+      </small>
+    </label>
+    <label>Question image (optional)
+      <input type="file" name="image" accept=".png,.jpg,.jpeg,.gif,.webp">
+    </label>
+    {% if question and question.image_url %}
+      <img class="preview" src="{{ question.image_url }}" alt="Current question image">
+    {% endif %}
+    <label class="checkbox">
+      <input type="checkbox" name="is_active" value="1" {% if not question or question.is_active %}checked{% endif %}>
+      Active
+    </label>
+    <div class="form-actions">
+      <button type="submit">Save question</button>
+      <a href="{{ url_for('ar3d.admin_dashboard') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

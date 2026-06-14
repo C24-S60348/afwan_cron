@@ -1,0 +1,27 @@
+{% extends "ar3d/base.html" %}
+{% block title %}Responses | AR3D Admin{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><h1>Learner Responses</h1><p>Every row preserves the question and correct answer as they were when answered.</p></div>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Time</th><th>Name</th><th>Topic</th><th>Question</th><th>Submitted</th><th>Correct</th><th>Result</th></tr></thead>
+    <tbody>
+    {% for attempt in attempts %}
+      <tr>
+        <td>{{ attempt.answered_at }}</td>
+        <td>{{ attempt.player_name }}</td>
+        <td>{{ attempt.topic_name }}</td>
+        <td>{{ attempt.question_text }}</td>
+        <td>{{ attempt.selected_answer }}</td>
+        <td>{{ attempt.correct_answer }}</td>
+        <td><span class="status {{ 'active' if attempt.is_correct else 'wrong' }}">{{ 'Correct' if attempt.is_correct else 'Wrong' }}</span></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7">No responses yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

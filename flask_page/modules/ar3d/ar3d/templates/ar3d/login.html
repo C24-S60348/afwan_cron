@@ -1,0 +1,14 @@
+{% extends "ar3d/base.html" %}
+{% block title %}Lecturer Login{% endblock %}
+{% block content %}
+<section class="login-card">
+  <h1>Lecturer Login</h1>
+  <p>Manage app questions and review learner responses.</p>
+  <form method="post">
+    <label>Password
+      <input type="password" name="password" required autofocus>
+    </label>
+    <button type="submit">Log in</button>
+  </form>
+</section>
+{% endblock %}

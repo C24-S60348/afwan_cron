@@ -1,0 +1,43 @@
+{% extends "ar3d/base.html" %}
+{% block title %}Questions | AR3D Admin{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <h1>Question Management</h1>
+    <p>Create text or image questions served to the mobile app.</p>
+  </div>
+  <a class="button" href="{{ url_for('ar3d.admin_new_question') }}">New question</a>
+</div>
+<section class="stats">
+  <article><strong>{{ questions|length }}</strong><span>Questions</span></article>
+  <article><strong>{{ stats['total'] }}</strong><span>Answers</span></article>
+  <article><strong>{{ stats['players'] }}</strong><span>Players</span></article>
+  <article><strong>{{ stats['correct'] }}</strong><span>Correct</span></article>
+</section>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>Question</th><th>Topic</th><th>Image</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for question in questions %}
+      <tr>
+        <td>{{ question.id }}</td>
+        <td>{{ question.prompt }}</td>
+        <td>{{ question.topic_name }}</td>
+        <td>{% if question.image_url %}<img class="thumbnail" src="{{ question.image_url }}" alt="Question image">{% else %}-{% endif %}</td>
+        <td><span class="status {{ 'active' if question.is_active else 'archived' }}">{{ 'Active' if question.is_active else 'Archived' }}</span></td>
+        <td class="actions">
+          <a href="{{ url_for('ar3d.admin_edit_question', question_id=question.id) }}">Edit</a>
+          {% if question.is_active %}
+          <form method="post" action="{{ url_for('ar3d.admin_archive_question', question_id=question.id) }}">
+            <button class="danger-link" type="submit">Archive</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6">No questions yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
