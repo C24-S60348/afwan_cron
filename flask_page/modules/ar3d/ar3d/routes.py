@@ -447,22 +447,45 @@ def api_create_question():
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     db = get_db()
-    cursor = db.execute(
-        """
-        INSERT INTO questions
-            (topic_id, prompt, image_filename, correct_answer,
-             accepted_answers_json, is_active)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
-            topic_id,
-            prompt,
-            image_filename,
-            accepted_answers[0],
-            json.dumps(accepted_answers),
-            int(is_active),
-        ),
-    )
+    question_columns = {
+        row["name"] for row in db.execute("PRAGMA table_info(questions)").fetchall()
+    }
+    if {"options_json", "correct_index"} <= question_columns:
+        cursor = db.execute(
+            """
+            INSERT INTO questions
+                (topic_id, prompt, image_filename, options_json, correct_index,
+                 correct_answer, accepted_answers_json, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                topic_id,
+                prompt,
+                image_filename,
+                json.dumps(accepted_answers),
+                0,
+                accepted_answers[0],
+                json.dumps(accepted_answers),
+                int(is_active),
+            ),
+        )
+    else:
+        cursor = db.execute(
+            """
+            INSERT INTO questions
+                (topic_id, prompt, image_filename, correct_answer,
+                 accepted_answers_json, is_active)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                topic_id,
+                prompt,
+                image_filename,
+                accepted_answers[0],
+                json.dumps(accepted_answers),
+                int(is_active),
+            ),
+        )
     db.commit()
     row = _question_query("WHERE q.id = ?", (cursor.lastrowid,)).fetchone()
     return jsonify({"question": _question_to_dict(row)}), 201
