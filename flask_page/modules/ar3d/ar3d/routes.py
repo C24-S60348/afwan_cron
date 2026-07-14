@@ -24,6 +24,7 @@ from . import ar3d
 from .db import QUESTION_LEVELS, get_db
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+AR3D_API_VERSION = "2026.07.14.1"
 
 
 def _admin_authorized():
@@ -202,7 +203,9 @@ def answers_match(submitted, accepted):
 
 @ar3d.get("/api/ar3d/health")
 def health():
-    return jsonify({"status": "ok", "service": "ar3d"})
+    return jsonify(
+        {"status": "ok", "service": "ar3d", "version": AR3D_API_VERSION}
+    )
 
 
 @ar3d.get("/api/ar3d/topics")
