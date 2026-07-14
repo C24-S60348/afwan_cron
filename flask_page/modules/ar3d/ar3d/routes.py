@@ -21,7 +21,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 
 from . import ar3d
-from .db import get_db
+from .db import QUESTION_LEVELS, get_db
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
@@ -168,10 +168,15 @@ def _parse_question_payload():
         raise ValueError("Question text is required")
     if not accepted_answers:
         raise ValueError("At least one accepted answer is required")
+    level = str(data.get("level", "") or "").strip().upper() or None
+    if level and level not in QUESTION_LEVELS:
+        raise ValueError(
+            "level must be one of: " + ", ".join(QUESTION_LEVELS)
+        )
     topic = get_db().execute("SELECT id FROM topics WHERE id = ?", (topic_id,)).fetchone()
     if topic is None:
         raise ValueError("Unknown topic_id")
-    return topic_id, prompt, accepted_answers, is_active
+    return topic_id, prompt, accepted_answers, is_active, level
 
 
 def _normalized_text(value):
@@ -211,15 +216,17 @@ def list_topics():
 @ar3d.get("/api/ar3d/questions")
 def list_questions():
     topic = request.args.get("topic", "").strip()
+    level = request.args.get("level", "").strip().upper()
+    where = "WHERE q.is_active = 1 AND t.is_active = 1"
+    params = []
     if topic:
-        rows = _question_query(
-            "WHERE q.is_active = 1 AND t.is_active = 1 AND t.name = ? ORDER BY q.id",
-            (topic,),
-        ).fetchall()
-    else:
-        rows = _question_query(
-            "WHERE q.is_active = 1 AND t.is_active = 1 ORDER BY t.name, q.id"
-        ).fetchall()
+        where += " AND t.name = ?"
+        params.append(topic)
+    if level:
+        where += " AND q.level = ?"
+        params.append(level)
+    order = " ORDER BY q.id" if topic else " ORDER BY t.name, q.id"
+    rows = _question_query(where + order, tuple(params)).fetchall()
     return jsonify({"questions": [_question_to_public_dict(row) for row in rows]})
 
 
@@ -442,7 +449,9 @@ def record_answer():
 @admin_required
 def api_create_question():
     try:
-        topic_id, prompt, accepted_answers, is_active = _parse_question_payload()
+        topic_id, prompt, accepted_answers, is_active, level = (
+            _parse_question_payload()
+        )
         image_filename = _save_image(request.files.get("image"))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
@@ -454,13 +463,14 @@ def api_create_question():
         cursor = db.execute(
             """
             INSERT INTO questions
-                (topic_id, prompt, image_filename, options_json, correct_index,
-                 correct_answer, accepted_answers_json, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (topic_id, prompt, level, image_filename, options_json,
+                 correct_index, correct_answer, accepted_answers_json, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 topic_id,
                 prompt,
+                level,
                 image_filename,
                 json.dumps(accepted_answers),
                 0,
@@ -473,13 +483,14 @@ def api_create_question():
         cursor = db.execute(
             """
             INSERT INTO questions
-                (topic_id, prompt, image_filename, correct_answer,
+                (topic_id, prompt, level, image_filename, correct_answer,
                  accepted_answers_json, is_active)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 topic_id,
                 prompt,
+                level,
                 image_filename,
                 accepted_answers[0],
                 json.dumps(accepted_answers),
@@ -500,24 +511,29 @@ def api_update_question(question_id):
     if existing is None:
         return jsonify({"error": "Question not found"}), 404
     try:
-        topic_id, prompt, accepted_answers, is_active = _parse_question_payload()
+        topic_id, prompt, accepted_answers, is_active, level = (
+            _parse_question_payload()
+        )
         new_image = _save_image(request.files.get("image"))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
+    if level is None and "level" in existing.keys():
+        level = existing["level"]
     image_filename = new_image or existing["image_filename"]
     if new_image:
         _delete_image(existing["image_filename"])
     db = get_db()
     db.execute(
         """
-        UPDATE questions SET topic_id = ?, prompt = ?, image_filename = ?,
-            correct_answer = ?, accepted_answers_json = ?, is_active = ?,
-            updated_at = CURRENT_TIMESTAMP
+        UPDATE questions SET topic_id = ?, prompt = ?, level = ?,
+            image_filename = ?, correct_answer = ?, accepted_answers_json = ?,
+            is_active = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """,
         (
             topic_id,
             prompt,
+            level,
             image_filename,
             accepted_answers[0],
             json.dumps(accepted_answers),

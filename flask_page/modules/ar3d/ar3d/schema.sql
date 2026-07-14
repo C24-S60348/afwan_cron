@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS questions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     topic_id INTEGER NOT NULL,
     prompt TEXT NOT NULL,
+    level TEXT,
     image_filename TEXT,
     correct_answer TEXT NOT NULL,
     accepted_answers_json TEXT NOT NULL,
