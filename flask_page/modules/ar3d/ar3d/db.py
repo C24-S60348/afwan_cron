@@ -31,6 +31,7 @@ def init_db():
     db.executescript(schema_path.read_text(encoding="utf-8"))
     _migrate_questions_to_typed_answers(db)
     _migrate_questions_add_level(db)
+    _migrate_questions_add_place_and_choices(db)
     db.commit()
 
 
@@ -88,6 +89,21 @@ def _migrate_questions_add_level(db):
                     (level, prompt[len(prefix):].strip(), row["id"]),
                 )
                 break
+
+
+def _migrate_questions_add_place_and_choices(db):
+    columns = {
+        row["name"] for row in db.execute("PRAGMA table_info(questions)").fetchall()
+    }
+    if "place" not in columns:
+        db.execute("ALTER TABLE questions ADD COLUMN place TEXT")
+    # Deliberately not options_json: legacy databases reused that column to hold
+    # accepted answers, so multiple-choice options get their own column.
+    if "choices_json" not in columns:
+        db.execute(
+            "ALTER TABLE questions ADD COLUMN choices_json TEXT NOT NULL DEFAULT '[]'"
+        )
+    db.execute("CREATE INDEX IF NOT EXISTS idx_questions_place ON questions (place)")
 
 
 @click.command("init-db")

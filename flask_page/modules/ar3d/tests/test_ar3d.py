@@ -47,7 +47,7 @@ class Ar3dApiTestCase(unittest.TestCase):
     def test_health_and_topics(self):
         health = self.client.get("/api/ar3d/health")
         self.assertEqual(health.status_code, 200)
-        self.assertEqual(health.get_json()["version"], "2026.07.14.1")
+        self.assertEqual(health.get_json()["version"], "2026.07.28.1")
         response = self.client.get("/api/ar3d/topics")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.get_json()["topics"]), 4)
@@ -231,6 +231,143 @@ class Ar3dApiTestCase(unittest.TestCase):
         self.assertEqual(created.status_code, 201)
         question = created.get_json()["question"]
         self.assertEqual(question["accepted_answers"], ["0.5", "1/2"])
+
+    def test_question_place_and_options_round_trip(self):
+        created = self.client.post(
+            "/api/ar3d/admin/questions",
+            headers=self.headers,
+            json={
+                "topic_id": 4,
+                "prompt": "Siapa membina Kota A'Famosa?",
+                "accepted_answers": ["Portugis"],
+                "options": ["Belanda", "Portugis", "Inggeris", "Jepun"],
+                "place": "kota-a-famosa",
+                "is_active": True,
+            },
+        )
+        self.assertEqual(created.status_code, 201)
+        question = created.get_json()["question"]
+        self.assertEqual(question["place"], "kota-a-famosa")
+        self.assertEqual(
+            question["options"], ["Belanda", "Portugis", "Inggeris", "Jepun"]
+        )
+
+        other = self.client.post(
+            "/api/ar3d/admin/questions",
+            headers=self.headers,
+            json={
+                "topic_id": 4,
+                "prompt": "Di mana Menara Taming Sari?",
+                "accepted_answers": ["Melaka"],
+                "options": ["Melaka", "Johor"],
+                "place": "menara-taming-sari",
+            },
+        )
+        self.assertEqual(other.status_code, 201)
+
+        filtered = self.client.get(
+            "/api/ar3d/questions?place=kota-a-famosa"
+        ).get_json()["questions"]
+        self.assertEqual([q["place"] for q in filtered], ["kota-a-famosa"])
+
+        # Omitted fields keep their stored values on update.
+        updated = self.client.put(
+            f"/api/ar3d/admin/questions/{question['id']}",
+            headers=self.headers,
+            json={
+                "topic_id": 4,
+                "prompt": "Siapa membina Kota A'Famosa di Melaka?",
+                "accepted_answers": ["Portugis"],
+            },
+        )
+        self.assertEqual(updated.status_code, 200)
+        after = updated.get_json()["question"]
+        self.assertEqual(after["place"], "kota-a-famosa")
+        self.assertEqual(
+            after["options"], ["Belanda", "Portugis", "Inggeris", "Jepun"]
+        )
+
+    def test_question_options_validation(self):
+        too_few = self.client.post(
+            "/api/ar3d/admin/questions",
+            headers=self.headers,
+            json={
+                "topic_id": 4,
+                "prompt": "Only one option",
+                "accepted_answers": ["Portugis"],
+                "options": ["Portugis"],
+            },
+        )
+        self.assertEqual(too_few.status_code, 400)
+
+        no_correct_option = self.client.post(
+            "/api/ar3d/admin/questions",
+            headers=self.headers,
+            json={
+                "topic_id": 4,
+                "prompt": "Correct answer missing from the options",
+                "accepted_answers": ["Portugis"],
+                "options": ["Belanda", "Inggeris"],
+            },
+        )
+        self.assertEqual(no_correct_option.status_code, 400)
+
+    def test_questions_default_to_empty_options(self):
+        created = self.client.post(
+            "/api/ar3d/admin/questions",
+            headers=self.headers,
+            json={
+                "topic_id": 1,
+                "prompt": "Free-text question",
+                "accepted_answers": ["0.5", "1/2"],
+            },
+        )
+        self.assertEqual(created.status_code, 201)
+        question = created.get_json()["question"]
+        self.assertEqual(question["options"], [])
+        self.assertIsNone(question["place"])
+
+    def test_legacy_options_json_is_not_exposed_as_choices(self):
+        """Legacy databases reused options_json for accepted answers."""
+        legacy_root = Path(self.temp_dir.name) / "legacy-options"
+        legacy_root.mkdir()
+        database = legacy_root / "legacy.sqlite3"
+        connection = sqlite3.connect(database)
+        connection.executescript(
+            """
+            CREATE TABLE questions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                topic_id INTEGER NOT NULL,
+                prompt TEXT NOT NULL,
+                image_filename TEXT,
+                options_json TEXT NOT NULL,
+                correct_index INTEGER NOT NULL,
+                is_active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            INSERT INTO questions (topic_id, prompt, options_json, correct_index)
+            VALUES (1, 'Legacy question', '["0.5", "1/2"]', 0);
+            """
+        )
+        connection.commit()
+        connection.close()
+        legacy_app = create_app(
+            {
+                "TESTING": True,
+                "SECRET_KEY": "legacy-test-secret",
+                "AR3D_DATABASE": str(database),
+                "AR3D_UPLOAD_FOLDER": str(legacy_root / "uploads"),
+                "AR3D_ADMIN_PASSWORD": "lecturer-password",
+                "AR3D_ADMIN_API_KEY": "test-api-key",
+            }
+        )
+        questions = legacy_app.test_client().get(
+            "/api/ar3d/admin/questions", headers=self.headers
+        ).get_json()["questions"]
+        legacy = next(q for q in questions if q["prompt"] == "Legacy question")
+        self.assertEqual(legacy["options"], [])
+        self.assertEqual(legacy["accepted_answers"], ["0.5"])
 
     def test_note_crud_and_seeded_drive_link(self):
         public_notes = self.client.get("/api/ar3d/notes")

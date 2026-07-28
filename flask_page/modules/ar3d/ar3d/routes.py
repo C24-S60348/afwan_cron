@@ -24,7 +24,7 @@ from . import ar3d
 from .db import QUESTION_LEVELS, get_db
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.07.14.1"
+AR3D_API_VERSION = "2026.07.28.1"
 
 
 def _admin_authorized():
@@ -78,7 +78,10 @@ def _delete_image(filename):
 def _question_to_dict(row):
     data = dict(row)
     data["accepted_answers"] = json.loads(data["accepted_answers_json"])
+    data["options"] = json.loads(data.pop("choices_json", None) or "[]")
     data.pop("accepted_answers_json", None)
+    # Legacy databases reused options_json to store accepted answers, so it is
+    # never surfaced as multiple-choice options.
     data.pop("options_json", None)
     data.pop("correct_index", None)
     data["is_active"] = bool(data["is_active"])
@@ -174,10 +177,29 @@ def _parse_question_payload():
         raise ValueError(
             "level must be one of: " + ", ".join(QUESTION_LEVELS)
         )
+    place = str(data.get("place", "") or "").strip() or None
+    raw_options = data.get("options", [])
+    if isinstance(raw_options, str):
+        try:
+            decoded = json.loads(raw_options)
+            raw_options = (
+                decoded if isinstance(decoded, list) else raw_options.splitlines()
+            )
+        except json.JSONDecodeError:
+            raw_options = raw_options.splitlines()
+    options = [str(option).strip() for option in raw_options if str(option).strip()]
+    if options and len(options) < 2:
+        raise ValueError("Multiple-choice questions need at least two options")
+    if options and not any(
+        answers_match(option, answer)
+        for option in options
+        for answer in accepted_answers
+    ):
+        raise ValueError("One of the options must match an accepted answer")
     topic = get_db().execute("SELECT id FROM topics WHERE id = ?", (topic_id,)).fetchone()
     if topic is None:
         raise ValueError("Unknown topic_id")
-    return topic_id, prompt, accepted_answers, is_active, level
+    return topic_id, prompt, accepted_answers, is_active, level, place, options
 
 
 def _normalized_text(value):
@@ -220,6 +242,7 @@ def list_topics():
 def list_questions():
     topic = request.args.get("topic", "").strip()
     level = request.args.get("level", "").strip().upper()
+    place = request.args.get("place", "").strip()
     where = "WHERE q.is_active = 1 AND t.is_active = 1"
     params = []
     if topic:
@@ -228,6 +251,9 @@ def list_questions():
     if level:
         where += " AND q.level = ?"
         params.append(level)
+    if place:
+        where += " AND q.place = ?"
+        params.append(place)
     order = " ORDER BY q.id" if topic else " ORDER BY t.name, q.id"
     rows = _question_query(where + order, tuple(params)).fetchall()
     return jsonify({"questions": [_question_to_public_dict(row) for row in rows]})
@@ -452,7 +478,7 @@ def record_answer():
 @admin_required
 def api_create_question():
     try:
-        topic_id, prompt, accepted_answers, is_active, level = (
+        topic_id, prompt, accepted_answers, is_active, level, place, options = (
             _parse_question_payload()
         )
         image_filename = _save_image(request.files.get("image"))
@@ -466,14 +492,17 @@ def api_create_question():
         cursor = db.execute(
             """
             INSERT INTO questions
-                (topic_id, prompt, level, image_filename, options_json,
-                 correct_index, correct_answer, accepted_answers_json, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (topic_id, prompt, level, place, choices_json, image_filename,
+                 options_json, correct_index, correct_answer,
+                 accepted_answers_json, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 topic_id,
                 prompt,
                 level,
+                place,
+                json.dumps(options),
                 image_filename,
                 json.dumps(accepted_answers),
                 0,
@@ -486,14 +515,16 @@ def api_create_question():
         cursor = db.execute(
             """
             INSERT INTO questions
-                (topic_id, prompt, level, image_filename, correct_answer,
-                 accepted_answers_json, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+                (topic_id, prompt, level, place, choices_json, image_filename,
+                 correct_answer, accepted_answers_json, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 topic_id,
                 prompt,
                 level,
+                place,
+                json.dumps(options),
                 image_filename,
                 accepted_answers[0],
                 json.dumps(accepted_answers),
@@ -514,29 +545,38 @@ def api_update_question(question_id):
     if existing is None:
         return jsonify({"error": "Question not found"}), 404
     try:
-        topic_id, prompt, accepted_answers, is_active, level = (
+        topic_id, prompt, accepted_answers, is_active, level, place, options = (
             _parse_question_payload()
         )
         new_image = _save_image(request.files.get("image"))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
-    if level is None and "level" in existing.keys():
+    existing_columns = existing.keys()
+    # Omitted fields keep whatever the question already had.
+    if level is None and "level" in existing_columns:
         level = existing["level"]
+    if place is None and "place" in existing_columns:
+        place = existing["place"]
+    if not options and "choices_json" in existing_columns:
+        options = json.loads(existing["choices_json"] or "[]")
     image_filename = new_image or existing["image_filename"]
     if new_image:
         _delete_image(existing["image_filename"])
     db = get_db()
     db.execute(
         """
-        UPDATE questions SET topic_id = ?, prompt = ?, level = ?,
-            image_filename = ?, correct_answer = ?, accepted_answers_json = ?,
-            is_active = ?, updated_at = CURRENT_TIMESTAMP
+        UPDATE questions SET topic_id = ?, prompt = ?, level = ?, place = ?,
+            choices_json = ?, image_filename = ?, correct_answer = ?,
+            accepted_answers_json = ?, is_active = ?,
+            updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """,
         (
             topic_id,
             prompt,
             level,
+            place,
+            json.dumps(options),
             image_filename,
             accepted_answers[0],
             json.dumps(accepted_answers),
