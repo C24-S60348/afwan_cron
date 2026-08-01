@@ -47,7 +47,7 @@ class Ar3dApiTestCase(unittest.TestCase):
     def test_health_and_topics(self):
         health = self.client.get("/api/ar3d/health")
         self.assertEqual(health.status_code, 200)
-        self.assertEqual(health.get_json()["version"], "2026.08.01.2")
+        self.assertEqual(health.get_json()["version"], "2026.08.01.3")
         response = self.client.get("/api/ar3d/topics")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.get_json()["topics"]), 4)
@@ -455,6 +455,48 @@ class Ar3dApiTestCase(unittest.TestCase):
         self.assertNotEqual(
             replaced.get_json()["note"]["image_url"], note["image_url"]
         )
+
+    def test_image_only_note_needs_no_points(self):
+        created = self.client.post(
+            "/api/ar3d/admin/notes",
+            headers=self.headers,
+            data={
+                "emoji": "🔢",
+                "title": "Nota Ringkas Matematik - Sekolah Menengah",
+                "points": "[]",
+                "sort_order": "-1",
+                "is_active": "1",
+                "image": (io.BytesIO(b"fake-note-image"), "note.jpg"),
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(created.status_code, 201)
+        note = created.get_json()["note"]
+        self.assertEqual(note["points"], [])
+        self.assertIsNotNone(note["image_url"])
+
+        # The stored image keeps the note valid when the points are cleared.
+        cleared = self.client.put(
+            f"/api/ar3d/admin/notes/{note['id']}",
+            headers=self.headers,
+            json={
+                "emoji": "🔢",
+                "title": note["title"],
+                "points": [],
+                "sort_order": -1,
+                "is_active": True,
+            },
+        )
+        self.assertEqual(cleared.status_code, 200)
+        self.assertEqual(cleared.get_json()["note"]["points"], [])
+
+        # Without any image, points or a link are still required.
+        rejected = self.client.post(
+            "/api/ar3d/admin/notes",
+            headers=self.headers,
+            json={"title": "Empty note", "points": []},
+        )
+        self.assertEqual(rejected.status_code, 400)
 
     def test_answer_submission_accepts_case_insensitive_text(self):
         question = self.client.post(

@@ -24,7 +24,7 @@ from . import ar3d
 from .db import QUESTION_LEVELS, get_db
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.08.01.2"
+AR3D_API_VERSION = "2026.08.01.3"
 
 
 def _admin_authorized():
@@ -124,7 +124,7 @@ def _note_to_dict(row):
     return data
 
 
-def _parse_note_payload():
+def _parse_note_payload(has_image=False):
     data = request.get_json(silent=True) if request.is_json else request.form
     data = data or {}
     title = str(data.get("title", "")).strip()
@@ -149,8 +149,9 @@ def _parse_note_payload():
     }
     if not title:
         raise ValueError("Note title is required")
-    if not points and not external_url:
-        raise ValueError("Add at least one note point or an external URL")
+    # An image on its own is a complete note — some notes are just a diagram.
+    if not points and not external_url and not has_image:
+        raise ValueError("Add at least one note point, an image, or an external URL")
     if external_url and not external_url.startswith(("https://", "http://")):
         raise ValueError("External URL must start with http:// or https://")
     return emoji, title, points, external_url, sort_order, is_active
@@ -352,10 +353,10 @@ def api_admin_notes():
 @admin_required
 def api_create_note():
     try:
-        emoji, title, points, external_url, sort_order, is_active = (
-            _parse_note_payload()
-        )
         image_filename = _save_image(request.files.get("image"))
+        emoji, title, points, external_url, sort_order, is_active = (
+            _parse_note_payload(has_image=image_filename is not None)
+        )
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     db = get_db()
@@ -388,10 +389,11 @@ def api_update_note(note_id):
     if existing is None:
         return jsonify({"error": "Note not found"}), 404
     try:
-        emoji, title, points, external_url, sort_order, is_active = (
-            _parse_note_payload()
-        )
         new_image = _save_image(request.files.get("image"))
+        has_image = bool(new_image or existing["image_filename"])
+        emoji, title, points, external_url, sort_order, is_active = (
+            _parse_note_payload(has_image=has_image)
+        )
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     image_filename = new_image or existing["image_filename"]
