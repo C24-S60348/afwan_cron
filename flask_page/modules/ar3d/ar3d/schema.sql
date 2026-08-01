@@ -50,12 +50,25 @@ CREATE TABLE IF NOT EXISTS notes (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS survey_responses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    status TEXT NOT NULL,
+    age_group TEXT NOT NULL,
+    easiness TEXT NOT NULL,
+    ar_experience TEXT NOT NULL,
+    question_fit TEXT NOT NULL,
+    star_rating INTEGER NOT NULL,
+    comment TEXT,
+    submitted_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_questions_topic ON questions (topic_id);
 -- idx_questions_place is created by the migration, after the place column is
 -- added to databases that predate it.
 CREATE INDEX IF NOT EXISTS idx_attempts_question ON answer_attempts (question_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_answered_at ON answer_attempts (answered_at);
 CREATE INDEX IF NOT EXISTS idx_notes_order ON notes (sort_order, id);
+CREATE INDEX IF NOT EXISTS idx_survey_submitted_at ON survey_responses (submitted_at);
 
 INSERT INTO topics (name, description)
 SELECT 'Maths for Primary Students', 'Primary-level learning questions'

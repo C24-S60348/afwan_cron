@@ -24,7 +24,7 @@ from . import ar3d
 from .db import QUESTION_LEVELS, get_db
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.08.01.1"
+AR3D_API_VERSION = "2026.08.01.2"
 
 
 def _admin_authorized():
@@ -291,6 +291,37 @@ def list_notes():
     return jsonify({"notes": [_note_to_dict(row) for row in rows]})
 
 
+@ar3d.post("/api/ar3d/survey")
+def submit_survey():
+    data = request.get_json(silent=True) or {}
+    status = str(data.get("status", "")).strip()
+    age_group = str(data.get("age_group", "")).strip()
+    easiness = str(data.get("easiness", "")).strip()
+    ar_experience = str(data.get("ar_experience", "")).strip()
+    question_fit = str(data.get("question_fit", "")).strip()
+    comment = str(data.get("comment", "")).strip() or None
+    if not all([status, age_group, easiness, ar_experience, question_fit]):
+        return jsonify({"error": "All required survey fields must be answered"}), 400
+    try:
+        star_rating = int(data.get("star_rating", 0))
+    except (TypeError, ValueError):
+        return jsonify({"error": "star_rating must be a number"}), 400
+    if not 1 <= star_rating <= 5:
+        return jsonify({"error": "star_rating must be between 1 and 5"}), 400
+    db = get_db()
+    cursor = db.execute(
+        """
+        INSERT INTO survey_responses
+            (status, age_group, easiness, ar_experience, question_fit,
+             star_rating, comment)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (status, age_group, easiness, ar_experience, question_fit, star_rating, comment),
+    )
+    db.commit()
+    return jsonify({"id": cursor.lastrowid}), 201
+
+
 @ar3d.post("/api/ar3d/admin/login")
 def api_admin_login():
     data = request.get_json(silent=True) or {}
@@ -429,6 +460,21 @@ def api_admin_responses():
             ]
         }
     )
+
+
+@ar3d.get("/api/ar3d/admin/survey-responses")
+@admin_required
+def api_admin_survey_responses():
+    limit = min(max(request.args.get("limit", 200, type=int), 1), 1000)
+    rows = get_db().execute(
+        """
+        SELECT * FROM survey_responses
+        ORDER BY submitted_at DESC, id DESC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+    return jsonify({"responses": [dict(row) for row in rows]})
 
 
 @ar3d.post("/api/ar3d/answers")
