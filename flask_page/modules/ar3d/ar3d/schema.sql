@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS notes (
     title TEXT NOT NULL,
     points_json TEXT NOT NULL DEFAULT '[]',
     external_url TEXT,
+    image_filename TEXT,
     sort_order INTEGER NOT NULL DEFAULT 0,
     is_active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

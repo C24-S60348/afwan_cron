@@ -47,7 +47,7 @@ class Ar3dApiTestCase(unittest.TestCase):
     def test_health_and_topics(self):
         health = self.client.get("/api/ar3d/health")
         self.assertEqual(health.status_code, 200)
-        self.assertEqual(health.get_json()["version"], "2026.07.28.1")
+        self.assertEqual(health.get_json()["version"], "2026.08.01.1")
         response = self.client.get("/api/ar3d/topics")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.get_json()["topics"]), 4)
@@ -415,6 +415,46 @@ class Ar3dApiTestCase(unittest.TestCase):
             for item in self.client.get("/api/ar3d/notes").get_json()["notes"]
         ]
         self.assertNotIn("Updated fractions", titles)
+
+    def test_note_image_upload_and_replace(self):
+        created = self.client.post(
+            "/api/ar3d/admin/notes",
+            headers=self.headers,
+            data={
+                "emoji": "🔢",
+                "title": "Secondary school notes",
+                "points": '["Quick reference sheet"]',
+                "sort_order": "3",
+                "is_active": "1",
+                "image": (io.BytesIO(b"fake-note-image"), "note.jpg"),
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(created.status_code, 201)
+        note = created.get_json()["note"]
+        self.assertIsNotNone(note["image_url"])
+
+        public_notes = self.client.get("/api/ar3d/notes").get_json()["notes"]
+        published = next(n for n in public_notes if n["id"] == note["id"])
+        self.assertIsNotNone(published["image_url"])
+
+        replaced = self.client.put(
+            f"/api/ar3d/admin/notes/{note['id']}",
+            headers=self.headers,
+            data={
+                "emoji": "🔢",
+                "title": "Secondary school notes",
+                "points": '["Quick reference sheet"]',
+                "sort_order": "3",
+                "is_active": "1",
+                "image": (io.BytesIO(b"new-fake-note-image"), "note2.jpg"),
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(replaced.status_code, 200)
+        self.assertNotEqual(
+            replaced.get_json()["note"]["image_url"], note["image_url"]
+        )
 
     def test_answer_submission_accepts_case_insensitive_text(self):
         question = self.client.post(

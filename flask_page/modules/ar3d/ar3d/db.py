@@ -32,7 +32,14 @@ def init_db():
     _migrate_questions_to_typed_answers(db)
     _migrate_questions_add_level(db)
     _migrate_questions_add_place_and_choices(db)
+    _migrate_notes_add_image(db)
     db.commit()
+
+
+def _migrate_notes_add_image(db):
+    columns = {row["name"] for row in db.execute("PRAGMA table_info(notes)").fetchall()}
+    if "image_filename" not in columns:
+        db.execute("ALTER TABLE notes ADD COLUMN image_filename TEXT")
 
 
 def _migrate_questions_to_typed_answers(db):

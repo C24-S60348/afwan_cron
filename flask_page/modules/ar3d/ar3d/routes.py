@@ -24,7 +24,7 @@ from . import ar3d
 from .db import QUESTION_LEVELS, get_db
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.07.28.1"
+AR3D_API_VERSION = "2026.08.01.1"
 
 
 def _admin_authorized():
@@ -116,16 +116,26 @@ def _note_to_dict(row):
     data = dict(row)
     data["points"] = json.loads(data.pop("points_json"))
     data["is_active"] = bool(data["is_active"])
+    data["image_url"] = (
+        url_for("ar3d.uploaded_image", filename=data["image_filename"], _external=True)
+        if data["image_filename"]
+        else None
+    )
     return data
 
 
 def _parse_note_payload():
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True) if request.is_json else request.form
+    data = data or {}
     title = str(data.get("title", "")).strip()
     emoji = str(data.get("emoji", "📚")).strip() or "📚"
     raw_points = data.get("points", [])
     if isinstance(raw_points, str):
-        raw_points = raw_points.splitlines()
+        try:
+            decoded = json.loads(raw_points)
+            raw_points = decoded if isinstance(decoded, list) else raw_points.splitlines()
+        except json.JSONDecodeError:
+            raw_points = raw_points.splitlines()
     points = [str(point).strip() for point in raw_points if str(point).strip()]
     external_url = str(data.get("external_url", "")).strip() or None
     try:
@@ -314,20 +324,22 @@ def api_create_note():
         emoji, title, points, external_url, sort_order, is_active = (
             _parse_note_payload()
         )
+        image_filename = _save_image(request.files.get("image"))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     db = get_db()
     cursor = db.execute(
         """
         INSERT INTO notes
-            (emoji, title, points_json, external_url, sort_order, is_active)
-        VALUES (?, ?, ?, ?, ?, ?)
+            (emoji, title, points_json, external_url, image_filename, sort_order, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         (
             emoji,
             title,
             json.dumps(points),
             external_url,
+            image_filename,
             sort_order,
             int(is_active),
         ),
@@ -341,18 +353,23 @@ def api_create_note():
 @admin_required
 def api_update_note(note_id):
     db = get_db()
-    if db.execute("SELECT id FROM notes WHERE id = ?", (note_id,)).fetchone() is None:
+    existing = db.execute("SELECT * FROM notes WHERE id = ?", (note_id,)).fetchone()
+    if existing is None:
         return jsonify({"error": "Note not found"}), 404
     try:
         emoji, title, points, external_url, sort_order, is_active = (
             _parse_note_payload()
         )
+        new_image = _save_image(request.files.get("image"))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
+    image_filename = new_image or existing["image_filename"]
+    if new_image:
+        _delete_image(existing["image_filename"])
     db.execute(
         """
         UPDATE notes SET emoji = ?, title = ?, points_json = ?,
-            external_url = ?, sort_order = ?, is_active = ?,
+            external_url = ?, image_filename = ?, sort_order = ?, is_active = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """,
@@ -361,6 +378,7 @@ def api_update_note(note_id):
             title,
             json.dumps(points),
             external_url,
+            image_filename,
             sort_order,
             int(is_active),
             note_id,
