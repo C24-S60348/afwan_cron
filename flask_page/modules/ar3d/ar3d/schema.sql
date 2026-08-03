@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS questions (
     prompt TEXT NOT NULL,
     level TEXT,
     place TEXT,
+    checkpoint INTEGER,
     choices_json TEXT NOT NULL DEFAULT '[]',
     image_filename TEXT,
     correct_answer TEXT NOT NULL,

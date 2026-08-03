@@ -5,7 +5,41 @@ from pathlib import Path
 import click
 from flask import current_app, g
 
-QUESTION_LEVELS = ("ASAS", "SEDERHANA", "APLIKASI", "ANALISIS", "CABARAN")
+QUESTION_LEVELS = (
+    # Secondary-school difficulty buckets.
+    "ASAS",
+    "SEDERHANA",
+    "APLIKASI",
+    "ANALISIS",
+    "CABARAN",
+    # Primary-school card colours, from "primary school questions.docx".
+    "HIJAU",
+    "BIRU",
+    "UNGU",
+    "EMAS",
+)
+
+# The 14 AR checkpoints on the printed 100-square board, keyed by square number.
+# Each of the 7 landmarks appears twice, once early and once late, so the square
+# number — not the landmark — is what decides difficulty. The tier follows the
+# card ranges in the primary question document: 1-25 HIJAU, 26-50 BIRU,
+# 51-75 UNGU, 76-100 EMAS.
+CHECKPOINTS = {
+    8: {"place": "muzium-samudera", "name": "Muzium Samudera", "tier": "HIJAU"},
+    18: {"place": "menara-taming-sari", "name": "Menara Taming Sari", "tier": "HIJAU"},
+    25: {"place": "pantai-klebang", "name": "Pantai Klebang", "tier": "HIJAU"},
+    35: {"place": "masjid-cina", "name": "Masjid Cina Melaka", "tier": "BIRU"},
+    39: {"place": "kota-a-famosa", "name": "Kota A'Famosa", "tier": "BIRU"},
+    49: {"place": "masjid-selat", "name": "Masjid Selat Melaka", "tier": "BIRU"},
+    55: {"place": "menara-taming-sari", "name": "Menara Taming Sari", "tier": "UNGU"},
+    67: {"place": "kota-a-famosa", "name": "Kota A'Famosa", "tier": "UNGU"},
+    71: {"place": "stadium-hang-jebat", "name": "Stadium Hang Jebat", "tier": "UNGU"},
+    79: {"place": "muzium-samudera", "name": "Muzium Samudera", "tier": "EMAS"},
+    81: {"place": "masjid-selat", "name": "Masjid Selat Melaka", "tier": "EMAS"},
+    85: {"place": "masjid-cina", "name": "Masjid Cina Melaka", "tier": "EMAS"},
+    93: {"place": "pantai-klebang", "name": "Pantai Klebang", "tier": "EMAS"},
+    98: {"place": "stadium-hang-jebat", "name": "Stadium Hang Jebat", "tier": "EMAS"},
+}
 
 
 def get_db():
@@ -32,6 +66,7 @@ def init_db():
     _migrate_questions_to_typed_answers(db)
     _migrate_questions_add_level(db)
     _migrate_questions_add_place_and_choices(db)
+    _migrate_questions_add_checkpoint(db)
     _migrate_notes_add_image(db)
     db.commit()
 
@@ -111,6 +146,17 @@ def _migrate_questions_add_place_and_choices(db):
             "ALTER TABLE questions ADD COLUMN choices_json TEXT NOT NULL DEFAULT '[]'"
         )
     db.execute("CREATE INDEX IF NOT EXISTS idx_questions_place ON questions (place)")
+
+
+def _migrate_questions_add_checkpoint(db):
+    columns = {
+        row["name"] for row in db.execute("PRAGMA table_info(questions)").fetchall()
+    }
+    if "checkpoint" not in columns:
+        db.execute("ALTER TABLE questions ADD COLUMN checkpoint INTEGER")
+    db.execute(
+        "CREATE INDEX IF NOT EXISTS idx_questions_checkpoint ON questions (checkpoint)"
+    )
 
 
 @click.command("init-db")

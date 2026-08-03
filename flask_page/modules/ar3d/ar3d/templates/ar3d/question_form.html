@@ -11,6 +11,21 @@
         {% endfor %}
       </select>
     </label>
+    <label>Checkpoint
+      <select name="checkpoint" required>
+        <option value="">Choose a square on the board</option>
+        {% for checkpoint in checkpoints %}
+          <option value="{{ checkpoint.square }}" {% if question and question.checkpoint == checkpoint.square %}selected{% endif %}>
+            Square {{ checkpoint.square }} — {{ checkpoint.name }} ({{ checkpoint.tier }})
+          </option>
+        {% endfor %}
+      </select>
+      <small>
+        The square decides how hard the question should be. Each landmark is
+        printed twice, once early and once late, and the later square carries
+        the harder questions.
+      </small>
+    </label>
     <label>Question
       <textarea name="prompt" rows="4" required>{{ question.prompt if question else '' }}</textarea>
     </label>

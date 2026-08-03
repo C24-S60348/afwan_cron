@@ -21,10 +21,10 @@ from flask import (
 from werkzeug.utils import secure_filename
 
 from . import ar3d
-from .db import QUESTION_LEVELS, get_db
+from .db import CHECKPOINTS, QUESTION_LEVELS, get_db
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.08.01.3"
+AR3D_API_VERSION = "2026.08.03.1"
 
 
 def _admin_authorized():
@@ -189,6 +189,18 @@ def _parse_question_payload():
             "level must be one of: " + ", ".join(QUESTION_LEVELS)
         )
     place = str(data.get("place", "") or "").strip() or None
+    raw_checkpoint = str(data.get("checkpoint", "") or "").strip()
+    checkpoint = None
+    if raw_checkpoint:
+        try:
+            checkpoint = int(raw_checkpoint)
+        except ValueError:
+            raise ValueError("checkpoint must be a square number") from None
+        if checkpoint not in CHECKPOINTS:
+            raise ValueError(
+                "checkpoint must be one of: "
+                + ", ".join(str(square) for square in sorted(CHECKPOINTS))
+            )
     raw_options = data.get("options", [])
     if isinstance(raw_options, str):
         try:
@@ -210,7 +222,16 @@ def _parse_question_payload():
     topic = get_db().execute("SELECT id FROM topics WHERE id = ?", (topic_id,)).fetchone()
     if topic is None:
         raise ValueError("Unknown topic_id")
-    return topic_id, prompt, accepted_answers, is_active, level, place, options
+    return (
+        topic_id,
+        prompt,
+        accepted_answers,
+        is_active,
+        level,
+        place,
+        checkpoint,
+        options,
+    )
 
 
 def _normalized_text(value):
@@ -249,6 +270,19 @@ def list_topics():
     return jsonify({"topics": [dict(row) for row in rows]})
 
 
+@ar3d.get("/api/ar3d/checkpoints")
+def list_checkpoints():
+    """The 14 AR squares on the printed board, in board order."""
+    return jsonify(
+        {
+            "checkpoints": [
+                {"square": square, **details}
+                for square, details in sorted(CHECKPOINTS.items())
+            ]
+        }
+    )
+
+
 @ar3d.get("/api/ar3d/questions")
 def list_questions():
     topic = request.args.get("topic", "").strip()
@@ -265,6 +299,13 @@ def list_questions():
     if place:
         where += " AND q.place = ?"
         params.append(place)
+    checkpoint = request.args.get("checkpoint", "").strip()
+    if checkpoint:
+        try:
+            where += " AND q.checkpoint = ?"
+            params.append(int(checkpoint))
+        except ValueError:
+            return jsonify({"error": "checkpoint must be a square number"}), 400
     order = " ORDER BY q.id" if topic else " ORDER BY t.name, q.id"
     rows = _question_query(where + order, tuple(params)).fetchall()
     return jsonify({"questions": [_question_to_public_dict(row) for row in rows]})
@@ -544,9 +585,10 @@ def record_answer():
 @admin_required
 def api_create_question():
     try:
-        topic_id, prompt, accepted_answers, is_active, level, place, options = (
-            _parse_question_payload()
-        )
+        (
+            topic_id, prompt, accepted_answers, is_active, level, place,
+            checkpoint, options,
+        ) = _parse_question_payload()
         image_filename = _save_image(request.files.get("image"))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
@@ -558,16 +600,17 @@ def api_create_question():
         cursor = db.execute(
             """
             INSERT INTO questions
-                (topic_id, prompt, level, place, choices_json, image_filename,
-                 options_json, correct_index, correct_answer,
+                (topic_id, prompt, level, place, checkpoint, choices_json,
+                 image_filename, options_json, correct_index, correct_answer,
                  accepted_answers_json, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 topic_id,
                 prompt,
                 level,
                 place,
+                checkpoint,
                 json.dumps(options),
                 image_filename,
                 json.dumps(accepted_answers),
@@ -581,15 +624,17 @@ def api_create_question():
         cursor = db.execute(
             """
             INSERT INTO questions
-                (topic_id, prompt, level, place, choices_json, image_filename,
-                 correct_answer, accepted_answers_json, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (topic_id, prompt, level, place, checkpoint, choices_json,
+                 image_filename, correct_answer, accepted_answers_json,
+                 is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 topic_id,
                 prompt,
                 level,
                 place,
+                checkpoint,
                 json.dumps(options),
                 image_filename,
                 accepted_answers[0],
@@ -611,9 +656,10 @@ def api_update_question(question_id):
     if existing is None:
         return jsonify({"error": "Question not found"}), 404
     try:
-        topic_id, prompt, accepted_answers, is_active, level, place, options = (
-            _parse_question_payload()
-        )
+        (
+            topic_id, prompt, accepted_answers, is_active, level, place,
+            checkpoint, options,
+        ) = _parse_question_payload()
         new_image = _save_image(request.files.get("image"))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
@@ -623,6 +669,8 @@ def api_update_question(question_id):
         level = existing["level"]
     if place is None and "place" in existing_columns:
         place = existing["place"]
+    if checkpoint is None and "checkpoint" in existing_columns:
+        checkpoint = existing["checkpoint"]
     if not options and "choices_json" in existing_columns:
         options = json.loads(existing["choices_json"] or "[]")
     image_filename = new_image or existing["image_filename"]
@@ -632,7 +680,7 @@ def api_update_question(question_id):
     db.execute(
         """
         UPDATE questions SET topic_id = ?, prompt = ?, level = ?, place = ?,
-            choices_json = ?, image_filename = ?, correct_answer = ?,
+            checkpoint = ?, choices_json = ?, image_filename = ?, correct_answer = ?,
             accepted_answers_json = ?, is_active = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
@@ -642,6 +690,7 @@ def api_update_question(question_id):
             prompt,
             level,
             place,
+            checkpoint,
             json.dumps(options),
             image_filename,
             accepted_answers[0],
@@ -716,7 +765,10 @@ def _question_form_context(question=None):
     topics = get_db().execute(
         "SELECT id, name FROM topics WHERE is_active = 1 ORDER BY name"
     ).fetchall()
-    return {"topics": topics, "question": question}
+    checkpoints = [
+        {"square": square, **details} for square, details in sorted(CHECKPOINTS.items())
+    ]
+    return {"topics": topics, "question": question, "checkpoints": checkpoints}
 
 
 @ar3d.route("/admin/ar3d/questions/new", methods=["GET", "POST"])
