@@ -68,6 +68,7 @@ def init_db():
     _migrate_questions_add_place_and_choices(db)
     _migrate_questions_add_checkpoint(db)
     _migrate_notes_add_image(db)
+    _migrate_survey_to_tam(db)
     db.commit()
 
 
@@ -157,6 +158,44 @@ def _migrate_questions_add_checkpoint(db):
     db.execute(
         "CREATE INDEX IF NOT EXISTS idx_questions_checkpoint ON questions (checkpoint)"
     )
+
+
+# The Soal Selidik follows "BORANG SOAL SELIDIK IGB": four TAM constructs asked
+# once about the printed board (B) and again about the app (C). Every item is
+# scored 1-4 — Sangat tidak setuju, Tidak setuju, Setuju, Sangat setuju.
+#
+# The document also asks for "Pengalaman mengajar", which i-GB deliberately
+# leaves out: its respondents are mostly students, for whom it means nothing.
+SURVEY_ITEM_CODES = (
+    "B-PEOU-1", "B-PEOU-2", "B-PEOU-3", "B-PEOU-4",
+    "B-PU-1", "B-PU-2", "B-PU-3", "B-PU-4",
+    "B-ATU-1", "B-ATU-2", "B-ATU-3",
+    "B-BI-1", "B-BI-2", "B-BI-3",
+    "C-PEOU-1", "C-PEOU-2", "C-PEOU-3", "C-PEOU-4",
+    "C-PU-1", "C-PU-2", "C-PU-3", "C-PU-4",
+    "C-ATU-1", "C-ATU-2", "C-ATU-3",
+    "C-BI-1", "C-BI-2", "C-BI-3",
+)
+
+SURVEY_GENDERS = ("Lelaki", "Perempuan")
+SURVEY_AGE_GROUPS = ("18 – 23 tahun", "24 tahun ke atas")
+SURVEY_STATUSES = ("Pensyarah", "Pentadbir", "Pelajar")
+
+
+def _migrate_survey_to_tam(db):
+    """Add the columns the TAM questionnaire needs.
+
+    The original three opinion columns (easiness, ar_experience, question_fit)
+    are NOT NULL and hold real answers from earlier respondents, so they stay
+    where they are; new rows simply write an empty string into them.
+    """
+    columns = {
+        row["name"] for row in db.execute("PRAGMA table_info(survey_responses)").fetchall()
+    }
+    if "gender" not in columns:
+        db.execute("ALTER TABLE survey_responses ADD COLUMN gender TEXT")
+    if "ratings_json" not in columns:
+        db.execute("ALTER TABLE survey_responses ADD COLUMN ratings_json TEXT")
 
 
 @click.command("init-db")

@@ -21,10 +21,18 @@ from flask import (
 from werkzeug.utils import secure_filename
 
 from . import ar3d
-from .db import CHECKPOINTS, QUESTION_LEVELS, get_db
+from .db import (
+    CHECKPOINTS,
+    QUESTION_LEVELS,
+    SURVEY_AGE_GROUPS,
+    SURVEY_GENDERS,
+    SURVEY_ITEM_CODES,
+    SURVEY_STATUSES,
+    get_db,
+)
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.08.03.1"
+AR3D_API_VERSION = "2026.08.10.1"
 
 
 def _admin_authorized():
@@ -239,8 +247,45 @@ def _normalized_text(value):
     return " ".join(normalized.casefold().strip().split())
 
 
+# Characters a lecturer types from a document but a phone keyboard does not
+# offer, mapped to the plain ASCII a student actually types.
+_CHARACTER_EQUIVALENTS = {
+    "−": "-",  # minus sign, as in "x = −3"
+    "–": "-",  # en dash
+    "—": "-",  # em dash
+    "×": "*",  # multiplication sign
+    "÷": "/",  # division sign
+    "⁄": "/",  # fraction slash
+    "′": "'",  # prime
+    # NFKC already folds "x²" to "x2", and a phone keyboard has no superscript,
+    # so drop the caret students use in its place and let "x^2" fold there too.
+    "^": "",
+}
+
+# Currency written on the answer but not always typed by the student, and
+# vice versa. "RM15", "RM 15" and "15" are the same amount.
+_CURRENCY_PREFIXES = ("rm", "myr", "$")
+
+
+def _canonical(value):
+    """Fold away everything two people would write differently.
+
+    Spacing carries no meaning in these answers: "y=3x+2" is the same as
+    "y = 3x + 2", so all whitespace goes rather than being collapsed.
+    """
+    text = unicodedata.normalize("NFKC", value).casefold()
+    for original, plain in _CHARACTER_EQUIVALENTS.items():
+        text = text.replace(original, plain)
+    return "".join(text.split())
+
+
 def _as_number(value):
-    compact = _normalized_text(value).replace(" ", "")
+    compact = _canonical(value)
+    for prefix in _CURRENCY_PREFIXES:
+        if compact.startswith(prefix):
+            compact = compact[len(prefix):]
+            break
+    compact = compact.replace(",", "")  # thousands separator, as in RM1,000
     try:
         return Fraction(compact)
     except (ValueError, ZeroDivisionError):
@@ -252,7 +297,7 @@ def answers_match(submitted, accepted):
     accepted_number = _as_number(accepted)
     if submitted_number is not None and accepted_number is not None:
         return submitted_number == accepted_number
-    return _normalized_text(submitted) == _normalized_text(accepted)
+    return _canonical(submitted) == _canonical(accepted)
 
 
 @ar3d.get("/api/ar3d/health")
@@ -336,29 +381,50 @@ def list_notes():
 @ar3d.post("/api/ar3d/survey")
 def submit_survey():
     data = request.get_json(silent=True) or {}
-    status = str(data.get("status", "")).strip()
+    gender = str(data.get("gender", "")).strip()
     age_group = str(data.get("age_group", "")).strip()
-    easiness = str(data.get("easiness", "")).strip()
-    ar_experience = str(data.get("ar_experience", "")).strip()
-    question_fit = str(data.get("question_fit", "")).strip()
+    status = str(data.get("status", "")).strip()
     comment = str(data.get("comment", "")).strip() or None
-    if not all([status, age_group, easiness, ar_experience, question_fit]):
-        return jsonify({"error": "All required survey fields must be answered"}), 400
+
+    if gender not in SURVEY_GENDERS:
+        return jsonify({"error": "gender must be one of: " + ", ".join(SURVEY_GENDERS)}), 400
+    if age_group not in SURVEY_AGE_GROUPS:
+        return jsonify({"error": "age_group must be one of: " + ", ".join(SURVEY_AGE_GROUPS)}), 400
+    if status not in SURVEY_STATUSES:
+        return jsonify({"error": "status must be one of: " + ", ".join(SURVEY_STATUSES)}), 400
+
+    raw_ratings = data.get("ratings") or {}
+    if not isinstance(raw_ratings, dict):
+        return jsonify({"error": "ratings must be an object of item code to score"}), 400
+    ratings = {}
+    for code in SURVEY_ITEM_CODES:
+        if code not in raw_ratings:
+            return jsonify({"error": f"Missing answer for {code}"}), 400
+        try:
+            score = int(raw_ratings[code])
+        except (TypeError, ValueError):
+            return jsonify({"error": f"{code} must be a number"}), 400
+        # Gred Skor on the form runs 1-4, not 1-5.
+        if not 1 <= score <= 4:
+            return jsonify({"error": f"{code} must be between 1 and 4"}), 400
+        ratings[code] = score
+
     try:
         star_rating = int(data.get("star_rating", 0))
     except (TypeError, ValueError):
         return jsonify({"error": "star_rating must be a number"}), 400
     if not 1 <= star_rating <= 5:
         return jsonify({"error": "star_rating must be between 1 and 5"}), 400
+
     db = get_db()
     cursor = db.execute(
         """
         INSERT INTO survey_responses
-            (status, age_group, easiness, ar_experience, question_fit,
-             star_rating, comment)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+            (status, age_group, gender, ratings_json, star_rating, comment,
+             easiness, ar_experience, question_fit)
+        VALUES (?, ?, ?, ?, ?, ?, '', '', '')
         """,
-        (status, age_group, easiness, ar_experience, question_fit, star_rating, comment),
+        (status, age_group, gender, json.dumps(ratings), star_rating, comment),
     )
     db.commit()
     return jsonify({"id": cursor.lastrowid}), 201
@@ -517,7 +583,13 @@ def api_admin_survey_responses():
         """,
         (limit,),
     ).fetchall()
-    return jsonify({"responses": [dict(row) for row in rows]})
+    responses = []
+    for row in rows:
+        data = dict(row)
+        # Older rows predate the TAM questionnaire and have no ratings.
+        data["ratings"] = json.loads(data.pop("ratings_json", None) or "{}")
+        responses.append(data)
+    return jsonify({"responses": responses})
 
 
 @ar3d.post("/api/ar3d/answers")
@@ -717,6 +789,29 @@ def api_delete_question(question_id):
     )
     db.commit()
     return "", 204
+
+
+@ar3d.delete("/api/ar3d/admin/questions/archived")
+@admin_required
+def api_purge_archived_questions():
+    """Remove archived questions for good.
+
+    Archiving only clears is_active, so retired questions pile up in the admin
+    list. Deleting the rows is safe for reporting: answer_attempts references
+    questions with ON DELETE SET NULL, and each attempt keeps its own copy of
+    the question text and both answers, so the history survives intact.
+    """
+    db = get_db()
+    archived = db.execute("SELECT id FROM questions WHERE is_active = 0").fetchall()
+    if not archived:
+        return jsonify({"deleted": 0, "questions": []}), 200
+    ids = [row["id"] for row in archived]
+    db.execute(
+        "DELETE FROM questions WHERE id IN (%s)" % ",".join("?" * len(ids)),
+        ids,
+    )
+    db.commit()
+    return jsonify({"deleted": len(ids), "questions": ids}), 200
 
 
 @ar3d.get("/uploads/ar3d/<path:filename>")
