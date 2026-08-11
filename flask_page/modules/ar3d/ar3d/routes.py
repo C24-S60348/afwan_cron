@@ -32,7 +32,7 @@ from .db import (
 )
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.08.10.1"
+AR3D_API_VERSION = "2026.08.11.1"
 
 
 def _admin_authorized():
@@ -165,9 +165,14 @@ def _parse_note_payload(has_image=False):
     return emoji, title, points, external_url, sort_order, is_active
 
 
-def _parse_question_payload():
+def _raw_payload():
+    """The submitted fields, so an update can tell "omitted" from "cleared"."""
     data = request.get_json(silent=True) if request.is_json else request.form
-    data = data or {}
+    return data or {}
+
+
+def _parse_question_payload():
+    data = _raw_payload()
     try:
         topic_id = int(data.get("topic_id", ""))
         prompt = str(data.get("prompt", "")).strip()
@@ -736,12 +741,15 @@ def api_update_question(question_id):
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     existing_columns = existing.keys()
-    # Omitted fields keep whatever the question already had.
-    if level is None and "level" in existing_columns:
+    # A field the caller left out keeps its old value; a field the caller sent
+    # as empty is being cleared on purpose. Without that distinction the admin
+    # screen could set a checkpoint but never remove one.
+    submitted = _raw_payload()
+    if "level" not in submitted and "level" in existing_columns:
         level = existing["level"]
-    if place is None and "place" in existing_columns:
+    if "place" not in submitted and "place" in existing_columns:
         place = existing["place"]
-    if checkpoint is None and "checkpoint" in existing_columns:
+    if "checkpoint" not in submitted and "checkpoint" in existing_columns:
         checkpoint = existing["checkpoint"]
     if not options and "choices_json" in existing_columns:
         options = json.loads(existing["choices_json"] or "[]")
