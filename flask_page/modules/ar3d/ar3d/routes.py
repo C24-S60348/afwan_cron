@@ -32,7 +32,7 @@ from .db import (
 )
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-AR3D_API_VERSION = "2026.08.11.1"
+AR3D_API_VERSION = "2026.08.11.2"
 
 
 def _admin_authorized():
@@ -783,7 +783,7 @@ def api_update_question(question_id):
         place = existing["place"]
     if "checkpoint" not in submitted and "checkpoint" in existing_columns:
         checkpoint = existing["checkpoint"]
-    if not options and "choices_json" in existing_columns:
+    if "options" not in submitted and "choices_json" in existing_columns:
         options = json.loads(existing["choices_json"] or "[]")
     image_filename = new_image or existing["image_filename"]
     if new_image:
