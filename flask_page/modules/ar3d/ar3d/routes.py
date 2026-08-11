@@ -165,6 +165,32 @@ def _parse_note_payload(has_image=False):
     return emoji, title, points, external_url, sort_order, is_active
 
 
+def _submit_legacy_survey(data, status, age_group, comment):
+    """Store a submission from an app that predates the TAM questionnaire."""
+    easiness = str(data.get("easiness", "")).strip()
+    ar_experience = str(data.get("ar_experience", "")).strip()
+    question_fit = str(data.get("question_fit", "")).strip()
+    if not all([status, age_group, easiness, ar_experience, question_fit]):
+        return jsonify({"error": "All required survey fields must be answered"}), 400
+    try:
+        star_rating = int(data.get("star_rating", 0))
+    except (TypeError, ValueError):
+        return jsonify({"error": "star_rating must be a number"}), 400
+    if not 1 <= star_rating <= 5:
+        return jsonify({"error": "star_rating must be between 1 and 5"}), 400
+    cursor = get_db().execute(
+        """
+        INSERT INTO survey_responses
+            (status, age_group, easiness, ar_experience, question_fit,
+             star_rating, comment)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (status, age_group, easiness, ar_experience, question_fit, star_rating, comment),
+    )
+    get_db().commit()
+    return jsonify({"id": cursor.lastrowid}), 201
+
+
 def _raw_payload():
     """The submitted fields, so an update can tell "omitted" from "cleared"."""
     data = request.get_json(silent=True) if request.is_json else request.form
@@ -390,6 +416,12 @@ def submit_survey():
     age_group = str(data.get("age_group", "")).strip()
     status = str(data.get("status", "")).strip()
     comment = str(data.get("comment", "")).strip() or None
+
+    # An app still on the short form knows nothing about the TAM items. Its
+    # submissions are accepted as they always were rather than rejected,
+    # because a phone in a student's hand does not update when the server does.
+    if "ratings" not in data:
+        return _submit_legacy_survey(data, status, age_group, comment)
 
     if gender not in SURVEY_GENDERS:
         return jsonify({"error": "gender must be one of: " + ", ".join(SURVEY_GENDERS)}), 400
