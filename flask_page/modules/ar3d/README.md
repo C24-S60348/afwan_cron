@@ -62,6 +62,15 @@ reached, the scanner falls back to the questions bundled inside the app.
 Android debug builds allow local HTTP traffic; release builds do not enable
 that exception.
 
+For Nginx deployments, allow the Flask app's 5 MB upload limit in the relevant
+server block:
+
+```nginx
+client_max_body_size 6M;
+```
+
+Then run `sudo nginx -t` and reload Nginx.
+
 ## Public mobile API
 
 ### List topics

@@ -1,4 +1,5 @@
 import json
+import re
 import secrets
 import unicodedata
 import uuid
@@ -297,6 +298,10 @@ _CHARACTER_EQUIVALENTS = {
 # vice versa. "RM15", "RM 15" and "15" are the same amount.
 _CURRENCY_PREFIXES = ("rm", "myr", "$")
 
+# A number ARCore accepted answers sometimes trail with a unit ("24 jam",
+# "180 minit", "125L") that a student never types.
+_LEADING_NUMBER_RE = re.compile(r"^[+-]?\d+(?:\.\d+)?(?:/\d+)?")
+
 
 def _canonical(value):
     """Fold away everything two people would write differently.
@@ -319,6 +324,16 @@ def _as_number(value):
     compact = compact.replace(",", "")  # thousands separator, as in RM1,000
     try:
         return Fraction(compact)
+    except (ValueError, ZeroDivisionError):
+        pass
+    # Accepted answers are sometimes written with a trailing unit
+    # ("24 jam", "180 minit", "125L"), so a learner who types just the
+    # number should still match on the leading numeric part.
+    match = _LEADING_NUMBER_RE.match(compact)
+    if not match:
+        return None
+    try:
+        return Fraction(match.group())
     except (ValueError, ZeroDivisionError):
         return None
 
