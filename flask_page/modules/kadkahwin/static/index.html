@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kad Kahwin Designer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Amiri:ital,wght@0,400;0,700&family=Scheherazade+New:wght@400;700&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Parisienne&family=Montez&family=Marck+Script&family=Cormorant+Upright:wght@600;700&family=Great+Vibes&family=Amiri:ital,wght@0,400;0,700&family=Scheherazade+New:wght@400;700&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -117,11 +118,23 @@
             width: 100%;
         }
 
-        .bismillah, .walimah-text {
+        .walimah-jawi {
             font-family: 'Scheherazade New', serif;
-            font-size: 1.7rem;
+            font-size: 2.1rem;
             color: #6b0000;
             direction: rtl;
+            margin-bottom: 4px;
+            line-height: 1.4;
+            letter-spacing: 1px;
+        }
+
+        .walimah-rumi {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #6b0000;
+            letter-spacing: 5px;
+            text-transform: uppercase;
             margin-bottom: 6px;
             line-height: 1.5;
         }
@@ -172,13 +185,17 @@
             border-bottom: 1.5px solid #b8860b;
         }
 
-        .couple-section { margin: 10px 0; }
+        .couple-section { margin: 8px 0; }
 
         #card-groom, #card-bride {
-            font-family: 'Great Vibes', cursive;
-            font-size: 2rem;
-            color: #8b1a1a;
-            line-height: 1.3;
+            font-family: 'Parisienne', 'Marck Script', 'Great Vibes', cursive;
+            font-size: 2.75rem;
+            font-weight: 400;
+            color: #7a1515;
+            line-height: 1.2;
+            letter-spacing: 0.5px;
+            display: block;
+            text-shadow: 0 0.5px 1px rgba(122, 21, 21, 0.12);
         }
 
         .and-connector {
@@ -190,12 +207,12 @@
         }
 
         .event-details {
-            margin-top: 14px;
+            margin-top: 10px;
             font-family: 'Quicksand', sans-serif;
             font-size: 0.75rem;
             font-weight: 500;
             color: #111;
-            line-height: 2;
+            line-height: 1.85;
             letter-spacing: 0.3px;
         }
 
@@ -211,7 +228,60 @@
         .event-details .detail-divider {
             color: #b8860b;
             display: block;
-            margin: 6px 0 4px;
+            margin: 4px 0 2px;
+        }
+
+        /* ── QR Code Section on Card ── */
+        .card-qr-section {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-frame {
+            background: #ffffff;
+            padding: 5px;
+            border-radius: 6px;
+            border: 1px solid rgba(184,134,11,0.5);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 82px;
+            min-height: 82px;
+        }
+
+        #card-qrcode {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #card-qrcode canvas, #card-qrcode img {
+            display: block;
+            width: 76px !important;
+            height: 76px !important;
+        }
+
+        .qr-label {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 0.62rem;
+            color: #6b0000;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .qr-link-btn {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 0.58rem;
+            color: #b8860b;
+            text-decoration: underline;
+            margin-top: 2px;
+            cursor: pointer;
         }
 
         /* ── Right: Controls Panel ── */
@@ -448,7 +518,7 @@
             <div class="corner-ornament br">❧</div>
 
             <div class="card-content">
-                <div id="card-header-text" class="bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+                <div id="card-header-text" class="walimah-jawi">وَلِيمَةُ الْعُرْسِ</div>
                 <div class="card-divider">— ❖ ❖ ❖ —</div>
 
                 <p class="invite-line">Dengan segala hormatnya</p>
@@ -464,21 +534,29 @@
                 <div class="card-divider" style="margin: 10px 0">— ❖ —</div>
 
                 <div class="couple-section">
-                    <p id="card-groom">Ahmad Faris</p>
+                    <p id="card-groom">Afwan Haziq</p>
                     <span class="and-connector">— &amp; —</span>
-                    <p id="card-bride">Nurul Izzati</p>
+                    <p id="card-bride">Umi Safierah</p>
                 </div>
 
                 <div class="card-divider" style="margin: 10px 0">— ❖ ❖ ❖ —</div>
 
                 <div class="event-details">
                     <span class="detail-title" id="card-majlis">Majlis Walimatul Urus</span><br>
-                    <span id="card-tarikh">Sabtu, 14 Jun 2025</span><br>
-                    <span id="card-masa">11.00 pagi – 4.00 petang</span>
+                    <span id="card-tarikh">Ahad, 1 Ogos 2027</span><br>
+                    <span id="card-masa">10.00 pagi – 4.00 petang</span>
                     <span class="detail-divider">— ❖ —</span>
                     <span class="detail-title">Tempat</span><br>
-                    <span id="card-venue-name">Dewan Sri Kenangan</span><br>
-                    <span id="card-venue-addr">Jalan Bahagia, 50000 Kuala Lumpur</span>
+                    <span id="card-venue-name" style="font-weight: 700; font-size: 0.8rem;">De Sabil Homestay &amp; Hall</span><br>
+                    <span id="card-venue-addr">Sijangkang, Selangor</span>
+                </div>
+
+                <div class="card-qr-section" id="card-qr-container">
+                    <div class="qr-frame">
+                        <div id="card-qrcode"></div>
+                    </div>
+                    <div class="qr-label">Imbas Lokasi (Google Maps)</div>
+                    <a id="qr-maps-link" href="#" target="_blank" rel="noopener noreferrer" class="qr-link-btn">Buka Google Maps &#8599;</a>
                 </div>
             </div>
         </div>
@@ -503,46 +581,61 @@
             <div class="field-row">
                 <label class="field-label">Teks Kepala Kad</label>
                 <div class="toggle-group">
-                    <button class="toggle-btn active" id="btn-bismillah" onclick="setHeader('bismillah')">Bismillah (Arab)</button>
-                    <button class="toggle-btn" id="btn-walimah" onclick="setHeader('walimah')">Walimatul Urus (Jawi)</button>
+                    <button class="toggle-btn active" id="btn-walimah-jawi" onclick="setHeader('jawi')">Walimatul Urus (Jawi)</button>
+                    <button class="toggle-btn" id="btn-walimah-rumi" onclick="setHeader('rumi')">Walimatul Urus (Rumi)</button>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <label class="field-label">Gaya Tulisan Nama Pengantin</label>
+                <div class="toggle-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <button class="toggle-btn active" id="btn-font-parisienne" onclick="setCoupleFont('parisienne')">Parisienne (Lembut &amp; Anggun)</button>
+                    <button class="toggle-btn" id="btn-font-marck" onclick="setCoupleFont('marck')">Marck Script (Natural)</button>
+                    <button class="toggle-btn" id="btn-font-montez" onclick="setCoupleFont('montez')">Montez (Romantik)</button>
+                    <button class="toggle-btn" id="btn-font-greatvibes" onclick="setCoupleFont('greatvibes')">Great Vibes (Klasik)</button>
                 </div>
             </div>
 
             <div class="field-row-2col">
                 <div>
                     <label class="field-label">Pengantin Lelaki</label>
-                    <input type="text" id="f-groom" placeholder="Nama pengantin lelaki">
+                    <input type="text" id="f-groom" placeholder="Nama pengantin lelaki" value="Afwan Haziq">
                 </div>
                 <div>
                     <label class="field-label">Pengantin Perempuan</label>
-                    <input type="text" id="f-bride" placeholder="Nama pengantin perempuan">
+                    <input type="text" id="f-bride" placeholder="Nama pengantin perempuan" value="Umi Safierah">
                 </div>
             </div>
 
             <div class="field-row">
                 <label class="field-label">Jenis Majlis</label>
-                <input type="text" id="f-majlis" placeholder="Contoh: Majlis Walimatul Urus">
+                <input type="text" id="f-majlis" placeholder="Majlis Walimatul Urus" value="Majlis Walimatul Urus">
             </div>
 
             <div class="field-row-2col">
                 <div>
                     <label class="field-label">Tarikh</label>
-                    <input type="text" id="f-tarikh" placeholder="Sabtu, 14 Jun 2025">
+                    <input type="text" id="f-tarikh" placeholder="Ahad, 1 Ogos 2027" value="Ahad, 1 Ogos 2027">
                 </div>
                 <div>
                     <label class="field-label">Masa</label>
-                    <input type="text" id="f-masa" placeholder="11.00 pagi – 4.00 petang">
+                    <input type="text" id="f-masa" placeholder="10.00 pagi – 4.00 petang" value="10.00 pagi – 4.00 petang">
                 </div>
             </div>
 
             <div class="field-row">
                 <label class="field-label">Nama Tempat</label>
-                <input type="text" id="f-venue-name" placeholder="Dewan Sri Kenangan">
+                <input type="text" id="f-venue-name" placeholder="De Sabil Homestay &amp; Hall" value="De Sabil Homestay &amp; Hall">
             </div>
 
             <div class="field-row">
-                <label class="field-label">Alamat Tempat</label>
-                <input type="text" id="f-venue-addr" placeholder="Jalan Bahagia, 50000 Kuala Lumpur">
+                <label class="field-label">Alamat / Lokasi Ringkas</label>
+                <input type="text" id="f-venue-addr" placeholder="Sijangkang, Selangor" value="Sijangkang, Selangor">
+            </div>
+
+            <div class="field-row">
+                <label class="field-label">Pautan Google Maps (QR Code)</label>
+                <input type="text" id="f-map-url" placeholder="https://maps.google.com/..." value="https://maps.google.com/?q=De+Sabil+Homestay+%26+Hall+Sijangkang">
             </div>
 
             <p class="saved-badge" id="saved-badge">&#10003; Disimpan</p>
@@ -577,23 +670,89 @@
 <script>
     const fieldMap = [
         { field: 'f-guest',      card: 'card-guest',       fallback: '' },
-        { field: 'f-groom',      card: 'card-groom',       fallback: 'Ahmad Faris' },
-        { field: 'f-bride',      card: 'card-bride',       fallback: 'Nurul Izzati' },
+        { field: 'f-groom',      card: 'card-groom',       fallback: 'Afwan Haziq' },
+        { field: 'f-bride',      card: 'card-bride',       fallback: 'Umi Safierah' },
         { field: 'f-majlis',     card: 'card-majlis',      fallback: 'Majlis Walimatul Urus' },
-        { field: 'f-tarikh',     card: 'card-tarikh',      fallback: 'Sabtu, 14 Jun 2025' },
-        { field: 'f-masa',       card: 'card-masa',        fallback: '11.00 pagi – 4.00 petang' },
-        { field: 'f-venue-name', card: 'card-venue-name',  fallback: 'Dewan Sri Kenangan' },
-        { field: 'f-venue-addr', card: 'card-venue-addr',  fallback: 'Jalan Bahagia, 50000 Kuala Lumpur' },
+        { field: 'f-tarikh',     card: 'card-tarikh',      fallback: 'Ahad, 1 Ogos 2027' },
+        { field: 'f-masa',       card: 'card-masa',        fallback: '10.00 pagi – 4.00 petang' },
+        { field: 'f-venue-name', card: 'card-venue-name',  fallback: 'De Sabil Homestay & Hall' },
+        { field: 'f-venue-addr', card: 'card-venue-addr',  fallback: 'Sijangkang, Selangor' },
+        { field: 'f-map-url',    card: null,               fallback: 'https://maps.google.com/?q=De+Sabil+Homestay+%26+Hall+Sijangkang' },
     ];
+
+    let qrCodeInstance = null;
+
+    function updateQRCode(url) {
+        const fallbackUrl = fieldMap.find(f => f.field === 'f-map-url').fallback;
+        const targetUrl = (url && url.trim().length > 0) ? url.trim() : fallbackUrl;
+        const linkEl = document.getElementById('qr-maps-link');
+        if (linkEl) linkEl.href = targetUrl;
+
+        const qrContainer = document.getElementById('card-qrcode');
+        if (!qrContainer) return;
+        qrContainer.innerHTML = '';
+
+        if (typeof QRCode !== 'undefined') {
+            try {
+                qrCodeInstance = new QRCode(qrContainer, {
+                    text: targetUrl,
+                    width: 80,
+                    height: 80,
+                    colorDark: '#3a0007',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+            } catch (err) {
+                console.error("QR Code Error:", err);
+            }
+        }
+    }
 
     fieldMap.forEach(({ field, card, fallback }) => {
         const input = document.getElementById(field);
-        const cardEl = document.getElementById(card);
+        if (!input) return;
+        const cardEl = card ? document.getElementById(card) : null;
         input.addEventListener('input', () => {
-            cardEl.textContent = input.value.trim() || fallback;
+            if (cardEl) {
+                cardEl.textContent = input.value.trim() || fallback;
+            }
+            if (field === 'f-map-url') {
+                updateQRCode(input.value);
+            }
             saveData();
         });
     });
+
+    const COUPLE_FONTS = {
+        parisienne: { font: "'Parisienne', cursive", size: "2.75rem", line: "1.2" },
+        marck:      { font: "'Marck Script', cursive", size: "2.55rem", line: "1.25" },
+        montez:     { font: "'Montez', cursive", size: "3.1rem", line: "1.15" },
+        greatvibes: { font: "'Great Vibes', cursive", size: "2.7rem", line: "1.25" }
+    };
+
+    let currentCoupleFont = 'parisienne';
+
+    function setCoupleFont(key) {
+        const conf = COUPLE_FONTS[key] || COUPLE_FONTS.parisienne;
+        currentCoupleFont = key;
+        const groomEl = document.getElementById('card-groom');
+        const brideEl = document.getElementById('card-bride');
+        if (groomEl) {
+            groomEl.style.fontFamily = conf.font;
+            groomEl.style.fontSize = conf.size;
+            groomEl.style.lineHeight = conf.line;
+        }
+        if (brideEl) {
+            brideEl.style.fontFamily = conf.font;
+            brideEl.style.fontSize = conf.size;
+            brideEl.style.lineHeight = conf.line;
+        }
+        ['parisienne', 'marck', 'montez', 'greatvibes'].forEach(k => {
+            const btn = document.getElementById('btn-font-' + k);
+            if (btn) btn.classList.toggle('active', k === key);
+        });
+        saveData();
+    }
 
     let saveTimer;
     function saveData() {
@@ -601,10 +760,12 @@
         saveTimer = setTimeout(() => {
             const data = {};
             fieldMap.forEach(({ field }) => {
-                data[field] = document.getElementById(field).value;
+                const el = document.getElementById(field);
+                if (el) data[field] = el.value;
             });
             data.guests = JSON.stringify(guests);
-            data.headerType = document.getElementById('btn-walimah').classList.contains('active') ? 'walimah' : 'bismillah';
+            data.headerType = currentHeaderType;
+            data.coupleFont = currentCoupleFont;
             localStorage.setItem('kadKahwinData', JSON.stringify(data));
             const badge = document.getElementById('saved-badge');
             badge.classList.add('show');
@@ -617,11 +778,29 @@
         if (!raw) return;
         const data = JSON.parse(raw);
         fieldMap.forEach(({ field, card, fallback }) => {
-            const val = data[field] || '';
-            document.getElementById(field).value = val;
-            document.getElementById(card).textContent = val.trim() || fallback;
+            let val = data[field];
+            // If it was saved as undefined or blank string, populate with default/fallback
+            if (val === undefined || (field !== 'f-guest' && val.trim() === '')) {
+                val = fallback;
+            }
+            const inputEl = document.getElementById(field);
+            if (inputEl) inputEl.value = val;
+            if (card) {
+                const cardEl = document.getElementById(card);
+                if (cardEl) cardEl.textContent = val || fallback;
+            }
         });
-        if (data.headerType) setHeader(data.headerType);
+        if (data['f-map-url']) {
+            updateQRCode(data['f-map-url']);
+        }
+        if (data.coupleFont) {
+            setCoupleFont(data.coupleFont);
+        }
+        if (data.headerType) {
+            setHeader(data.headerType === 'rumi' ? 'rumi' : 'jawi');
+        } else {
+            setHeader('jawi');
+        }
         if (data.guests) {
             guests = JSON.parse(data.guests);
             renderList();
@@ -632,16 +811,24 @@
     //  Header text toggle
     // ════════════════════════════
     const HEADER = {
-        bismillah: { text: 'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ', cls: 'bismillah' },
-        walimah:   { text: 'وَلِيمَةُ الْعُرْسِ', cls: 'walimah-text' }
+        jawi: { text: 'وَلِيمَةُ الْعُرْسِ', cls: 'walimah-jawi' },
+        rumi: { text: 'WALIMATUL URUS', cls: 'walimah-rumi' }
     };
 
+    let currentHeaderType = 'jawi';
+
     function setHeader(type) {
+        const conf = HEADER[type] || HEADER.jawi;
+        currentHeaderType = type === 'rumi' ? 'rumi' : 'jawi';
         const el = document.getElementById('card-header-text');
-        el.textContent = HEADER[type].text;
-        el.className = HEADER[type].cls;
-        document.getElementById('btn-bismillah').classList.toggle('active', type === 'bismillah');
-        document.getElementById('btn-walimah').classList.toggle('active', type === 'walimah');
+        if (el) {
+            el.textContent = conf.text;
+            el.className = conf.cls;
+        }
+        const btnJawi = document.getElementById('btn-walimah-jawi');
+        const btnRumi = document.getElementById('btn-walimah-rumi');
+        if (btnJawi) btnJawi.classList.toggle('active', currentHeaderType === 'jawi');
+        if (btnRumi) btnRumi.classList.toggle('active', currentHeaderType === 'rumi');
         saveData();
     }
 
@@ -699,12 +886,23 @@
 
     function esc(str) { return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
 
+    function getDownloadFilename(ext) {
+        const groomRaw = (document.getElementById('f-groom') ? document.getElementById('f-groom').value : '').trim() || 'Afwan';
+        const brideRaw = (document.getElementById('f-bride') ? document.getElementById('f-bride').value : '').trim() || 'Umi';
+        const groomShort = groomRaw.split(/\s+/)[0] || 'Afwan';
+        const brideShort = brideRaw.split(/\s+/)[0] || 'Umi';
+        const coupleLabel = `${groomShort} dan ${brideShort}`;
+
+        const guestName = (document.getElementById('f-guest') ? document.getElementById('f-guest').value : '').trim();
+        const safeGuest = guestName ? guestName.replace(/[/\\?%*:|"<>]/g, '') : 'Umum';
+        return `kad kahwin ${coupleLabel} - ${safeGuest}.${ext}`;
+    }
+
     async function downloadPNG() {
         const card = document.getElementById('card-preview');
         const canvas = await html2canvas(card, { scale: 4, useCORS: true, backgroundColor: '#fff8e7' });
         const link = document.createElement('a');
-        const name = (document.getElementById('f-guest').value || 'tetamu').replace(/\s+/g, '-');
-        link.download = `kad-kahwin-${name}.png`;
+        link.download = getDownloadFilename('png');
         link.href = canvas.toDataURL('image/png');
         link.click();
     }
@@ -719,11 +917,11 @@
         const h = canvas.height * pxToMm;
         const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [w, h] });
         pdf.addImage(imgData, 'JPEG', 0, 0, w, h, '', 'FAST');
-        const name = (document.getElementById('f-guest').value || 'tetamu').replace(/\s+/g, '-');
-        pdf.save(`kad-kahwin-${name}.pdf`);
+        pdf.save(getDownloadFilename('pdf'));
     }
 
     loadData();
+    updateQRCode(document.getElementById('f-map-url') ? document.getElementById('f-map-url').value : '');
 </script>
 
 </body>
