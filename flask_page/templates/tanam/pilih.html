@@ -1,43 +1,706 @@
-{# tanam/pilih.html #}
-
 {% extends "tanam/base.html" %}
 
 {% block head %}
 <style>
-    .container {
-        background-color: rgb(0 0 0 / 28%);
+    :root {
+        --color-blue: #007aff;
+        --color-blue-hover: #0066d6;
+        --color-grey: #64748b;
+        --color-grey-hover: #475569;
+        --color-yellow: #ffb700;
+        --color-yellow-hover: #e5a500;
+        --text-dark: #111827;
+        --text-muted: #4b5563;
+        --card-radius: 24px;
+        --btn-radius: 12px;
     }
-    .card a img {
-        
-        width: 90px;
-        height: 90px;
 
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .tanam-page-container {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px 36px 16px;
+        box-sizing: border-box;
+    }
+
+    /* Header styling */
+    .tanam-header {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 28px;
+    }
+
+    .tanam-title {
+        font-size: clamp(2.3rem, 5vw, 3.4rem);
+        font-weight: 900;
+        color: #14281d;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.6);
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .tanam-sprout-svg {
+        width: 48px;
+        height: 48px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+
+    /* Carousel layout */
+    .carousel-section {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .carousel-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        width: 100%;
+        max-width: 1040px;
+    }
+
+    /* Square navigation buttons */
+    .nav-arrow {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-arrow:hover {
+        background: #ffffff;
+        transform: scale(1.06);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    .nav-arrow:active {
+        transform: scale(0.94);
+    }
+
+    .nav-arrow:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-arrow svg {
+        width: 22px;
+        height: 22px;
+        stroke: #1e293b;
+        stroke-width: 3;
+    }
+
+    /* Window & Track */
+    .carousel-window {
+        overflow: hidden;
+        width: 858px; /* Default for 3 cards: 3 * 270px + 2 * 24px = 858px */
+        max-width: 100%;
+        padding: 10px 4px 18px 4px;
+        cursor: grab;
+    }
+
+    .carousel-window:active {
+        cursor: grabbing;
+    }
+
+    .carousel-track {
+        display: flex;
+        gap: 24px;
+        transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+        will-change: transform;
+        align-items: stretch;
+    }
+
+    /* Plant Card */
+    .plant-card {
+        flex: 0 0 270px;
+        width: 270px;
+        max-width: 270px;
+        background: #ffffff;
+        border-radius: var(--card-radius);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+        padding: 24px 20px 20px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .plant-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16), 0 4px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Card Image */
+    .card-img-wrap {
+        height: 145px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        pointer-events: none;
+    }
+
+    .card-img-wrap img {
+        max-height: 140px;
+        max-width: 90%;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.08));
+    }
+
+    /* Card Plant Name */
+    .card-name-wrap {
+        min-height: 58px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 2px;
+    }
+
+    .plant-primary-name {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        line-height: 1.25;
+        margin: 0;
+        max-width: 160px;
+        word-break: normal;
+        text-align: center;
+    }
+
+    .plant-sub-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-top: 3px;
+        line-height: 1.2;
+    }
+
+    /* Difficulty Label */
+    .card-difficulty {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #475569;
+        margin: 10px 0 10px 0;
+        letter-spacing: 0.2px;
+    }
+
+    /* Card Buttons */
+    .card-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        width: 100%;
+        margin-top: auto;
+    }
+
+    .card-btn {
+        display: block;
+        width: 100%;
+        border: none;
+        border-radius: var(--btn-radius);
+        font-family: inherit;
+        font-size: 1.02rem;
+        font-weight: 700;
+        padding: 10px 0;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-sizing: border-box;
+        line-height: 1.3;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .card-btn:active {
+        transform: scale(0.97) !important;
+    }
+
+    /* Button Colors */
+    .btn-mudah {
+        background-color: var(--color-blue);
+        color: #ffffff;
+    }
+
+    .btn-mudah:hover {
+        background-color: var(--color-blue-hover);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+    }
+
+    .btn-sederhana {
+        background-color: var(--color-grey);
+        color: #ffffff;
+    }
+
+    .btn-sederhana:hover {
+        background-color: var(--color-grey-hover);
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(100, 116, 139, 0.35);
+    }
+
+    .btn-belajar {
+        background-color: var(--color-yellow);
+        color: #1e293b;
+    }
+
+    .btn-belajar:hover {
+        background-color: var(--color-yellow-hover);
+        color: #1e293b;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 183, 0, 0.38);
+    }
+
+    /* Carousel Pagination Dots */
+    .carousel-dots {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 24px;
+    }
+
+    .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.75);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+        border: none;
+        padding: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dot:hover {
+        background: #ffffff;
+        transform: scale(1.15);
+    }
+
+    .dot.active {
+        width: 24px;
+        border-radius: 6px;
+        background: var(--color-blue);
+        box-shadow: 0 2px 6px rgba(0, 122, 255, 0.5);
+    }
+
+    /* Admin Add link */
+    .admin-link-wrap {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .admin-link {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 6px 14px;
+        border-radius: 20px;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s ease;
+    }
+
+    .admin-link:hover {
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 980px) {
+        .carousel-window {
+            width: 564px; /* Fits 2 cards: 2 * 270px + 24px = 564px */
+        }
+    }
+
+    @media (max-width: 680px) {
+        .tanam-page-container {
+            padding: 16px 10px 28px 10px;
+        }
+
+        .tanam-header {
+            margin-top: 6px;
+            margin-bottom: 18px;
+        }
+
+        .tanam-title {
+            font-size: 2.2rem;
+            gap: 8px;
+        }
+
+        .tanam-sprout-svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        .carousel-wrapper {
+            gap: 8px;
+        }
+
+        .nav-arrow {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            border-radius: 10px;
+        }
+
+        .nav-arrow svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .carousel-window {
+            width: 270px; /* 1 card visible */
+        }
+
+        .plant-card {
+            flex: 0 0 270px;
+            width: 270px;
+            padding: 20px 16px 18px 16px;
+        }
+    }
+
+    @media (max-width: 340px) {
+        .carousel-window {
+            width: 240px;
+        }
+        .plant-card {
+            flex: 0 0 240px;
+            width: 240px;
+        }
     }
 </style>
-
 {% endblock %}
 
+{% block content %}
+<div class="tanam-page-container">
+    <!-- Header -->
+    <header class="tanam-header">
+        <h1 class="tanam-title">
+            Tanam-Tanam
+            <svg class="tanam-sprout-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- Curved stem -->
+                <path d="M30 60C30 42 34 28 52 22" stroke="#4a8c14" stroke-width="5" stroke-linecap="round"/>
+                <!-- Left Leaf -->
+                <path d="M32 38C18 38 10 32 10 24C18 22 28 27 32 38Z" fill="url(#sproutGrad1)" stroke="#3e7811" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Right Leaf -->
+                <path d="M36 30C46 20 58 20 58 14C50 12 36 19 36 30Z" fill="url(#sproutGrad2)" stroke="#3e7811" stroke-width="2" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="sproutGrad1" x1="10" y1="24" x2="32" y2="38" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#8ce324"/>
+                        <stop offset="1" stop-color="#4ea310"/>
+                    </linearGradient>
+                    <linearGradient id="sproutGrad2" x1="36" y1="30" x2="58" y2="14" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#a0f032"/>
+                        <stop offset="1" stop-color="#5bb514"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </h1>
+    </header>
+
+    <!-- Carousel Section -->
+    <main class="carousel-section">
+        <div class="carousel-wrapper">
+            <!-- Left Arrow Button -->
+            <button class="nav-arrow nav-prev" id="prevBtn" aria-label="Sebelumnya" title="Sebelumnya">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+
+            <!-- Carousel Window -->
+            <div class="carousel-window" id="carouselWindow">
+                <div class="carousel-track" id="carouselTrack">
+                    {% for p in plants %}
+                    <div class="plant-card" data-index="{{ loop.index0 }}">
+                        <!-- Plant Illustration -->
+                        <div class="card-img-wrap">
+                            <img src="{{ p.imgsrc }}" alt="{{ p.name }}" loading="lazy" draggable="false">
+                        </div>
+
+                        <!-- Plant Name -->
+                        <div class="card-name-wrap">
+                            <h2 class="plant-primary-name">{{ p.primary_name }}</h2>
+                            {% if p.sub_name %}
+                            <div class="plant-sub-name">{{ p.sub_name }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Difficulty Label -->
+                        <div class="card-difficulty">Kesukaran</div>
+
+                        <!-- Three Buttons -->
+                        <div class="card-actions">
+                            <a href="/tanam_mula?pokok={{ p.nameid }}&level=mudah" class="card-btn btn-mudah">Mudah</a>
+                            <a href="/tanam_mula?pokok={{ p.nameid }}&level=sederhana" class="card-btn btn-sederhana">Sederhana</a>
+                            <a href="/tanam_desc?pokok={{ p.nameid }}" class="card-btn btn-belajar">Belajar</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right Arrow Button -->
+            <button class="nav-arrow nav-next" id="nextBtn" aria-label="Seterusnya" title="Seterusnya">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Carousel Pagination Dots -->
+        <div class="carousel-dots" id="carouselDots" role="tablist" aria-label="Halaman tanaman">
+            <!-- Rendered dynamically by JavaScript -->
+        </div>
+
+        <!-- Add plant link -->
+        <div class="admin-link-wrap">
+            <a href="/tanam_add" class="admin-link">+ Tambah Tanaman</a>
+        </div>
+    </main>
+</div>
+{% endblock %}
 
 {% block script %}
 <script>
-    let currentIndex = 0;
-    
-    function slideLeft() {
-        const cardContainer = document.querySelector('.card-container');
-        const cards = document.querySelectorAll('.card');
-        if (currentIndex > 0) {
-            currentIndex--;
-            cardContainer.style.transform = `translateX(${-currentIndex * 360}px)`;
+    (function() {
+        const track = document.getElementById('carouselTrack');
+        const windowElem = document.getElementById('carouselWindow');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const dotsContainer = document.getElementById('carouselDots');
+        const cards = document.querySelectorAll('.plant-card');
+        const totalCards = cards.length;
+
+        let currentIndex = 0;
+        let visibleCount = 3;
+        let cardWidth = 270;
+        const gap = 24;
+        let maxIndex = 0;
+
+        function updateLayout() {
+            if (cards.length === 0) return;
+            cardWidth = cards[0].offsetWidth;
+            const windowWidth = windowElem.offsetWidth;
+            
+            // Calculate how many cards fit completely in the window
+            visibleCount = Math.max(1, Math.floor((windowWidth + gap) / (cardWidth + gap)));
+            maxIndex = Math.max(0, totalCards - visibleCount);
+
+            // Re-render dots based on maxIndex + 1 steps (or totalCards)
+            renderDots();
+
+            if (currentIndex > maxIndex) {
+                currentIndex = maxIndex;
+            }
+            moveToIndex(currentIndex, false);
         }
-    }
-    
-    function slideRight() {
-        const cardContainer = document.querySelector('.card-container');
-        const cards = document.querySelectorAll('.card-container');
-        if (currentIndex < cards.length) {
-            currentIndex++;
-            cardContainer.style.transform = `translateX(${-currentIndex * 360}px)`;
+
+        function renderDots() {
+            dotsContainer.innerHTML = '';
+            if (totalCards <= 1) return;
+
+            const totalDots = maxIndex + 1;
+            for (let i = 0; i < totalDots; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'dot' + (i === currentIndex ? ' active' : '');
+                dot.setAttribute('aria-label', 'Pergi ke tanaman ' + (i + 1));
+                dot.addEventListener('click', () => {
+                    moveToIndex(i);
+                });
+                dotsContainer.appendChild(dot);
+            }
         }
-    }
+
+        function moveToIndex(index, animate = true) {
+            currentIndex = Math.max(0, Math.min(index, maxIndex));
+            
+            const step = cardWidth + gap;
+            const targetX = currentIndex * step;
+
+            if (animate) {
+                track.style.transition = 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)';
+            } else {
+                track.style.transition = 'none';
+            }
+
+            track.style.transform = `translateX(-${targetX}px)`;
+
+            // Update arrow disabled states
+            prevBtn.disabled = (currentIndex === 0);
+            nextBtn.disabled = (currentIndex === maxIndex);
+
+            // Update active dot
+            const dots = dotsContainer.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                moveToIndex(currentIndex - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < maxIndex) {
+                moveToIndex(currentIndex + 1);
+            }
+        });
+
+        // Touch & Swipe Support
+        let startX = 0;
+        let isDragging = false;
+        let startTime = 0;
+
+        // Touch events
+        windowElem.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startTime = Date.now();
+            isDragging = true;
+            track.style.transition = 'none';
+        }, { passive: true });
+
+        windowElem.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const currentX = e.touches[0].clientX;
+            const diffX = currentX - startX;
+            const step = cardWidth + gap;
+            const baseTranslate = -(currentIndex * step);
+            track.style.transform = `translateX(${baseTranslate + diffX}px)`;
+        }, { passive: true });
+
+        windowElem.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            const endX = e.changedTouches[0].clientX;
+            const diffX = endX - startX;
+            const timeElapsed = Date.now() - startTime;
+
+            handleDragEnd(diffX, timeElapsed);
+        });
+
+        // Mouse Drag Support
+        windowElem.addEventListener('mousedown', (e) => {
+            if (e.button !== 0 || e.target.closest('.card-btn')) return;
+            startX = e.clientX;
+            startTime = Date.now();
+            isDragging = true;
+            track.style.transition = 'none';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const currentX = e.clientX;
+            const diffX = currentX - startX;
+            const step = cardWidth + gap;
+            const baseTranslate = -(currentIndex * step);
+            track.style.transform = `translateX(${baseTranslate + diffX}px)`;
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            const endX = e.clientX;
+            const diffX = endX - startX;
+            const timeElapsed = Date.now() - startTime;
+
+            handleDragEnd(diffX, timeElapsed);
+        });
+
+        function handleDragEnd(diffX, timeElapsed) {
+            if (Math.abs(diffX) > 40 || (Math.abs(diffX) > 20 && timeElapsed < 250)) {
+                if (diffX < 0 && currentIndex < maxIndex) {
+                    moveToIndex(currentIndex + 1);
+                } else if (diffX > 0 && currentIndex > 0) {
+                    moveToIndex(currentIndex - 1);
+                } else {
+                    moveToIndex(currentIndex);
+                }
+            } else {
+                moveToIndex(currentIndex);
+            }
+        }
+
+        // Keyboard Arrow Navigation
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                if (currentIndex > 0) moveToIndex(currentIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                if (currentIndex < maxIndex) moveToIndex(currentIndex + 1);
+            }
+        });
+
+        // Window resize observer
+        window.addEventListener('resize', () => {
+            updateLayout();
+        });
+
+        // Initial setup
+        updateLayout();
+    })();
 </script>
 {% endblock %}

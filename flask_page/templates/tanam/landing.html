@@ -1,0 +1,115 @@
+{% extends "tanam/base.html" %}
+
+{% block head %}
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .landing-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        width: 100%;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .landing-header {
+        margin-bottom: 40px;
+    }
+
+    .landing-title {
+        font-size: clamp(2.8rem, 7vw, 4.5rem);
+        font-weight: 900;
+        color: #14281d;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 12px rgba(255, 255, 255, 0.6);
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .landing-sprout-svg {
+        width: clamp(48px, 6vw, 68px);
+        height: clamp(48px, 6vw, 68px);
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+
+    .btn-mula {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #ffc72c 0%, #ffad00 100%);
+        color: #182215;
+        font-size: clamp(1.4rem, 3.5vw, 1.85rem);
+        font-weight: 800;
+        padding: 14px 68px;
+        border-radius: 9999px;
+        text-decoration: none;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 25px rgba(255, 173, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.12);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-mula:hover {
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 14px 32px rgba(255, 173, 0, 0.55), 0 6px 14px rgba(0, 0, 0, 0.16);
+        color: #182215;
+        background: linear-gradient(180deg, #ffd147 0%, #ffb71a 100%);
+    }
+
+    .btn-mula:active {
+        transform: translateY(1px) scale(0.98);
+        box-shadow: 0 6px 16px rgba(255, 173, 0, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <div class="landing-header">
+        <h1 class="landing-title">
+            Tanam - Tanam
+            <svg class="landing-sprout-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- Curved stem -->
+                <path d="M30 60C30 42 34 28 52 22" stroke="#4a8c14" stroke-width="5" stroke-linecap="round"/>
+                <!-- Left Leaf -->
+                <path d="M32 38C18 38 10 32 10 24C18 22 28 27 32 38Z" fill="url(#sproutGrad1)" stroke="#3e7811" stroke-width="2" stroke-linejoin="round"/>
+                <!-- Right Leaf -->
+                <path d="M36 30C46 20 58 20 58 14C50 12 36 19 36 30Z" fill="url(#sproutGrad2)" stroke="#3e7811" stroke-width="2" stroke-linejoin="round"/>
+                <defs>
+                    <linearGradient id="sproutGrad1" x1="10" y1="24" x2="32" y2="38" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#8ce324"/>
+                        <stop offset="1" stop-color="#4ea310"/>
+                    </linearGradient>
+                    <linearGradient id="sproutGrad2" x1="36" y1="30" x2="58" y2="14" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#a0f032"/>
+                        <stop offset="1" stop-color="#5bb514"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </h1>
+    </div>
+
+    <a href="/tanam_pilih" class="btn-mula">Mula</a>
+</div>
+{% endblock %}

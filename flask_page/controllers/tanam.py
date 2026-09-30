@@ -14,25 +14,22 @@ tanam_blueprint = Blueprint('tanam', __name__)
 
 @tanam_blueprint.route("/tanam")
 def tanam():
-    html = ""
-    html += af_htmltitle("Tanam-Tanam 🌱")
-    html += "<div style='text-align: center;'>"
-    html += af_htmlbuttonlink("Mula", "primary", "/tanam_pilih")
-    html += "</div>"
-
-    return render_template("tanam/main.html", title="Tanam", html=html)
+    return render_template("tanam/landing.html", title="Tanam-Tanam 🌱")
 
 @tanam_blueprint.route("/tanam_pilih")
 def tanam_pilih():
-    html = ""
-    html += af_htmltitle("Tanam-Tanam 🌱")
-    html += modelpilihanslides()
-
-    html += "<a href='/tanam_add'>add</a>"
-    
-    
-
-    return render_template("tanam/pilih.html", title="Tanam", html=html)
+    plants = gettanamcsv()
+    for p in plants:
+        name = p.get("name", "")
+        if "(" in name and ")" in name:
+            parts = name.split("(", 1)
+            p["primary_name"] = parts[0].strip()
+            p["sub_name"] = "(" + parts[1].strip()
+        else:
+            p["primary_name"] = name
+            p["sub_name"] = ""
+            
+    return render_template("tanam/pilih.html", title="Tanam-Tanam 🌱", plants=plants)
 
 @tanam_blueprint.route("/tanam_add")
 def tanam_add():
