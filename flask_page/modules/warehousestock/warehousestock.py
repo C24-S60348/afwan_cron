@@ -5,7 +5,10 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, flash, redirect, url_for, Response, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from sqlalchemy import func
-from .models import db, User, Customer, Item, ItemStock, ProductionPlan, StockMovement, DailyStockRecord, DeliverySchedule
+try:
+    from .models import db, User, Customer, Item, ItemStock, ProductionPlan, StockMovement, DailyStockRecord, DeliverySchedule
+except (ImportError, ValueError):
+    from models import db, User, Customer, Item, ItemStock, ProductionPlan, StockMovement, DailyStockRecord, DeliverySchedule
 
 _MODULE_DIR = os.path.dirname(__file__)
 _STATIC_DIR = os.path.join(_MODULE_DIR, 'static')
