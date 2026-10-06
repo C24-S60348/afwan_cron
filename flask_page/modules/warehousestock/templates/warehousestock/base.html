@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}WIP Warehouse Management{% endblock %} - Stock & MC Plan</title>
+  
+  <!-- Locally hosted Bootstrap 5.3 CSS -->
+  <link rel="stylesheet" href="{{ url_for('warehousestock.static', filename='lib/bootstrap/bootstrap.min.css') }}">
+  <!-- Locally hosted Bootstrap Icons CSS -->
+  <link rel="stylesheet" href="{{ url_for('warehousestock.static', filename='lib/bootstrap-icons/bootstrap-icons.min.css') }}">
+  <!-- Custom Modern Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('warehousestock.static', filename='css/custom.css') }}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <div class="d-flex" style="min-height: 100vh;">
+    <!-- Modern Sidebar -->
+    <aside id="sidebar" class="d-flex flex-column">
+      <div class="brand-header d-flex align-items-center justify-content-between">
+        <a href="{{ url_for('warehousestock.index') }}" class="text-decoration-none d-flex align-items-center gap-2 text-white">
+          <i class="bi bi-box-seam-fill text-primary fs-3"></i>
+          <div>
+            <span class="fs-6 fw-bold tracking-tight d-block">WIP Warehouse</span>
+            <small class="text-secondary" style="font-size: 0.72rem;">STOCK & PRODUCTION</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="py-2 flex-grow-1 overflow-y-auto">
+        <div class="sidebar-heading">Navigation</div>
+        <nav class="nav flex-column">
+          <a class="nav-link {% if request.endpoint in ('warehousestock.index', 'warehousestock.dashboard') %}active{% endif %}" href="{{ url_for('warehousestock.index') }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+
+          <div class="sidebar-heading mt-2">Workbook Modules</div>
+          <a class="nav-link {% if request.endpoint == 'warehousestock.stock_control' %}active{% endif %}" href="{{ url_for('warehousestock.stock_control') }}">
+            <i class="bi bi-diagram-3"></i> Stock Control
+          </a>
+          <a class="nav-link {% if request.endpoint == 'warehousestock.master_stock' %}active{% endif %}" href="{{ url_for('warehousestock.master_stock') }}">
+            <i class="bi bi-table"></i> Master Stock
+          </a>
+          <a class="nav-link {% if request.endpoint == 'warehousestock.mc_plan' %}active{% endif %}" href="{{ url_for('warehousestock.mc_plan') }}">
+            <i class="bi bi-gear-wide-connected"></i> MC Plan & Shortages
+            {% if critical_shortages_count > 0 %}
+              <span class="badge bg-danger ms-auto">{{ critical_shortages_count }}</span>
+            {% endif %}
+          </a>
+          <a class="nav-link {% if request.endpoint == 'warehousestock.washing_qa' %}active{% endif %}" href="{{ url_for('warehousestock.washing_qa') }}">
+            <i class="bi bi-shield-check"></i> Washing & QA
+          </a>
+          <a class="nav-link {% if request.endpoint == 'warehousestock.daily_stock' %}active{% endif %}" href="{{ url_for('warehousestock.daily_stock') }}">
+            <i class="bi bi-calendar3"></i> Daily Movements
+          </a>
+          <a class="nav-link {% if request.endpoint == 'warehousestock.secret_instructions' %}active{% endif %}" href="{{ url_for('warehousestock.secret_instructions') }}">
+            <i class="bi bi-journal-text"></i> System Reference
+          </a>
+        </nav>
+      </div>
+
+      <!-- User Profile Card in Sidebar -->
+      <div class="p-3 border-top border-secondary border-opacity-25 bg-dark bg-opacity-50">
+        <div class="d-flex align-items-center justify-content-between">
+          <a href="{{ url_for('warehousestock.profile') }}" class="d-flex align-items-center gap-2 text-decoration-none">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <div>
+              <div class="text-white fw-semibold small">{{ current_user.username }}</div>
+              <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ current_user.role }}</span>
+            </div>
+          </a>
+          <a href="{{ url_for('warehousestock.logout') }}" class="btn btn-sm btn-outline-danger" title="Sign Out">
+            <i class="bi bi-box-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content wrapper -->
+    <div id="main-content">
+      <!-- Top Navbar -->
+      <nav class="top-navbar d-flex align-items-center justify-content-between sticky-top">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary d-lg-none" id="sidebarToggle" type="button">
+            <i class="bi bi-list"></i>
+          </button>
+          <div class="d-flex align-items-center gap-2">
+            <h5 class="mb-0 fw-bold text-dark">{% block page_title %}Dashboard{% endblock %}</h5>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge bg-light text-dark border d-none d-md-inline-block">
+            <i class="bi bi-hdd-network text-success me-1"></i> SQLite Database (Active)
+          </span>
+          <span class="badge bg-primary text-white">
+            <i class="bi bi-boxes me-1"></i> {{ total_items_count }} Items Tracked
+          </span>
+        </div>
+      </nav>
+
+      <!-- Alert Flash Messages -->
+      <div class="container-fluid px-4 pt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Page Body Content -->
+      <main class="container-fluid px-4 py-3 flex-grow-1">
+        {% block content %}{% endblock %}
+      </main>
+
+      <!-- Footer -->
+      <footer class="bg-white border-top py-3 px-4 text-muted small text-center text-md-start d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <span>&copy; {{ current_year }} WIP Warehouse Stock Management System &bull; Scalable SQLite/MySQL Architecture</span>
+        <span class="mt-2 mt-md-0">afwan_cron Module Edition &bull; Migrated from Excel</span>
+      </footer>
+    </div>
+  </div>
+  {% else %}
+  <!-- Full page unauthenticated layout (e.g. login or public doc) -->
+  <main class="min-vh-100 bg-light">
+    {% block unauth_content %}{% endblock %}
+  </main>
+  {% endif %}
+
+  <!-- Locally hosted JS bundle -->
+  <script src="{{ url_for('warehousestock.static', filename='lib/bootstrap/bootstrap.bundle.min.js') }}"></script>
+  <!-- Locally hosted Chart.js -->
+  <script src="{{ url_for('warehousestock.static', filename='lib/chartjs/chart.umd.min.js') }}"></script>
+  <!-- Main custom application JS -->
+  <script src="{{ url_for('warehousestock.static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

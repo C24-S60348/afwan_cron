@@ -1,0 +1,250 @@
+{% extends "warehousestock/base.html" %}
+
+{% block title %}Washing & QA{% endblock %}
+{% block page_title %}Washing & QA Inspection Center{% endblock %}
+
+{% block content %}
+<!-- KPI Stage Metric Tiles -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg">
+    <div class="card p-3 kpi-card">
+      <div class="kpi-label">Wash Area</div>
+      <div class="kpi-value text-secondary mt-1">{{ wash_total|format_num }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-droplet-half text-primary"></i> Cleaning stage</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg">
+    <div class="card p-3 kpi-card kpi-success">
+      <div class="kpi-label">QA Area</div>
+      <div class="kpi-value text-success mt-1">{{ qa_total|format_num }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-patch-check-fill text-success"></i> Inspection queue</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg">
+    <div class="card p-3 kpi-card">
+      <div class="kpi-label">QA Transit</div>
+      <div class="kpi-value text-info mt-1">{{ transit_total|format_num }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-truck text-info"></i> En route to W/H</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg">
+    <div class="card p-3 kpi-card kpi-warning">
+      <div class="kpi-label">Return QA</div>
+      <div class="kpi-value text-warning mt-1">{{ return_qa_total|format_num }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-arrow-return-left text-warning"></i> Re-wash / Rework</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg">
+    <div class="card p-3 kpi-card kpi-danger">
+      <div class="kpi-label">NG Disposed</div>
+      <div class="kpi-value text-danger mt-1">{{ ng_total|format_num }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-x-octagon-fill text-danger"></i> Defective rejected</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Card -->
+<div class="card p-3 mb-4">
+  <form method="GET" action="{{ url_for('warehousestock.washing_qa') }}" class="row g-2 align-items-center">
+    <div class="col-md-5">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" name="search" class="form-control border-start-0" placeholder="Search Part Number..." value="{{ search }}">
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <select name="customer_id" class="form-select" onchange="this.form.submit()">
+        <option value="">-- All Customers --</option>
+        {% for c in customers %}
+          <option value="{{ c.id }}" {% if selected_customer_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3 d-flex gap-1">
+      <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel me-1"></i> Filter</button>
+      <a href="{{ url_for('warehousestock.washing_qa') }}" class="btn btn-outline-secondary" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+    </div>
+  </form>
+</div>
+
+<!-- Washing & QA Table -->
+<div class="card">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <div>
+      <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-check text-primary me-2"></i> Quality Assurance & Washing Status</h6>
+      <small class="text-muted">Workflow: Wash Area &rarr; QA Area &rarr; QA Transit / Warehouse</small>
+    </div>
+    <span class="badge bg-light text-secondary border">Excel Sheet: washing qa</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 text-center">
+      <thead>
+        <tr class="text-start">
+          <th>Part No</th>
+          <th>Customer</th>
+          <th>STD PKG</th>
+          <th class="text-center bg-secondary bg-opacity-10">Wash Area (ctn)</th>
+          <th class="text-center bg-success bg-opacity-10 text-success">QA Area (ctn)</th>
+          <th class="text-center bg-info bg-opacity-10 text-info">QA Transit (ctn)</th>
+          <th class="text-center bg-warning bg-opacity-10 text-warning">Return QA (ctn)</th>
+          <th class="text-center bg-danger bg-opacity-10 text-danger">NG Disposed (ctn)</th>
+          <th class="text-center">Workflow Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td class="text-start fw-bold text-dark">{{ it.part_no }}</td>
+          <td class="text-start"><span class="badge bg-light text-dark border">{{ it.customer.name }}</span></td>
+          <td class="text-start">{{ it.std_pkg|format_num }}</td>
+
+          <td class="fw-semibold {% if it.stock and it.stock.wash_area_ctn > 0 %}text-primary{% else %}text-muted{% endif %}">
+            {{ it.stock.wash_area_ctn|format_num if it.stock else '0' }}
+          </td>
+          <td class="fw-semibold {% if it.stock and it.stock.qa_area_ctn > 0 %}text-success{% else %}text-muted{% endif %}">
+            {{ it.stock.qa_area_ctn|format_num if it.stock else '0' }}
+          </td>
+          <td class="fw-semibold {% if it.stock and it.stock.qa_transit_ctn > 0 %}text-info{% else %}text-muted{% endif %}">
+            {{ it.stock.qa_transit_ctn|format_num if it.stock else '0' }}
+          </td>
+          <td class="fw-semibold {% if it.stock and it.stock.return_qa_ctn > 0 %}text-warning{% else %}text-muted{% endif %}">
+            {{ it.stock.return_qa_ctn|format_num if it.stock else '0' }}
+          </td>
+          <td class="fw-semibold {% if it.stock and it.stock.ng_disposed_ctn > 0 %}text-danger{% else %}text-muted{% endif %}">
+            {{ it.stock.ng_disposed_ctn|format_num if it.stock else '0' }}
+          </td>
+
+          <!-- Actions -->
+          <td class="text-center">
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary py-1 px-2" style="font-size: 0.75rem;"
+                      data-bs-toggle="modal" data-bs-target="#qaActionModal"
+                      data-item-id="{{ it.id }}"
+                      data-part-no="{{ it.part_no }}"
+                      data-action-type="to_qa"
+                      data-action-title="Send from Wash Area to QA Area">
+                <i class="bi bi-arrow-right"></i> To QA
+              </button>
+              <button class="btn btn-outline-success py-1 px-2" style="font-size: 0.75rem;"
+                      data-bs-toggle="modal" data-bs-target="#qaActionModal"
+                      data-item-id="{{ it.id }}"
+                      data-part-no="{{ it.part_no }}"
+                      data-action-type="approve_qa"
+                      data-action-title="Approve QA Inspection">
+                <i class="bi bi-check-lg"></i> Approve
+              </button>
+              <button class="btn btn-outline-danger py-1 px-2" style="font-size: 0.75rem;"
+                      data-bs-toggle="modal" data-bs-target="#qaActionModal"
+                      data-item-id="{{ it.id }}"
+                      data-part-no="{{ it.part_no }}"
+                      data-action-type="dispose_ng"
+                      data-action-title="Dispose Defect (NG)">
+                <i class="bi bi-trash"></i> NG
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-3 d-block mb-1"></i> No items match criteria.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination.pages > 1 %}
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+    <div class="small text-muted">
+      Page {{ pagination.page }} of {{ pagination.pages }} ({{ pagination.total }} items)
+    </div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.washing_qa', page=pagination.prev_num, customer_id=selected_customer_id, search=search) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('warehousestock.washing_qa', page=p, customer_id=selected_customer_id, search=search) }}">{{ p }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.washing_qa', page=pagination.next_num, customer_id=selected_customer_id, search=search) }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+
+<!-- QA Action Modal -->
+<div class="modal fade" id="qaActionModal" tabindex="-1" aria-labelledby="qaActionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('warehousestock.washing_qa_action') }}">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="qa_modal_title"><i class="bi bi-shield-check text-primary me-2"></i> QA Action</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="item_id" id="qa_item_id">
+
+          <div class="alert alert-light border py-2 mb-3 small">
+            Item: <strong id="qa_part_no"></strong>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Action</label>
+            <select name="action_type" id="qa_action_type" class="form-select" required>
+              <option value="to_qa">Send from Wash Area to QA Area</option>
+              <option value="approve_qa">Approve QA Inspection</option>
+              <option value="reject_to_wash">Reject & Return to Wash (Return QA)</option>
+              <option value="dispose_ng">Dispose Defective (NG)</option>
+            </select>
+          </div>
+
+          <div class="mb-3" id="dest_choice_wrapper">
+            <label class="form-label small fw-semibold text-secondary">Approval Destination (If Approving QA)</label>
+            <select name="dest_choice" class="form-select">
+              <option value="QA transit">QA Transit</option>
+              <option value="Warehouse">Warehouse Directly</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Carton Quantity (ctn)</label>
+            <input type="number" step="0.1" min="0.1" name="qty" class="form-control" placeholder="e.g. 2" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Inspection / Operator Notes</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Visual inspection passed..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-lg me-1"></i> Submit Action</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

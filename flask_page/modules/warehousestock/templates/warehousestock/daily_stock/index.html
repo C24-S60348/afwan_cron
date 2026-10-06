@@ -1,0 +1,256 @@
+{% extends "warehousestock/base.html" %}
+
+{% block title %}Daily Movements{% endblock %}
+{% block page_title %}Daily Stock Movements & Delivery Tracking{% endblock %}
+
+{% block content %}
+<!-- Date Tabs & Actions Bar -->
+<div class="card p-3 mb-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <!-- Date Pills -->
+    <div class="d-flex align-items-center gap-2 overflow-x-auto pb-2 pb-md-0">
+      <span class="text-secondary small fw-bold me-1"><i class="bi bi-calendar-event me-1"></i> Date:</span>
+      {% for d in available_dates %}
+        <a href="{{ url_for('warehousestock.daily_stock', date=d, customer_id=selected_customer_id, search=search) }}"
+           class="btn btn-sm {% if selected_date == d %}btn-primary fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} text-nowrap">
+          {{ d }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Action Button -->
+    <div>
+      <button class="btn btn-success text-nowrap" data-bs-toggle="modal" data-bs-target="#addMovementModal">
+        <i class="bi bi-plus-circle me-1"></i> Record IN / OUT
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Row -->
+  <hr class="my-3 opacity-25">
+  <form method="GET" action="{{ url_for('warehousestock.daily_stock') }}" class="row g-2 align-items-center">
+    <input type="hidden" name="date" value="{{ selected_date }}">
+
+    <div class="col-md-5">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" name="search" class="form-control border-start-0" placeholder="Search Part Number..." value="{{ search }}">
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <select name="customer_id" class="form-select" onchange="this.form.submit()">
+        <option value="">-- All Customers --</option>
+        {% for c in customers %}
+          <option value="{{ c.id }}" {% if selected_customer_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3 d-flex gap-1">
+      <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel me-1"></i> Filter</button>
+      <a href="{{ url_for('warehousestock.daily_stock', date=selected_date) }}" class="btn btn-outline-secondary" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+    </div>
+  </form>
+</div>
+
+<!-- Daily Stock Table Card -->
+<div class="card mb-4">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <div>
+      <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-table text-primary me-2"></i> Stock Movement Log: {{ selected_date }}</h6>
+      <small class="text-muted">Showing {{ pagination.total }} recorded part items for this sheet date</small>
+    </div>
+    <span class="badge bg-light text-secondary border">Excel Sheets: 29.04.15 &ndash; 09.05.15</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 text-center">
+      <thead>
+        <tr class="text-start">
+          <th>Part No</th>
+          <th>Pedma Delivery No</th>
+          <th>Customer</th>
+          <th class="text-center bg-primary bg-opacity-10 text-primary">W/H Stock</th>
+          <th class="text-center text-success"><i class="bi bi-arrow-down-left"></i> IN</th>
+          <th class="text-center text-danger"><i class="bi bi-arrow-up-right"></i> OUT</th>
+          <th class="text-center">QTY/CTN</th>
+          <th class="text-center bg-warning bg-opacity-10">HEATING</th>
+          <th class="text-center bg-info bg-opacity-10">QA</th>
+          <th class="text-center bg-light">W/H</th>
+          <th class="text-center fw-bold">Total ctn</th>
+          <th class="text-center fw-bold text-success">KPCS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td class="text-start fw-bold text-dark">{{ r.item.part_no }}</td>
+          <td class="text-start text-muted">{{ r.item.delivery_part_no or '-' }}</td>
+          <td class="text-start"><span class="badge bg-light text-dark border">{{ r.item.customer.name }}</span></td>
+
+          <td class="fw-semibold text-primary">{{ r.wh_stock|format_num }}</td>
+          <td class="{% if r.in_qty > 0 %}text-success fw-bold{% else %}text-muted{% endif %}">{{ r.in_qty|format_num if r.in_qty > 0 else '-' }}</td>
+          <td class="{% if r.out_qty > 0 %}text-danger fw-bold{% else %}text-muted{% endif %}">{{ r.out_qty|format_num if r.out_qty > 0 else '-' }}</td>
+          <td>{{ r.qty_per_ctn|format_num }}</td>
+
+          <td class="{% if r.heating_ctn > 0 %}text-warning fw-semibold{% else %}text-muted{% endif %}">{{ r.heating_ctn|format_num if r.heating_ctn > 0 else '-' }}</td>
+          <td class="{% if r.qa_ctn > 0 %}text-info fw-semibold{% else %}text-muted{% endif %}">{{ r.qa_ctn|format_num if r.qa_ctn > 0 else '-' }}</td>
+          <td class="{% if r.wh_ctn > 0 %}text-dark fw-semibold{% else %}text-muted{% endif %}">{{ r.wh_ctn|format_num if r.wh_ctn > 0 else '-' }}</td>
+
+          <td class="fw-bold bg-light">{{ r.total_ctn|format_num }}</td>
+          <td class="fw-bold bg-light text-success">{{ r.kpcs|format_num }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="12" class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-3 d-block mb-1"></i> No records found for {{ selected_date }}.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination.pages > 1 %}
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+    <div class="small text-muted">
+      Page {{ pagination.page }} of {{ pagination.pages }} ({{ pagination.total }} records)
+    </div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.daily_stock', page=pagination.prev_num, date=selected_date, customer_id=selected_customer_id, search=search) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('warehousestock.daily_stock', page=p, date=selected_date, customer_id=selected_customer_id, search=search) }}">{{ p }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.daily_stock', page=pagination.next_num, date=selected_date, customer_id=selected_customer_id, search=search) }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Delivery Schedules Card -->
+{% if deliveries %}
+<div class="card">
+  <div class="card-header bg-white py-3">
+    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-truck text-primary me-2"></i> Pedma Delivery Schedules for {{ selected_date }}</h6>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Part No</th>
+          <th>Pedma Part No</th>
+          <th>Delivery Label</th>
+          <th>Scheduled Stock</th>
+          <th>Delivered Qty</th>
+          <th>Balance Remaining</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in deliveries %}
+        <tr>
+          <td class="fw-bold">{{ d.item.part_no }}</td>
+          <td><code>{{ d.pedma_part_no or '-' }}</code></td>
+          <td><span class="badge bg-light text-dark border">{{ d.delivery_label or 'Scheduled' }}</span></td>
+          <td>{{ d.stock_qty|format_num }}</td>
+          <td class="text-primary fw-semibold">{{ d.deliver_qty|format_num }}</td>
+          <td class="fw-bold {% if d.balance_qty > 0 %}text-success{% else %}text-muted{% endif %}">{{ d.balance_qty|format_num }}</td>
+          <td>
+            <span class="badge {% if d.balance_qty <= 0 %}bg-success{% else %}bg-info text-dark{% endif %}">
+              {{ 'Completed' if d.balance_qty <= 0 else 'Active' }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Add IN / OUT Movement Modal -->
+<div class="modal fade" id="addMovementModal" tabindex="-1" aria-labelledby="addMovementModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('warehousestock.daily_stock_add_movement') }}">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="addMovementModalLabel"><i class="bi bi-box-arrow-in-right text-success me-2"></i> Record Daily Stock Movement</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Target Item (Part No) *</label>
+            <select name="item_id" class="form-select" required>
+              <option value="">-- Choose Part Number --</option>
+              {% for it in records[:50] %}
+                <option value="{{ it.item.id }}">{{ it.item.part_no }} ({{ it.item.customer.name }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Movement Type *</label>
+              <select name="movement_type" class="form-select" required>
+                <option value="IN">IN (Receiving / Inbound)</option>
+                <option value="OUT">OUT (Delivery / Outbound)</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Location</label>
+              <select name="target_location" class="form-select" required>
+                <option value="Warehouse" selected>Warehouse</option>
+                <option value="HEATING">HEATING</option>
+                <option value="QA">QA Area</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Quantity (Cartons) *</label>
+              <input type="number" step="0.1" min="0.1" name="qty" class="form-control" placeholder="e.g. 10" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Date</label>
+              <input type="text" name="date" class="form-control" value="{{ selected_date }}">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Reference / Delivery Order No</label>
+            <input type="text" name="reference" class="form-control" placeholder="e.g. DO-2024-8842">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Notes</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="Movement description..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success fw-semibold"><i class="bi bi-save me-1"></i> Save Movement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

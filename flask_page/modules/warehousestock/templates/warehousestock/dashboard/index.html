@@ -1,0 +1,334 @@
+{% extends "warehousestock/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Executive Warehouse Dashboard{% endblock %}
+
+{% block content %}
+<!-- KPI Overview Row -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card p-3 kpi-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="kpi-label">Total Items</div>
+          <div class="kpi-value text-dark mt-1">{{ total_items }}</div>
+          <div class="small text-muted mt-1"><i class="bi bi-diagram-2 text-primary"></i> Across {{ total_customers }} Customers</div>
+        </div>
+        <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-3 fs-3">
+          <i class="bi bi-boxes"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card p-3 kpi-card kpi-success">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="kpi-label">Total Cartons</div>
+          <div class="kpi-value text-success mt-1">{{ stock_totals.total_ctn|format_num }}</div>
+          <div class="small text-muted mt-1"><i class="bi bi-box me-1"></i> In WIP & Warehouse</div>
+        </div>
+        <div class="p-2 bg-success bg-opacity-10 text-success rounded-3 fs-3">
+          <i class="bi bi-archive-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card p-3 kpi-card kpi-warning">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="kpi-label">Total Volume (KPCS)</div>
+          <div class="kpi-value text-warning mt-1">{{ stock_totals.total_kpcs|format_num }}</div>
+          <div class="small text-muted mt-1"><i class="bi bi-pie-chart me-1"></i> Thousand pieces</div>
+        </div>
+        <div class="p-2 bg-warning bg-opacity-10 text-warning rounded-3 fs-3">
+          <i class="bi bi-stack"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-xl-3">
+    <div class="card p-3 kpi-card kpi-danger">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="kpi-label">Critical Shortages</div>
+          <div class="kpi-value text-danger mt-1">{{ critical_count }}</div>
+          <div class="small text-muted mt-1"><i class="bi bi-exclamation-triangle text-danger me-1"></i> {{ low_count }} Low items</div>
+        </div>
+        <div class="p-2 bg-danger bg-opacity-10 text-danger rounded-3 fs-3">
+          <i class="bi bi-bell-fill"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card h-100 p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart-fill text-primary me-2"></i> Stock by Channel Stage</h6>
+        <span class="badge bg-light text-secondary border">WIP Distribution</span>
+      </div>
+      <div style="position: relative; height: 260px;">
+        <canvas id="channelChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100 p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-bar-chart-fill text-info me-2"></i> Stock by Customer (Cartons)</h6>
+        <span class="badge bg-light text-secondary border">Clients</span>
+      </div>
+      <div style="position: relative; height: 260px;">
+        <canvas id="customerChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Critical Shortage Alerts & Channel Breakdown Row -->
+<div class="row g-3 mb-4">
+  <!-- Critical Shortages Table -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-octagon-fill me-2"></i> Top Production Shortage Alerts</h6>
+        <a href="{{ url_for('warehousestock.mc_plan', status='CRITICAL_SHORTAGE') }}" class="btn btn-sm btn-outline-danger">
+          View All Shortages <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>Part No</th>
+              <th>Customer</th>
+              <th>Machine</th>
+              <th>Closing (ctn)</th>
+              <th>July Forecast</th>
+              <th>Shortage (KPCS)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for plan in critical_shortages %}
+            <tr>
+              <td class="fw-bold text-dark">{{ plan.item.part_no }}</td>
+              <td><span class="badge bg-light text-dark border">{{ plan.item.customer.name }}</span></td>
+              <td><code class="text-secondary">{{ plan.item.mc_number or 'N/A' }}</code></td>
+              <td>{{ plan.closing_ctn|format_num }}</td>
+              <td>{{ plan.forecast_month1|format_num }}</td>
+              <td>
+                <span class="badge badge-shortage">
+                  <i class="bi bi-arrow-down-circle me-1"></i>{{ plan.shortage_kpcs|format_num }}
+                </span>
+              </td>
+              <td>
+                <a href="{{ url_for('warehousestock.mc_plan', search=plan.item.part_no) }}" class="btn btn-xs btn-outline-primary py-1 px-2" style="font-size: 0.75rem;">
+                  <i class="bi bi-sliders"></i> Plan
+                </a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-4 text-muted">
+                <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
+                No critical shortages detected.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Channel Summary -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header bg-white py-3">
+        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Channel Stock Summary</h6>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <span><i class="bi bi-house-door text-primary me-2"></i> Warehouse Stock</span>
+            <span class="badge bg-primary rounded-pill">{{ stock_totals.warehouse|format_num }} ctn</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <span><i class="bi bi-truck text-info me-2"></i> QA Transit</span>
+            <span class="badge bg-info text-dark rounded-pill">{{ stock_totals.qa_transit|format_num }} ctn</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <span><i class="bi bi-droplet-half text-cyan me-2"></i> Wash Area</span>
+            <span class="badge bg-secondary rounded-pill">{{ stock_totals.wash_area|format_num }} ctn</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <span><i class="bi bi-patch-check text-success me-2"></i> QA Area</span>
+            <span class="badge bg-success rounded-pill">{{ stock_totals.qa_area|format_num }} ctn</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <span><i class="bi bi-gear text-warning me-2"></i> Production Area</span>
+            <span class="badge bg-warning text-dark rounded-pill">{{ stock_totals.production|format_num }} ctn</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <span><i class="bi bi-check2-all text-dark me-2"></i> Finished Goods</span>
+            <span class="badge bg-dark rounded-pill">{{ stock_totals.finished_goods|format_num }} ctn</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+            <span><i class="bi bi-x-octagon text-danger me-2"></i> NG - Disposed</span>
+            <span class="badge bg-danger rounded-pill">{{ stock_totals.ng_disposed|format_num }} ctn</span>
+          </li>
+        </ul>
+      </div>
+      <div class="card-footer bg-light p-3 text-center">
+        <a href="{{ url_for('warehousestock.stock_control') }}" class="btn btn-sm btn-outline-primary w-100">
+          <i class="bi bi-diagram-3 me-1"></i> Open Stock Control Matrix
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Transactions Row -->
+<div class="card">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-secondary me-2"></i> Recent Stock Transactions</h6>
+    <a href="{{ url_for('warehousestock.daily_stock') }}" class="btn btn-sm btn-light border">Daily Sheet Movements</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Part No</th>
+          <th>Type</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Cartons</th>
+          <th>KPCS</th>
+          <th>Operator</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in recent_movements %}
+        <tr>
+          <td class="small text-muted">{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td class="fw-semibold">{{ m.item.part_no }}</td>
+          <td>
+            <span class="badge {% if m.movement_type == 'IN' %}bg-success{% elif m.movement_type == 'OUT' %}bg-danger{% else %}bg-primary{% endif %}">
+              {{ m.movement_type }}
+            </span>
+          </td>
+          <td><span class="text-secondary small">{{ m.source_stage or '-' }}</span></td>
+          <td><span class="text-dark small fw-semibold">{{ m.dest_stage or '-' }}</span></td>
+          <td>{{ m.ctn_qty|format_num }}</td>
+          <td>{{ m.kpcs_qty|format_num }}</td>
+          <td><span class="badge bg-light text-dark border">{{ m.user.username if m.user else 'System' }}</span></td>
+          <td class="small text-muted">{{ m.notes or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-3 d-block mb-1"></i>
+            No movements logged yet. Transactions recorded via "Stock Control" or "Daily Movements" will appear here.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Channel Donut Chart
+  const channelCtx = document.getElementById('channelChart');
+  if (channelCtx) {
+    new Chart(channelCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Warehouse', 'QA Transit', 'Wash Area', 'QA Area', 'Production', 'Finished Goods'],
+        datasets: [{
+          data: [
+            {{ stock_totals.warehouse }},
+            {{ stock_totals.qa_transit }},
+            {{ stock_totals.wash_area }},
+            {{ stock_totals.qa_area }},
+            {{ stock_totals.production }},
+            {{ stock_totals.finished_goods }}
+          ],
+          backgroundColor: [
+            '#2563eb',
+            '#06b6d4',
+            '#64748b',
+            '#10b981',
+            '#f59e0b',
+            '#1e293b'
+          ],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { boxWidth: 12, font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  // Customer Bar Chart
+  const custCtx = document.getElementById('customerChart');
+  if (custCtx) {
+    const custLabels = [{% for c in customer_stocks %}'{{ c.name }}',{% endfor %}];
+    const custData = [{% for c in customer_stocks %}{{ c.ctn_sum }},{% endfor %}];
+
+    new Chart(custCtx, {
+      type: 'bar',
+      data: {
+        labels: custLabels,
+        datasets: [{
+          label: 'Cartons',
+          data: custData,
+          backgroundColor: '#3b82f6',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { font: { size: 10 } }
+          },
+          x: {
+            ticks: { font: { size: 10 } }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

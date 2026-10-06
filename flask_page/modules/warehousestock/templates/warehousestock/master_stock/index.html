@@ -1,0 +1,232 @@
+{% extends "warehousestock/base.html" %}
+
+{% block title %}Master Stock{% endblock %}
+{% block page_title %}Master Stock Catalogue{% endblock %}
+
+{% block content %}
+<!-- Filter & Action Card -->
+<div class="card p-3 mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col-md-7">
+      <form method="GET" action="{{ url_for('warehousestock.master_stock') }}" class="row g-2">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" name="search" class="form-control border-start-0" placeholder="Search Part / Machine..." value="{{ search }}">
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <select name="customer_id" class="form-select" onchange="this.form.submit()">
+            <option value="">-- All Customers --</option>
+            {% for c in customers %}
+              <option value="{{ c.id }}" {% if selected_customer_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2 d-flex gap-1">
+          <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i></button>
+          <a href="{{ url_for('warehousestock.master_stock') }}" class="btn btn-outline-secondary" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-md-5 d-flex justify-content-md-end gap-2 mt-2 mt-md-0">
+      <a href="{{ url_for('warehousestock.export_csv') }}" class="btn btn-outline-success">
+        <i class="bi bi-file-earmark-excel me-1"></i> Export CSV
+      </a>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+        <i class="bi bi-plus-circle me-1"></i> Add Item
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Master Table Card -->
+<div class="card">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <div>
+      <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-table text-primary me-2"></i> Master Inventory Items</h6>
+      <small class="text-muted">Total: {{ pagination.total }} items in database</small>
+    </div>
+    <span class="badge bg-light text-secondary border">Real-Time Balances</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Part No</th>
+          <th>Pedma Delivery No</th>
+          <th>Customer</th>
+          <th>STD PKG</th>
+          <th>Machine</th>
+          <th>Material Size</th>
+          <th>Warehouse (ctn)</th>
+          <th>Total (ctn)</th>
+          <th>Total (KPCS)</th>
+          <th class="text-center">Adjust</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td class="fw-bold text-dark">{{ it.part_no }}</td>
+          <td><span class="text-muted">{{ it.delivery_part_no or '-' }}</span></td>
+          <td><span class="badge bg-light text-dark border">{{ it.customer.name }}</span></td>
+          <td>{{ it.std_pkg|format_num }}</td>
+          <td><code class="text-secondary">{{ it.mc_number or 'N/A' }}</code></td>
+          <td class="small text-muted">{{ it.material_size or '-' }}</td>
+          <td class="fw-semibold text-primary">{{ it.stock.warehouse_ctn|format_num if it.stock else '0' }}</td>
+          <td class="fw-semibold">{{ it.stock.total_ctn|format_num if it.stock else '0' }}</td>
+          <td class="fw-bold text-success">{{ it.stock.total_kpcs|format_num if it.stock else '0' }}</td>
+          <td class="text-center">
+            <button class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;"
+                    data-bs-toggle="modal" data-bs-target="#adjustStockModal"
+                    data-item-id="{{ it.id }}"
+                    data-part-no="{{ it.part_no }}"
+                    data-current-wh="{{ it.stock.warehouse_ctn if it.stock else 0 }}">
+              <i class="bi bi-pencil-square"></i> Adjust
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="10" class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-3 d-block mb-1"></i> No items found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination.pages > 1 %}
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+    <div class="small text-muted">
+      Page {{ pagination.page }} of {{ pagination.pages }} ({{ pagination.total }} items)
+    </div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.master_stock', page=pagination.prev_num, customer_id=selected_customer_id, search=search) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('warehousestock.master_stock', page=p, customer_id=selected_customer_id, search=search) }}">{{ p }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.master_stock', page=pagination.next_num, customer_id=selected_customer_id, search=search) }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('warehousestock.add_item') }}">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="addItemModalLabel"><i class="bi bi-plus-circle text-primary me-2"></i> Add New Part / Item</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Part Number *</label>
+            <input type="text" name="part_no" class="form-control" placeholder="e.g. AC050099" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Delivery Part No (Pedma)</label>
+            <input type="text" name="delivery_part_no" class="form-control" placeholder="e.g. UC050099">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Customer *</label>
+            <select name="customer_id" class="form-select" required>
+              {% for c in customers %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">STD PKG</label>
+              <input type="number" step="0.1" name="std_pkg" class="form-control" value="100" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Initial Warehouse ctn</label>
+              <input type="number" step="0.1" name="initial_ctn" class="form-control" value="0">
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Machine Number</label>
+              <input type="text" name="mc_number" class="form-control" placeholder="e.g. 203">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Material Size</label>
+              <input type="text" name="material_size" class="form-control" placeholder="e.g. 0.31 X 37.5">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-save me-1"></i> Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Adjust Stock Modal -->
+<div class="modal fade" id="adjustStockModal" tabindex="-1" aria-labelledby="adjustStockModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('warehousestock.adjust_stock') }}">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="adjustStockModalLabel"><i class="bi bi-sliders text-primary me-2"></i> Stock Balance Adjustment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="item_id" id="adjust_item_id">
+
+          <div class="alert alert-light border py-2 mb-3 small">
+            Adjusting Item: <strong id="adjust_part_no"></strong>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">New Warehouse Cartons (ctn)</label>
+            <input type="number" step="0.1" min="0" name="warehouse_ctn" id="adjust_warehouse_ctn" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Reason / Audit Note</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Physical inventory cycle count..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-lg me-1"></i> Apply Adjustment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

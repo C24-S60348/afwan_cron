@@ -1,0 +1,259 @@
+{% extends "warehousestock/base.html" %}
+
+{% block title %}MC Plan & Shortages{% endblock %}
+{% block page_title %}Machine Production & Shortage Planning{% endblock %}
+
+{% block content %}
+<!-- Summary Metric Tiles -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 kpi-card">
+      <div class="kpi-label">Total Planned Items</div>
+      <div class="kpi-value text-dark mt-1">{{ total_planned }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-gear-wide-connected text-primary"></i> Production parts</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 kpi-card kpi-danger">
+      <div class="kpi-label">Critical Shortages</div>
+      <div class="kpi-value text-danger mt-1">{{ critical_count }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-exclamation-octagon-fill text-danger"></i> Negative stock balance</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 kpi-card kpi-warning">
+      <div class="kpi-label">Low Stock Warning</div>
+      <div class="kpi-value text-warning mt-1">{{ low_count }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-exclamation-triangle-fill text-warning"></i> Near reorder buffer</div>
+    </div>
+  </div>
+
+  <div class="col-sm-6 col-lg-3">
+    <div class="card p-3 kpi-card kpi-success">
+      <div class="kpi-label">Healthy / Normal</div>
+      <div class="kpi-value text-success mt-1">{{ normal_count }}</div>
+      <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success"></i> Stock meets forecast</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Card -->
+<div class="card p-3 mb-4">
+  <form method="GET" action="{{ url_for('warehousestock.mc_plan') }}" class="row g-2 align-items-center">
+    <div class="col-md-3">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" name="search" class="form-control border-start-0" placeholder="Part No / Material..." value="{{ search }}">
+      </div>
+    </div>
+
+    <div class="col-md-2">
+      <select name="customer_id" class="form-select" onchange="this.form.submit()">
+        <option value="">-- Customer --</option>
+        {% for c in customers %}
+          <option value="{{ c.id }}" {% if selected_customer_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <select name="mc_number" class="form-select" onchange="this.form.submit()">
+        <option value="">-- Machine No --</option>
+        {% for m in machine_numbers %}
+          <option value="{{ m }}" {% if selected_mc == m %}selected{% endif %}>M/C: {{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="">-- All Statuses --</option>
+        <option value="CRITICAL_SHORTAGE" {% if selected_status == 'CRITICAL_SHORTAGE' %}selected{% endif %}>Critical Shortage (&lt; 0)</option>
+        <option value="LOW" {% if selected_status == 'LOW' %}selected{% endif %}>Low Stock Warning</option>
+        <option value="NORMAL" {% if selected_status == 'NORMAL' %}selected{% endif %}>Normal Stock</option>
+      </select>
+    </div>
+
+    <div class="col-md-2 d-flex gap-1">
+      <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel me-1"></i> Filter</button>
+      <a href="{{ url_for('warehousestock.mc_plan') }}" class="btn btn-outline-secondary" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+    </div>
+  </form>
+</div>
+
+<!-- Plan Table Card -->
+<div class="card">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <div>
+      <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-gear-wide-connected text-primary me-2"></i> Machine Production & Shortage Matrix</h6>
+      <small class="text-muted">Formula: Shortage KPCS = Closing KPCS - Forecast</small>
+    </div>
+    <span class="badge bg-light text-secondary border">Excel Sheet: mc plan</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Part No</th>
+          <th>Customer</th>
+          <th>STD PKG</th>
+          <th>M/C No</th>
+          <th>Material Size</th>
+          <th>Closing (ctn)</th>
+          <th>Closing (KPCS)</th>
+          <th>M1 Forecast</th>
+          <th>M2 Forecast</th>
+          <th>Shortage (KPCS)</th>
+          <th>Shortage (ctn)</th>
+          <th>Status</th>
+          <th class="text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plan in plans %}
+        <tr>
+          <td class="fw-bold text-dark">{{ plan.item.part_no }}</td>
+          <td><span class="badge bg-light text-dark border">{{ plan.item.customer.name }}</span></td>
+          <td>{{ plan.item.std_pkg|format_num }}</td>
+          <td><code class="text-primary fw-semibold">{{ plan.item.mc_number or 'N/A' }}</code></td>
+          <td class="small text-muted">{{ plan.item.material_size or '-' }}</td>
+          <td class="fw-semibold">{{ plan.closing_ctn|format_num }}</td>
+          <td class="fw-semibold">{{ plan.closing_kpcs|format_num }}</td>
+          <td>{{ plan.forecast_month1|format_num }}</td>
+          <td>{{ plan.forecast_month2|format_num }}</td>
+
+          <!-- Shortage KPCS -->
+          <td>
+            {% if plan.shortage_kpcs < 0 %}
+              <span class="badge badge-shortage fw-bold">{{ plan.shortage_kpcs|format_num }}</span>
+            {% else %}
+              <span class="text-success fw-semibold">+{{ plan.shortage_kpcs|format_num }}</span>
+            {% endif %}
+          </td>
+
+          <!-- Shortage Cartons -->
+          <td>
+            {% if plan.shortage_ctn < 0 %}
+              <span class="badge badge-shortage">{{ plan.shortage_ctn|format_num }}</span>
+            {% else %}
+              <span class="text-muted">{{ plan.shortage_ctn|format_num }}</span>
+            {% endif %}
+          </td>
+
+          <!-- Status Badge -->
+          <td>
+            {% if plan.status == 'CRITICAL_SHORTAGE' %}
+              <span class="badge badge-shortage"><i class="bi bi-x-octagon-fill me-1"></i> Shortage</span>
+            {% elif plan.status == 'LOW' %}
+              <span class="badge badge-low"><i class="bi bi-exclamation-triangle-fill me-1"></i> Low</span>
+            {% else %}
+              <span class="badge badge-normal"><i class="bi bi-check-circle-fill me-1"></i> OK</span>
+            {% endif %}
+          </td>
+
+          <!-- Action -->
+          <td class="text-center">
+            <button class="btn btn-xs btn-outline-primary py-1 px-2" style="font-size: 0.75rem;"
+                    data-bs-toggle="modal" data-bs-target="#updatePlanModal"
+                    data-plan-id="{{ plan.id }}"
+                    data-part-no="{{ plan.item.part_no }}"
+                    data-closing-ctn="{{ plan.closing_ctn }}"
+                    data-forecast-m1="{{ plan.forecast_month1 }}"
+                    data-forecast-m2="{{ plan.forecast_month2 }}">
+              <i class="bi bi-pencil"></i> Update
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="13" class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-3 d-block mb-1"></i> No production plan items match criteria.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination.pages > 1 %}
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+    <div class="small text-muted">
+      Page {{ pagination.page }} of {{ pagination.pages }} ({{ pagination.total }} plans)
+    </div>
+    <ul class="pagination pagination-sm mb-0">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.mc_plan', page=pagination.prev_num, customer_id=selected_customer_id, mc_number=selected_mc, status=selected_status, search=search) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('warehousestock.mc_plan', page=p, customer_id=selected_customer_id, mc_number=selected_mc, status=selected_status, search=search) }}">{{ p }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('warehousestock.mc_plan', page=pagination.next_num, customer_id=selected_customer_id, mc_number=selected_mc, status=selected_status, search=search) }}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Update Plan Modal -->
+<div class="modal fade" id="updatePlanModal" tabindex="-1" aria-labelledby="updatePlanModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('warehousestock.update_plan') }}">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="updatePlanModalLabel"><i class="bi bi-pencil-square text-primary me-2"></i> Update Machine Plan & Forecast</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="plan_id" id="plan_id">
+
+          <div class="alert alert-light border py-2 mb-3 small">
+            Part: <strong id="plan_part_no"></strong>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Closing Cartons (ctn)</label>
+            <input type="number" step="0.1" name="closing_ctn" id="plan_closing_ctn" class="form-control" required>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Month 1 Forecast (KPCS)</label>
+              <input type="number" step="0.1" name="forecast_m1" id="plan_forecast_m1" class="form-control">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold text-secondary">Month 2 Forecast (KPCS)</label>
+              <input type="number" step="0.1" name="forecast_m2" id="plan_forecast_m2" class="form-control">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Planning Notes</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Expedited run on Machine 203..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary fw-semibold"><i class="bi bi-check-lg me-1"></i> Recalculate & Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
